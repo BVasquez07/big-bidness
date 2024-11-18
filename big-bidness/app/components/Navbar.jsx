@@ -11,11 +11,11 @@ export const Navbar = () => {
     return (
     <div className='bg-white'>
             {/* Make navbar full width by using w-full */}
-            <div className='w-full h-16 flex mx-auto px-3 justify-between items-center shadow-black shadow-lg lg:px-8'>
+            <div className='w-full h-16 flex mx-auto px-3 justify-between items-center shadow-slate-200 shadow-sm lg:px-8'>
                 <a href="/">Big Bidness</a>
                 <div className="hidden md:inline-block">
                     <div className="space-x-4">
-                        <a href="/" className="text-black bg-gray-100 hover:bg-black hover:text-white rounded-md px-1 py-1">Create Listing</a>
+                        <a href="/create-listing" className="text-black bg-gray-100 hover:bg-black hover:text-white rounded-md px-1 py-1">Create Listing</a>
                         <a href="/" className="text-black hover:bg-black hover:text-white rounded-md px-1 py-1">Activity</a>
                         <a href="/" className="text-black hover:bg-black hover:text-white rounded-md px-1 py-1 ">Settings</a>
                         <a href="/" className="text-black bg-neutral-300 border border-slate-500 hover:bg-zinc-800 hover:text-white rounded-md px-3 py-1">Sign In</a>
