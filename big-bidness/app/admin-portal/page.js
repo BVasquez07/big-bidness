@@ -7,14 +7,6 @@ import SusUsers from "./components/SusUsersTable/SusUsers";
 
 export default function Listing() {
     return(
-
-        /*
-            Componentes needed:
-                1. listing details 
-                2. Current Bids
-                3. Comment section (will have some sub components)
-        
-        */
         <div className="mt-5 flex justify-center">
             <div className="border-2 rounded-lg p-4">
                 <Tabs defaultValue="complaints" className="w-fit h-[500px]">

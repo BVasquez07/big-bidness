@@ -7,6 +7,7 @@ import {
     TableHeader,
     TableRow,
   } from "@/components/ui/table"
+import { Button } from "@/components/ui/button";
 export default function QuitSys({}){
     return(
         <Table>
@@ -16,7 +17,7 @@ export default function QuitSys({}){
                     <TableHead className="w-[100px]">User</TableHead>
                     <TableHead></TableHead>
                     <TableHead>Acct. Balance</TableHead>
-                    <TableHead >Action</TableHead>
+                    <TableHead> Action</TableHead>
                 </TableRow>
             </TableHeader>
             <TableBody>
@@ -24,7 +25,10 @@ export default function QuitSys({}){
                     <TableCell className="font-medium">INV001</TableCell>
                     <TableCell></TableCell>
                     <TableCell>Credit Card</TableCell>
-                    <TableCell>$250.00</TableCell>
+                    <TableCell className="flex space-x-2 text-right">
+                        <Button className="bg-green-300 flex-1">Accept</Button>
+                        <Button className="bg-red-300 flex-1">Deny</Button>
+                    </TableCell>
                 </TableRow>
             </TableBody>
         </Table>
