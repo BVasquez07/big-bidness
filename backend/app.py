@@ -153,7 +153,7 @@ def signin():
         return jsonify({"error": str(e)}), 500
 
 
-@app.route("/post", methods=["Post"])
+@app.route("/post", methods=["POST"])
 def product_post():
     try:
         query=request.json
@@ -164,6 +164,54 @@ def product_post():
         status=query.get("listingstatus", "available")
         price=query.get("price")
 
+        if not product_name or not price:
+            return jsonify({"error": "Product name and price are required"}), 400
+
+        user_response=supabase.auth.get_user()
+
+        if not user_response or not hasattr(user_response, 'user') or not user_response.user:
+            return jsonify({"error": "Authentication failed"}), 401
+
+        user = user_response.user
+        email = user.email  
+
+        seller_result=supabase.table("users").select("userid").eq("email", email).execute()
+        seller_data=seller_result.data
+
+        if not seller_data:
+            return jsonify({"error": "Seller not found"}), 404
+
+        seller_id=seller_data[0]["userid"]
+
+        insert_result = supabase.table("products").insert({
+
+            "sellerid": seller_id,
+            "product_name": product_name,
+            "imageurl": imageurl,
+            "min_price": min_price,
+            "max_price": max_price,
+            "listingstatus": status,
+            "price": price
+        
+        
+        
+        }).execute()
+
+        if not insert_result.data:
+            return jsonify({"error": "Failed to insert product"}), 500
+
+        inserted_product=supabase.table("products").select("productid").eq("sellerid", seller_id).eq("product_name", product_name).order("productid", desc=True).limit(1).execute()
+
+        if not inserted_product.data or "productid" not in inserted_product.data[0]:
+            return jsonify({"error": "Product ID not returned"}), 500
+
+        product_id = inserted_product.data[0]["productid"]
+
+        return jsonify({"message": "Product posted successfully!", "product_id": product_id}), 201
+
+    except Exception as e:
+        logging.error(f"Error during product posting: {str(e)}")
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
     app.run(host="localhost", debug=True, port=8080)
