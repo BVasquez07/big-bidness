@@ -4,6 +4,8 @@ import os
 from supabase import create_client, Client
 from dotenv import load_dotenv
 import logging
+import jwt
+import datetime
 
 load_dotenv()
 
@@ -20,6 +22,7 @@ supabase: Client = create_client(url, key)
 app = Flask(__name__)
 CORS(app)
 
+
 @app.route("/")
 def hello():
     return "Hello World!"
@@ -30,7 +33,6 @@ def hello():
 @app.route("/register", methods=["POST"]) 
 def register():
     try:
-
         query=request.json
         firstname=query.get("firstname")
         lastname=query.get("lastname")
@@ -50,6 +52,11 @@ def register():
         email_check = supabase.table("users").select("email").eq("email", email).execute()
         if email_check.data:
             return jsonify({"error": "Email is already being used"}), 400
+        
+        sign_up_response=supabase.auth.sign_up({"email": email, "password": password})
+        logging.debug(f"Sign-up response: {sign_up_response}")
+
+
 
         new_user = supabase.table("users").insert({
             "firstname": firstname,
@@ -95,55 +102,75 @@ def register():
         logging.error(f"Error during signup: {str(e)}")
         return jsonify({"error": str(e)}), 500
     
-@app.route("/signin", methods=["Post"])
+
+
+    
+@app.route("/signin", methods=["POST"])
 def signin():
     try:
         query=request.json
-        username=query.get('username')
+        email=query.get('email')
         password=query.get('password')
 
-        if not username or not password:
-            return jsonify({"error": "Please provide username and password"}), 400
-
-        user_result = supabase.table("users").select("userid, password").eq("username", username).execute()
-        user_data = user_result.data
-        userid=user_data[0]["userid"]
-        correct_password = user_data[0]["password"]
 
 
-        approval_result=supabase.table("approvals").select("userid, applicationdetails").eq("userid", userid).execute()
-        approval_data=approval_result.data
+        if not email or not password:
+            return jsonify({"error": "Please provide email and password"}), 400
+
+        user_response=supabase.auth.sign_in_with_password({"email": email, "password": password})
+
+        # Check if the user_response contains a valid user and session
+        if not user_response or not hasattr(user_response, 'user') or not user_response.user:
+            return jsonify({"error": "Authentication failed"}), 401
+        user=user_response.user 
+ 
+        approval_result = supabase.table("approvals").select("email", "applicationdetails").eq("email", user.email).execute()
+        approval_data = approval_result.data
 
         if not approval_data:
             return jsonify({"error": "No approval record found"}), 404
         
-        if password != correct_password:
-            return jsonify({"error": "Incorrect password"}), 401
         approval_status = approval_data[0]["applicationdetails"]
-        if approval_status == "Approval Pending":
+        
+        if approval_status=="Approval Pending":
             return jsonify({"error": "Approval Needed"}), 403
-        elif approval_status == "Approval Rejected":
+        elif approval_status=="Approval Rejected":
             return jsonify({"error": "Approval Rejected"}), 403
 
+        access_token=user_response.session.access_token 
 
-
-        return jsonify({"message": "Login Successful!"}), 200
+        return jsonify({
+            "message": "Login Successful!",
+            "user": {
+                "id": user.id,
+                "email": user.email,
+                "role": user.role
+            },
+            "access_token": access_token
+        }), 200
 
     except Exception as e:
         logging.error(f"Error during signin: {str(e)}")
         return jsonify({"error": str(e)}), 500
 
-    
+
+@app.route("/post", methods=["Post"])
+def product_post():
+    try:
 
 
-
+        query=request.json
+        product_name=query.get("title")
+        imageurl=query.get("imageurl")
+        min_price=query.get("min_price")
+        max_price=query.get("max_price")
+        status=query.get("listingstatus", "available")
+        price=query.get("price")
 
 
     except Exception as e:
-        logging.error(f"Error during singin: {str(e)}")
+        logging.error(f"Error during product posting: {str(e)}")
         return jsonify({"error": str(e)}), 500
-
-
 
 if __name__ == "__main__":
     app.run(host="localhost", debug=True, port=8080)
