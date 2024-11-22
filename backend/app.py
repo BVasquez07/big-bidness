@@ -4,8 +4,7 @@ import os
 from supabase import create_client, Client
 from dotenv import load_dotenv
 import logging
-import jwt
-import datetime
+
 
 load_dotenv()
 
@@ -157,8 +156,6 @@ def signin():
 @app.route("/post", methods=["Post"])
 def product_post():
     try:
-
-
         query=request.json
         product_name=query.get("title")
         imageurl=query.get("imageurl")
@@ -167,10 +164,6 @@ def product_post():
         status=query.get("listingstatus", "available")
         price=query.get("price")
 
-
-    except Exception as e:
-        logging.error(f"Error during product posting: {str(e)}")
-        return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
     app.run(host="localhost", debug=True, port=8080)
