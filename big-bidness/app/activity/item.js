@@ -16,8 +16,8 @@ export const Item = ({data}) => {
                 <p className='text-lg mb-1'>
                 ${data.price}
                 </p>
-                { data.completed }
-                { data.expiry ? <p className="text-lg text-gray-500"> Expires: {data.expiry}</p> : '' }
+                { data.completed && !data.rated ? <button className="text-lg text-gray-500">Pending Rating</button> : '' }
+                { data.expiry && !data.completed ? <p className="text-lg text-gray-500"> Expires: {data.expiry}</p> : '' }
             </div>
         </div>
     </>
