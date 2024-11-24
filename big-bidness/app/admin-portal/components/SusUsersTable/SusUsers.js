@@ -29,6 +29,7 @@ export default function SusUsers({}){
             <TableBody>
                 <TableRowContent
                     ArrOfObj={arr_obj}
+                    xOnly={true}
                 />
             </TableBody>
         </Table>

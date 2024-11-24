@@ -30,6 +30,7 @@ export default function UserApps({}){
             <TableBody>
                 <TableRowContent
                     ArrOfObj={arr_obj}
+                    addActions={true}
                 />
             </TableBody>
         </Table>

@@ -24,12 +24,12 @@ export default function Complaints({}){
                     <TableHead className="w-[100px]">User</TableHead>
                     <TableHead>Complaints</TableHead>
                     <TableHead>Acct. Balance</TableHead>
-                    <TableHead className="text-right">Action</TableHead>
                 </TableRow>
             </TableHeader>
             <TableBody>
                 <TableRowContent
                     ArrOfObj={arr_obj}
+                    addActions={false}
                 />
             </TableBody>
         </Table>
