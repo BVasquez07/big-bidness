@@ -27,8 +27,8 @@ def hello():
 
 
         
-@app.route("/signup", methods=["POST"]) 
-def signup():
+@app.route("/register", methods=["POST"]) 
+def register():
     try:
 
         query=request.json
@@ -95,9 +95,53 @@ def signup():
         logging.error(f"Error during signup: {str(e)}")
         return jsonify({"error": str(e)}), 500
     
+@app.route("/signin", methods=["Post"])
+def signin():
+    try:
+        query=request.json
+        username=query.get('username')
+        password=query.get('password')
+
+        if not username or not password:
+            return jsonify({"error": "Please provide username and password"}), 400
+
+        user_result = supabase.table("users").select("userid, password").eq("username", username).execute()
+        user_data = user_result.data
+        userid=user_data[0]["userid"]
+        correct_password = user_data[0]["password"]
+
+
+        approval_result=supabase.table("approvals").select("userid, applicationdetails").eq("userid", userid).execute()
+        approval_data=approval_result.data
+
+        if not approval_data:
+            return jsonify({"error": "No approval record found"}), 404
+        
+        if password != correct_password:
+            return jsonify({"error": "Incorrect password"}), 401
+        approval_status = approval_data[0]["applicationdetails"]
+        if approval_status == "Approval Pending":
+            return jsonify({"error": "Approval Needed"}), 403
+        elif approval_status == "Approval Rejected":
+            return jsonify({"error": "Approval Rejected"}), 403
 
 
 
+        return jsonify({"message": "Login Successful!"}), 200
+
+    except Exception as e:
+        logging.error(f"Error during signin: {str(e)}")
+        return jsonify({"error": str(e)}), 500
+
+    
+
+
+
+
+
+    except Exception as e:
+        logging.error(f"Error during singin: {str(e)}")
+        return jsonify({"error": str(e)}), 500
 
 
 
