@@ -57,7 +57,7 @@ export default function activity() {
 
   return (
     <div>
-        <h1 className='pl-4 text-4xl pb-2 font-bold'>Activity</h1>
+        <h1 className='pl-4 text-4xl pb-8 font-bold pt-4'>Activity</h1>
         <div>
             <div className='pl-4 text-2xl font-semibold'>Active Bids</div>
             <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 lg:grid-cols-4 gap-6 p-4'>
