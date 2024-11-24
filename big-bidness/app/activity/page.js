@@ -1,7 +1,25 @@
 import React from 'react'
 
-export const page = () => {
+export default function activity() {
   return (
-    <div>page</div>
+    <>
+        <h1>Activity</h1>
+        <div>
+            <div>Active Bids</div>
+            
+        </div>
+        <div>
+            <div>Active Listings</div>
+            
+        </div>
+        <div>
+            <div>Completed Bids</div>
+            
+        </div>
+        <div>
+            <div>Completed Listings</div>
+            
+        </div>
+    </>
   )
 }
