@@ -153,6 +153,10 @@ def signin():
         return jsonify({"error": str(e)}), 500
 
 
+
+
+
+
 @app.route("/post", methods=["POST"])
 def product_post():
     try:
@@ -212,6 +216,31 @@ def product_post():
     except Exception as e:
         logging.error(f"Error during product posting: {str(e)}")
         return jsonify({"error": str(e)}), 500
+
+
+@app.route("/get-all-products", methods=["GET"])
+def getproducts():
+    try:
+       
+        products=supabase.table("products").select("*").execute()
+
+       
+        if products.data:
+            return jsonify({"products": products.data}), 200
+        else:
+            return jsonify({"products": []}), 200
+
+    except Exception as e:
+        logging.error(f"Error fetching products: {str(e)}")
+        return jsonify({"error": str(e)}), 500
+
+
+    except Exception as e:
+        logging.error(f"Error fetching products: {str(e)}")
+        return jsonify({"error": str(e)}), 500
+
+
+
 
 
 
