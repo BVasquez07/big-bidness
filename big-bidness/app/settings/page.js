@@ -22,11 +22,11 @@ export default function settings() {
             alert('Insufficient funds')
             return
         }
-        setBalance(balance - change)
+        setBalance(parseInt(balance) - parseInt(change))
     }
 
     const submitDeposit = () => {
-        setBalance(balance + change)
+        setBalance(parseInt(balance) + parseInt(change))
     }
 
   return (
@@ -62,12 +62,12 @@ export default function settings() {
                         <Input type="number" onChange={(e) => setChange(e.target.value)} />
                     </div>
                     <div className='flex w-1/6 space-x-2'>
-                        <a className='w-full' onClick={() => {submitWithdraw}}>
+                        <a className='w-full' onClick={() => {submitWithdraw()}}>
                             <Button>
                                 Withdraw
                             </Button>
                         </a>
-                        <a className='w-full' onClick={() => {submitDeposit}}>
+                        <a className='w-full' onClick={() => {submitDeposit()}}>
                             <Button>
                                 Deposit
                             </Button>
