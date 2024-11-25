@@ -14,6 +14,7 @@ import {
 
 import { Label } from "../../components/ui/label"
 import { Switch } from "../../components/ui/switch"
+import { Button } from "../../components/ui/button"
   
 import React from 'react'
 import { useState } from 'react'
@@ -22,9 +23,11 @@ export const Rate = ({setRating}) => {
 
     const [stars, setStars] = useState(0)
     const [complain, setComplain] = useState(false)
+    const [complainText, setComplainText] = useState('')
 
     const submitRating = () => {
-      setRating()
+      console.log(stars)
+      console.log(complainText)
     }
 
     return (
@@ -60,12 +63,13 @@ export const Rate = ({setRating}) => {
               <textarea
                 className="w-full p-2 border border-gray-300 rounded-md"
                 placeholder="What went wrong?"
+                onChange={(e) => setComplainText(e.target.value)}
               />
             </div>
           )}
           <DialogFooter className="sm:justify-start">
             <DialogClose asChild>
-              <button onClick={submitRating} className="">Submit</button>
+              <Button onClick={submitRating}>Submit</Button>
             </DialogClose>
           </DialogFooter>
         </DialogContent>
