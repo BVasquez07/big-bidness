@@ -273,11 +273,6 @@ def getproducts():
         return jsonify({"error": str(e)}), 500
 
 
-    except Exception as e:
-        logging.error(f"Error fetching products: {str(e)}")
-        return jsonify({"error": str(e)}), 500
-
-
 
 
 
@@ -346,12 +341,41 @@ def postcomplaint():
         logging.error(f"Error posting complaint: {str(e)}")
         return jsonify({"error": str(e)}), 500
 
+@app.route("/get-product-complaint", methods=["GET"])
+def getproductcomplaint():
+    try:
+
+        product_id=request.args.get("product_id")
+
+        complaints_result = supabase.table("complaints").select("*").eq("product_id", product_id).execute()
 
 
+        if not complaints_result.data or len(complaints_result.data) == 0:
+            return jsonify({"complaints": []}), 200
+
+        return jsonify({"complaints": complaints_result.data}), 200
+
+    except Exception as e:
+        logging.error(f"Error fetching complaints: {str(e)}")
+        return jsonify({"error": str(e)}), 500
+
+@app.route("/get-seller-complaint", methods=["GET"])
+def getsellercomplaint():
+    try:
+
+        sellerid=request.args.get("sellerid")
+
+        complaints_result = supabase.table("complaints").select("*").eq("sellerid", sellerid).execute()
 
 
+        if not complaints_result.data or len(complaints_result.data) == 0:
+            return jsonify({"complaints": []}), 200
 
+        return jsonify({"complaints": complaints_result.data}), 200
 
+    except Exception as e:
+        logging.error(f"Error fetching complaints: {str(e)}")
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
     app.run(host="localhost", debug=True, port=8080)
