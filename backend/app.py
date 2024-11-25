@@ -153,6 +153,10 @@ def signin():
         return jsonify({"error": str(e)}), 500
 
 
+
+
+
+
 @app.route("/post", methods=["POST"])
 def product_post():
     try:
@@ -212,6 +216,64 @@ def product_post():
     except Exception as e:
         logging.error(f"Error during product posting: {str(e)}")
         return jsonify({"error": str(e)}), 500
+
+
+@app.route("/update-post", methods=["POST"])
+def update_product_post():
+    try:
+        query=request.json
+        status=query.get("listingstatus")
+        product_id=query.get("product_id")
+
+        if not product_id:
+            return jsonify({"error":"Product ID is required"}), 400
+
+        if status not in ["available","not available"]:
+            return jsonify({"error":"Invalid listing status. It should be 'available' or 'not available'"}), 400
+
+        user_auth=supabase.auth.get_user()
+        if not user_auth or not hasattr(user_auth,'user') or not user_auth.user:
+            return jsonify({"error":"Authentication failed"}), 401
+
+        user = user_auth.user
+        email = user.email  
+        seller_result = supabase.table("users").select("userid").eq("email", email).execute()
+        if not seller_result.data or len(seller_result.data) == 0:
+            return jsonify({"error": "Seller not found"}), 404
+
+        seller_data = seller_result.data[0] 
+        seller_id = seller_data["userid"] 
+
+        response=supabase.table("products").update({"listingstatus":status}).eq("productid", product_id).execute()
+
+        if "error" in response or not response.data:
+            return jsonify({"error": response.get("error", "Failed to update product status")}), 500
+
+        return jsonify({"message": f"Product status updated to {status} successfully"}), 200
+
+    except Exception as e:
+        logging.error(f"Error during product updating: {str(e)}")
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/get-all-products", methods=["GET"])
+def getproducts():
+    try:
+       
+        products=supabase.table("products").select("*").execute()
+
+       
+        if products.data:
+            return jsonify({"products": products.data}), 200
+        else:
+            return jsonify({"products": []}), 200
+
+    except Exception as e:
+        logging.error(f"Error fetching products: {str(e)}")
+        return jsonify({"error": str(e)}), 500
+
+
+
 
 
 
@@ -279,12 +341,41 @@ def postcomplaint():
         logging.error(f"Error posting complaint: {str(e)}")
         return jsonify({"error": str(e)}), 500
 
+@app.route("/get-product-complaint", methods=["GET"])
+def getproductcomplaint():
+    try:
+
+        product_id=request.args.get("product_id")
+
+        complaints_result = supabase.table("complaints").select("*").eq("product_id", product_id).execute()
 
 
+        if not complaints_result.data or len(complaints_result.data) == 0:
+            return jsonify({"complaints": []}), 200
+
+        return jsonify({"complaints": complaints_result.data}), 200
+
+    except Exception as e:
+        logging.error(f"Error fetching complaints: {str(e)}")
+        return jsonify({"error": str(e)}), 500
+
+@app.route("/get-seller-complaint", methods=["GET"])
+def getsellercomplaint():
+    try:
+
+        sellerid=request.args.get("sellerid")
+
+        complaints_result = supabase.table("complaints").select("*").eq("sellerid", sellerid).execute()
 
 
+        if not complaints_result.data or len(complaints_result.data) == 0:
+            return jsonify({"complaints": []}), 200
 
+        return jsonify({"complaints": complaints_result.data}), 200
 
+    except Exception as e:
+        logging.error(f"Error fetching complaints: {str(e)}")
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
     app.run(host="localhost", debug=True, port=8080)
