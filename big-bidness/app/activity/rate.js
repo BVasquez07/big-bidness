@@ -11,6 +11,9 @@ import {
     DialogClose,
     DialogFooter,
 } from "../../components/ui/dialog"
+
+import { Label } from "../../components/ui/label"
+import { Switch } from "../../components/ui/switch"
   
 import React from 'react'
 import { useState } from 'react'
@@ -18,6 +21,7 @@ import { useState } from 'react'
 export const Rate = ({setRating}) => {
 
     const [stars, setStars] = useState(0)
+    const [complain, setComplain] = useState(false)
 
     const submitRating = () => {
       setRating()
@@ -29,9 +33,15 @@ export const Rate = ({setRating}) => {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Rate</DialogTitle>
-            <DialogDescription>
-              How would you rate your experience?
-            </DialogDescription>
+            <div className='flex justify-between'>
+              <DialogDescription>
+                How would you rate your experience?
+              </DialogDescription>
+              <div className="flex items-center space-x-2">
+                <Switch onClick={() => setComplain(!complain)} id="complain" />
+                <Label htmlFor="complain">Complain</Label>
+              </div>
+            </div>
           </DialogHeader>
           <div className="flex justify-center space-x-1 my-4">
             {[1, 2, 3, 4, 5].map((star) => (
@@ -45,6 +55,14 @@ export const Rate = ({setRating}) => {
               />
             ))}
           </div>
+          {complain && (
+            <div className="mt-4">
+              <textarea
+                className="w-full p-2 border border-gray-300 rounded-md"
+                placeholder="What went wrong?"
+              />
+            </div>
+          )}
           <DialogFooter className="sm:justify-start">
             <DialogClose asChild>
               <button onClick={submitRating} className="">Submit</button>
