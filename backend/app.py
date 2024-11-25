@@ -5,6 +5,7 @@ from supabase import create_client, Client
 from dotenv import load_dotenv
 import logging
 
+
 load_dotenv()
 
 url: str = os.environ.get("SUPABASE_URL")
@@ -20,6 +21,7 @@ supabase: Client = create_client(url, key)
 app = Flask(__name__)
 CORS(app)
 
+
 @app.route("/")
 def hello():
     return "Hello World!"
@@ -30,7 +32,6 @@ def hello():
 @app.route("/register", methods=["POST"]) 
 def register():
     try:
-
         query=request.json
         firstname=query.get("firstname")
         lastname=query.get("lastname")
@@ -50,6 +51,11 @@ def register():
         email_check = supabase.table("users").select("email").eq("email", email).execute()
         if email_check.data:
             return jsonify({"error": "Email is already being used"}), 400
+        
+        sign_up_response=supabase.auth.sign_up({"email": email, "password": password})
+        logging.debug(f"Sign-up response: {sign_up_response}")
+
+
 
         new_user = supabase.table("users").insert({
             "firstname": firstname,
@@ -95,53 +101,188 @@ def register():
         logging.error(f"Error during signup: {str(e)}")
         return jsonify({"error": str(e)}), 500
     
-@app.route("/signin", methods=["Post"])
+
+
+    
+@app.route("/signin", methods=["POST"])
 def signin():
     try:
         query=request.json
-        username=query.get('username')
+        email=query.get('email')
         password=query.get('password')
 
-        if not username or not password:
-            return jsonify({"error": "Please provide username and password"}), 400
-
-        user_result = supabase.table("users").select("userid, password").eq("username", username).execute()
-        user_data = user_result.data
-        userid=user_data[0]["userid"]
-        correct_password = user_data[0]["password"]
 
 
-        approval_result=supabase.table("approvals").select("userid, applicationdetails").eq("userid", userid).execute()
-        approval_data=approval_result.data
+        if not email or not password:
+            return jsonify({"error": "Please provide email and password"}), 400
+
+        user_response=supabase.auth.sign_in_with_password({"email": email, "password": password})
+
+        # Check if the user_response contains a valid user and session
+        if not user_response or not hasattr(user_response, 'user') or not user_response.user:
+            return jsonify({"error": "Authentication failed"}), 401
+        user=user_response.user 
+ 
+        approval_result = supabase.table("approvals").select("email", "applicationdetails").eq("email", user.email).execute()
+        approval_data = approval_result.data
 
         if not approval_data:
             return jsonify({"error": "No approval record found"}), 404
         
-        if password != correct_password:
-            return jsonify({"error": "Incorrect password"}), 401
         approval_status = approval_data[0]["applicationdetails"]
-        if approval_status == "Approval Pending":
+        
+        if approval_status=="Approval Pending":
             return jsonify({"error": "Approval Needed"}), 403
-        elif approval_status == "Approval Rejected":
+        elif approval_status=="Approval Rejected":
             return jsonify({"error": "Approval Rejected"}), 403
 
+        access_token=user_response.session.access_token 
 
-
-        return jsonify({"message": "Login Successful!"}), 200
+        return jsonify({
+            "message": "Login Successful!",
+            "user": {
+                "id": user.id,
+                "email": user.email,
+                "role": user.role
+            },
+            "access_token": access_token
+        }), 200
 
     except Exception as e:
         logging.error(f"Error during signin: {str(e)}")
         return jsonify({"error": str(e)}), 500
 
-    
 
+@app.route("/post", methods=["POST"])
+def product_post():
+    try:
+        query=request.json
+        product_name=query.get("title")
+        imageurl=query.get("imageurl")
+        min_price=query.get("min_price")
+        max_price=query.get("max_price")
+        status=query.get("listingstatus", "available")
+        price=query.get("price")
 
+        if not product_name or not price:
+            return jsonify({"error": "Product name and price are required"}), 400
 
+        user_response=supabase.auth.get_user()
 
+        if not user_response or not hasattr(user_response, 'user') or not user_response.user:
+            return jsonify({"error": "Authentication failed"}), 401
+
+        user = user_response.user
+        email = user.email  
+
+        seller_result=supabase.table("users").select("userid").eq("email", email).execute()
+        seller_data=seller_result.data
+
+        if not seller_data:
+            return jsonify({"error": "Seller not found"}), 404
+
+        seller_id=seller_data[0]["userid"]
+
+        insert_result = supabase.table("products").insert({
+
+            "sellerid": seller_id,
+            "product_name": product_name,
+            "imageurl": imageurl,
+            "min_price": min_price,
+            "max_price": max_price,
+            "listingstatus": status,
+            "price": price
+        
+        
+        
+        }).execute()
+
+        if not insert_result.data:
+            return jsonify({"error": "Failed to insert product"}), 500
+
+        inserted_product=supabase.table("products").select("productid").eq("sellerid", seller_id).eq("product_name", product_name).order("productid", desc=True).limit(1).execute()
+
+        if not inserted_product.data or "productid" not in inserted_product.data[0]:
+            return jsonify({"error": "Product ID not returned"}), 500
+
+        product_id = inserted_product.data[0]["productid"]
+
+        return jsonify({"message": "Product posted successfully!", "product_id": product_id}), 201
 
     except Exception as e:
-        logging.error(f"Error during singin: {str(e)}")
+        logging.error(f"Error during product posting: {str(e)}")
         return jsonify({"error": str(e)}), 500
+
+
+
+@app.route("/postcomplaint", methods=["POST"])
+def postcomplaint():
+    try:
+        
+        query=request.json
+        complaintdetails=query.get("complaintdetails")
+        status=query.get("status", "pending")
+        product_id=query.get("product_id")
+
+       
+        if not complaintdetails or not product_id:
+            return jsonify({"error": "Complaint details and product ID are required"}), 400
+
+      
+        user_response=supabase.auth.get_user()
+
+        if not user_response or not hasattr(user_response, "user") or not user_response.user:
+            return jsonify({"error": "Authentication failed"}), 401
+
+        user=user_response.user
+        email=user.email
+
+        
+        buyer_result=supabase.table("users").select("userid").eq("email", email).execute()
+
+        if not buyer_result.data or len(buyer_result.data) == 0:
+            return jsonify({"error":"User not found"}), 404
+
+        buyerid=buyer_result.data[0].get("userid") 
+        
+        product_result=supabase.table("products").select("sellerid").eq("productid", product_id).execute()
+
+        if not product_result.data or len(product_result.data) == 0:
+            return jsonify({"error": "Product not found"}), 404
+
+        sellerid = product_result.data[0].get("sellerid")
+
+       
+        if isinstance(sellerid, str): 
+            return jsonify({"error": "Seller ID is in UUID format, expected integer"}), 400
+
+       
+        complaint_result=supabase.table("complaints").insert({
+            "buyerid": buyerid, 
+            "sellerid": sellerid, 
+            "complaintdetails": complaintdetails,
+            "status": status,
+            "product_id": product_id
+        }).execute()
+
+        
+        if not complaint_result.data or len(complaint_result.data) == 0:
+            return jsonify({"error": "Failed to post the complaint"}), 500
+
+    
+        return jsonify({
+            "message": "Complaint posted successfully",
+            "complaint_id": complaint_result.data[0].get("complaintid")
+        }), 201
+
+    except Exception as e:
+        logging.error(f"Error posting complaint: {str(e)}")
+        return jsonify({"error": str(e)}), 500
+
+
+
+
+
 
 
 
