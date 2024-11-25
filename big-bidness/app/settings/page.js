@@ -36,12 +36,12 @@ export default function settings() {
                 Settings
             </h1>
         </div>
-        <div className='px-8'>  
+        <div className='px-8 space-y-6'>  
             <div className='border shadow rounded-md px-9 py-6'>
                 <h1 className='pb-2 font-semibold text-xl'>Profile Information</h1>
-                <h2><div className="font-semibold">Name:</div> {UserInfo.name}</h2>
+                <h2><div className="font-semibold inline-block">Name:</div> {UserInfo.name}</h2>
                 <div>
-                    <div className="font-semibold pr-2">Rating:</div>
+                    <div className="font-semibold pr-2 inline-block">Rating:</div>
                     {[1, 2, 3, 4, 5].map((star) => (
                     <Star
                         key={star}
@@ -52,11 +52,11 @@ export default function settings() {
                     />
                     ))}
                 </div>
-                <h1><div className="font-semibold">Role:</div> {UserInfo.role}</h1>
+                <h1><div className="inline-block font-semibold">Role:</div> {UserInfo.role}</h1>
             </div> 
-            <div>
-                <div>Financial</div>
-                <div>Balance: ${balance}</div>
+            <div className='border shadow rounded-md px-9 py-6'>
+                <h1 className='pb-2 font-semibold text-xl'>Financial</h1>
+                <h2><div className="inline-block text-md font-semibold pb-3">Balance: </div> {balance}</h2>
                 <div className='flex'>
                     <div className='w-5/6 pr-2'>
                         <Input type="number" onChange={(e) => setChange(e.target.value)} />
