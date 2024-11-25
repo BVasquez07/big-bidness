@@ -1,3 +1,6 @@
+'use client'
+import { Star } from 'lucide-react'
+
 import {
     Dialog,
     DialogContent,
@@ -7,12 +10,14 @@ import {
     DialogTrigger,
     DialogClose,
     DialogFooter,
-  } from "../../components/ui/dialog"
-  import { Button } from "../../components/ui/button"
+} from "../../components/ui/dialog"
   
-  import React from 'react'
+import React from 'react'
+import { useState } from 'react'
   
 export const Rate = ({setRating}) => {
+
+    const [stars, setStars] = useState(0)
 
     const submitRating = () => {
       setRating()
@@ -23,12 +28,23 @@ export const Rate = ({setRating}) => {
         <DialogTrigger className="border bg-black text-white py-1 px-3 rounded-md">Rate</DialogTrigger>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Are you absolutely sure?</DialogTitle>
+            <DialogTitle>Rate</DialogTitle>
             <DialogDescription>
-              This action cannot be undone. This will permanently delete your account
-              and remove your data from our servers.
+              How would you rate your experience?
             </DialogDescription>
           </DialogHeader>
+          <div className="flex justify-center space-x-1 my-4">
+            {[1, 2, 3, 4, 5].map((star) => (
+              <Star
+                key={star}
+                size={32}
+                onClick={() => setStars(star)}
+                fill={(stars) >= star ? "gold" : "none"}
+                stroke={(stars) >= star ? "gold" : "currentColor"}
+                className="cursor-pointer"
+              />
+            ))}
+          </div>
           <DialogFooter className="sm:justify-start">
             <DialogClose asChild>
               <button onClick={submitRating} className="">Submit</button>
