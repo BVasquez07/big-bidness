@@ -19,20 +19,21 @@ import { Button } from "../../components/ui/button"
 import React from 'react'
 import { useState } from 'react'
   
-export const Rate = ({setRating}) => {
+export const Rate = ({setRated}) => {
 
     const [stars, setStars] = useState(0)
     const [complain, setComplain] = useState(false)
     const [complainText, setComplainText] = useState('')
 
     const submitRating = () => {
+      setRated(true)
       console.log(stars)
       console.log(complainText)
     }
 
     return (
         <Dialog>
-        <DialogTrigger className="border bg-black text-white py-1 px-3 rounded-md">Rate</DialogTrigger>
+        <DialogTrigger className='pl-2'>Rate</DialogTrigger>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Rate</DialogTitle>
