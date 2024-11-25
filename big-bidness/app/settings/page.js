@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Star } from 'lucide-react'
 import { Input } from "../../components/ui/input"
 import { Button } from "../../components/ui/button"
+import { Verify } from './verify'
 
 
 const UserInfo = {
@@ -75,9 +76,10 @@ export default function settings() {
                     </div>
                 </div>
             </div>
-            <div>
-                Leave System
-            </div>   
+            <div className='border shadow rounded-md px-9 py-6'>
+                <h1 className='pb-6 font-semibold text-xl'>Quit System</h1>
+                <Verify />
+            </div> 
         </div>
     </>
   )
