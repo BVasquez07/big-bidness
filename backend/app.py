@@ -213,5 +213,78 @@ def product_post():
         logging.error(f"Error during product posting: {str(e)}")
         return jsonify({"error": str(e)}), 500
 
+
+
+@app.route("/postcomplaint", methods=["POST"])
+def postcomplaint():
+    try:
+        
+        query=request.json
+        complaintdetails=query.get("complaintdetails")
+        status=query.get("status", "pending")
+        product_id=query.get("product_id")
+
+       
+        if not complaintdetails or not product_id:
+            return jsonify({"error": "Complaint details and product ID are required"}), 400
+
+      
+        user_response=supabase.auth.get_user()
+
+        if not user_response or not hasattr(user_response, "user") or not user_response.user:
+            return jsonify({"error": "Authentication failed"}), 401
+
+        user=user_response.user
+        email=user.email
+
+        
+        buyer_result=supabase.table("users").select("userid").eq("email", email).execute()
+
+        if not buyer_result.data or len(buyer_result.data) == 0:
+            return jsonify({"error":"User not found"}), 404
+
+        buyerid=buyer_result.data[0].get("userid") 
+        
+        product_result=supabase.table("products").select("sellerid").eq("productid", product_id).execute()
+
+        if not product_result.data or len(product_result.data) == 0:
+            return jsonify({"error": "Product not found"}), 404
+
+        sellerid = product_result.data[0].get("sellerid")
+
+       
+        if isinstance(sellerid, str): 
+            return jsonify({"error": "Seller ID is in UUID format, expected integer"}), 400
+
+       
+        complaint_result=supabase.table("complaints").insert({
+            "buyerid": buyerid, 
+            "sellerid": sellerid, 
+            "complaintdetails": complaintdetails,
+            "status": status,
+            "product_id": product_id
+        }).execute()
+
+        
+        if not complaint_result.data or len(complaint_result.data) == 0:
+            return jsonify({"error": "Failed to post the complaint"}), 500
+
+    
+        return jsonify({
+            "message": "Complaint posted successfully",
+            "complaint_id": complaint_result.data[0].get("complaintid")
+        }), 201
+
+    except Exception as e:
+        logging.error(f"Error posting complaint: {str(e)}")
+        return jsonify({"error": str(e)}), 500
+
+
+
+
+
+
+
+
 if __name__ == "__main__":
     app.run(host="localhost", debug=True, port=8080)
