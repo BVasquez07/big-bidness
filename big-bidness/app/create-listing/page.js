@@ -1,7 +1,12 @@
-import React from 'react';
+import React from 'react'
+import { Form } from './Form';
 
-const CreateListing = () => {
-  return <h1>This is Create Listing</h1>;
-};
-
-export default CreateListing;
+export default function createListing() {
+  return (
+    <div className='flex justify-center'>
+        <div className='pt-10 pb-10'>
+            <Form/>
+        </div>
+    </div>
+  )
+}
