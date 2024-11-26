@@ -1,5 +1,6 @@
 import React from "react";
 import Comments from "@/app/components/Comments";
+import BiddingSection from "@/app/components/BiddingSection";
 
 // Dummy data for illustration
 const data = [
@@ -70,8 +71,7 @@ const ItemPage = ({ params }) => {
           {/* Right side: Bidding Section */}
           <div className="flex flex-col justify-start">
             <div className="p-4 border rounded-lg mb-6">
-              <h2 className="text-xl font-bold">Bidding Section</h2>
-              <p>Place your bids here.</p>
+              <BiddingSection />
             </div>
           </div>
         </div>
