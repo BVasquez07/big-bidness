@@ -29,7 +29,7 @@ def hello():
 
 
         
-@app.route("/register", methods=["POST"]) 
+@app.route("/register", methods=["POST"]) #register. One thing left to improve upon:taking in math answer
 def register():
     try:
         query=request.json
@@ -104,7 +104,7 @@ def register():
 
 
     
-@app.route("/signin", methods=["POST"])
+@app.route("/signin", methods=["POST"])#one thing left, also check if account is suspended
 def signin():
     try:
         query=request.json
@@ -118,7 +118,6 @@ def signin():
 
         user_response=supabase.auth.sign_in_with_password({"email": email, "password": password})
 
-        # Check if the user_response contains a valid user and session
         if not user_response or not hasattr(user_response, 'user') or not user_response.user:
             return jsonify({"error": "Authentication failed"}), 401
         user=user_response.user 
@@ -154,10 +153,44 @@ def signin():
 
 
 
+@app.route("/personalinfo", methods=["GET"])#this gets the user info 
+def personalinfo():
+    try:
+        user_response = supabase.auth.get_user()
+
+        if not user_response or not hasattr(user_response, "user") or not user_response.user:
+            return jsonify({"error": "Authentication failed"}), 401
+
+        user = user_response.user
+        email = user.email
+
+        user_query = supabase.table("users").select("*").eq("email", email).execute()
+        if not user_query.data or len(user_query.data) == 0:
+            return jsonify({"error": "User not found"}), 404
+
+        return jsonify({"user": user_query.data[0]}), 200
+    except Exception as e:
+        logging.error(f"Error getting user: {str(e)}")
+        return jsonify({"error": str(e)}), 500
+    
+@app.route("/userinfo", methods=["GET"])#gets any user info the user clicks ons
+def userinfo():
+    try:
+        username = request.args.get("username")
+        if not username:
+            return jsonify({"error": "Username is required"}), 400
+
+        user_query = supabase.table("users").select("*").eq("username", username).execute()
+        if not user_query.data or len(user_query.data) == 0:
+            return jsonify({"error": "User not found"}), 404
+
+        return jsonify({"user": user_query.data[0]}), 200
+    except Exception as e:
+        logging.error(f"Error getting user: {str(e)}")
+        return jsonify({"error": str(e)}), 500
 
 
-
-@app.route("/post", methods=["POST"])
+@app.route("/post", methods=["POST"])#posting product
 def product_post():
     try:
         query=request.json
@@ -218,7 +251,7 @@ def product_post():
         return jsonify({"error": str(e)}), 500
 
 
-@app.route("/update-post", methods=["POST"])
+@app.route("/update-post", methods=["POST"])#upadte lisiting status
 def update_product_post():
     try:
         query=request.json
@@ -256,7 +289,7 @@ def update_product_post():
         return jsonify({"error": str(e)}), 500
 
 
-@app.route("/get-all-products", methods=["GET"])
+@app.route("/get-all-products", methods=["GET"])#get all products for the front page
 def getproducts():
     try:
        
@@ -277,7 +310,7 @@ def getproducts():
 
 
 
-@app.route("/postcomplaint", methods=["POST"])
+@app.route("/postcomplaint", methods=["POST"])#get all complaints
 def postcomplaint():
     try:
         
@@ -341,7 +374,7 @@ def postcomplaint():
         logging.error(f"Error posting complaint: {str(e)}")
         return jsonify({"error": str(e)}), 500
 
-@app.route("/get-product-complaint", methods=["GET"])
+@app.route("/get-product-complaint", methods=["GET"])#get complainst based on product only
 def getproductcomplaint():
     try:
 
@@ -359,7 +392,7 @@ def getproductcomplaint():
         logging.error(f"Error fetching complaints: {str(e)}")
         return jsonify({"error": str(e)}), 500
 
-@app.route("/get-seller-complaint", methods=["GET"])
+@app.route("/get-seller-complaint", methods=["GET"])#get onlby seller complaint
 def getsellercomplaint():
     try:
 
@@ -378,7 +411,7 @@ def getsellercomplaint():
         return jsonify({"error": str(e)}), 500
 
 
-@app.route("/postbid", methods=["POST"])
+@app.route("/postbid", methods=["POST"])#bid for proudct
 def postbid():
     try:
 
@@ -427,10 +460,9 @@ def postbid():
 
 
 
-@app.route("/get-product-bid", methods=["GET"])
+@app.route("/get-product-bid", methods=["GET"])#get all the bid that are not expired
 def getproductbid():
     try:
-        # Get product_id from query parameters
         product_id = request.args.get("product_id")
         if not product_id:
             return jsonify({"error": "Product ID is required"}), 400
@@ -456,11 +488,45 @@ def getproductbid():
     except Exception as e:
         logging.error(f"Error fetching bids: {str(e)}")
         return jsonify({"error": str(e)}), 500
-    
+
+
+
+@app.route("/submitsuspension", methods=["POST"])#still working
+def suspensiocount():
+    try:
+        query=request.json()
+        suspensiocount=query.get("complaintdetails")
+
+
+       
+        if not suspensiocount :
+            return jsonify({"error": "Complaint details and product ID are required"}), 400
+
+      
+        user_response=supabase.auth.get_user()
+
+        if not user_response or not hasattr(user_response, "user") or not user_response.user:
+            return jsonify({"error": "Authentication failed"}), 401
+
+        user=user_response.user
+        email=user.email
+
+        
+        suspended_result=supabase.table("users").select("userid").eq("email", email).execute()
+
+        if not suspended_result.data or len(suspended_result.data) == 0:
+            return jsonify({"error":"User not found"}), 404
+
+        suspendedid=suspended_result.data[0].get("userid") 
 
 
 
 
+
+
+    except Exception as e:
+        logging.error(f"Error posting superuser: {str(e)}")
+        return jsonify({"error": str(e)}), 500
 
 
 
