@@ -26,10 +26,10 @@ export const Navbar = () => {
             <Link href="/settings" className="text-black hover:bg-black hover:text-white rounded-md px-1 py-1">
               Settings
             </Link>
-            <Link href="/sign-in" className="text-black bg-neutral-300 border border-slate-500 hover:bg-zinc-800 hover:text-white rounded-md px-3 py-1">
+            <Link href="/auth/login" className="text-black bg-neutral-300 border border-slate-500 hover:bg-zinc-800 hover:text-white rounded-md px-3 py-1">
               Sign In
             </Link>
-            <Link href="/register" className="text-white bg-zinc-800 border border-slate-500 hover:bg-neutral-300 hover:text-black rounded-md px-2 py-1">
+            <Link href="/auth/register" className="text-white bg-zinc-800 border border-slate-500 hover:bg-neutral-300 hover:text-black rounded-md px-2 py-1">
               Register
             </Link>
           </div>
