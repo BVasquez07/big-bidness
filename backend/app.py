@@ -29,9 +29,10 @@ def hello():
 
 
         
-@app.route("/register", methods=["POST"]) #register. One thing left to improve upon:taking in math answer
+@app.route("/register", methods=["POST"])
 def register():
     try:
+        #parameters
         query=request.json
         firstname=query.get("firstname")
         lastname=query.get("lastname")
@@ -41,17 +42,22 @@ def register():
         role=query.get("role", "User")
         vipstatus=query.get("vipstatus", False)
         accountbalance=query.get("accountbalance", 0.0)
-        suspensioncount=query.get("suspensioncount", 0)
-        rating=query.get("rating", 0.0)
-
-        username_check = supabase.table("users").select("username").eq("username", username).execute()
+        suspended=query.get("suspended", False)
+        rating=query.get("rating", 0.00)
+        question=query.get("question")
+        answer=query.get("answer")
+        
+        #checks the table if username is already in use
+        username_check = supabase.table("users").select("username").eq("username", username).execute() 
         if username_check.data:
             return jsonify({"error": "Username is taken"}), 400
-
+        
+        #checks the table if email is already in use
         email_check = supabase.table("users").select("email").eq("email", email).execute()
         if email_check.data:
             return jsonify({"error": "Email is already being used"}), 400
         
+        #the Auhtorization for email
         sign_up_response=supabase.auth.sign_up({"email": email, "password": password})
         logging.debug(f"Sign-up response: {sign_up_response}")
 
@@ -66,24 +72,27 @@ def register():
             "role": role,
             "vipstatus": vipstatus,
             "accountbalance": accountbalance,
-            "suspensioncount": suspensioncount,
-            "rating": rating
+            "suspended": suspended,
+            "rating": rating,
         }).execute()
 
         if hasattr(new_user, 'error') and new_user.error:
             return jsonify({"error": new_user.error.message}), 500
         if not new_user.data:
             raise Exception("Failed to insert new user. No data returned.")
-
-        new_userid = new_user.data[0].get("userid")
-        if not new_userid:
+        #gets userid
+        new_username= new_user.data[0].get("username")
+        if not new_username:
             raise Exception("Failed to retrieve userid for the new user.")
 
-
+        #sends userid and other relevant information to approval table
         approval_response = supabase.table("approvals").insert({
-            "userid": new_userid,
-            "applicationdetails": "Approval Pending", 
-            "approvedby": None
+            "username": new_username,
+            "applicationdetails": "Approval Pending",
+            "email":email, 
+            "approvedby": None,
+            "question":question,
+            "answer":answer
         }).execute()
 
 
@@ -95,7 +104,7 @@ def register():
             raise Exception("Failed to insert approval entry. No data returned.")
 
 
-        return jsonify({"message": "User signed up successfully and is awaiting approval."}), 200
+        return jsonify({"message": "User signed up successfully and is awaiting approval.Please check email for authorization"}), 200
 
     except Exception as e:
         logging.error(f"Error during signup: {str(e)}")
@@ -104,7 +113,7 @@ def register():
 
 
     
-@app.route("/signin", methods=["POST"])#one thing left, also check if account is suspended
+@app.route("/signin", methods=["POST"])#checks all condtions, if everythign is okay, logs in
 def signin():
     try:
         query=request.json
@@ -115,13 +124,28 @@ def signin():
 
         if not email or not password:
             return jsonify({"error": "Please provide email and password"}), 400
-
+        
+        #uses supabase authorization to login as this gives a acccess token
         user_response=supabase.auth.sign_in_with_password({"email": email, "password": password})
 
         if not user_response or not hasattr(user_response, 'user') or not user_response.user:
             return jsonify({"error": "Authentication failed"}), 401
+        
         user=user_response.user 
- 
+
+        suspended_result=supabase.table("users").select("email", "suspended").eq("email", user.email).execute()
+        suspended_data=suspended_result.data
+
+        if not suspended_data:
+            return jsonify({"error": "No suspended record found"}), 404
+        
+        suspended_status = suspended_data[0]["suspended"]
+        
+        #suspended conditions
+        if suspended_status==True:
+            return jsonify({"error": "Suspended. Pay up"}), 403
+        
+        #finds info from approval table
         approval_result = supabase.table("approvals").select("email", "applicationdetails").eq("email", user.email).execute()
         approval_data = approval_result.data
 
@@ -130,12 +154,16 @@ def signin():
         
         approval_status = approval_data[0]["applicationdetails"]
         
+        #approval conditions
         if approval_status=="Approval Pending":
             return jsonify({"error": "Approval Needed"}), 403
         elif approval_status=="Approval Rejected":
             return jsonify({"error": "Approval Rejected"}), 403
-
-        access_token=user_response.session.access_token 
+        
+        #gets access token
+        access_token=user_response.session.access_token
+        if not access_token:
+            return jsonify({"error": "Verify you email. Check your email"}), 401
 
         return jsonify({
             "message": "Login Successful!",
@@ -491,43 +519,104 @@ def getproductbid():
 
 
 
-@app.route("/submitsuspension", methods=["POST"])#still working
-def suspensiocount():
+@app.route("/submitrating", methods=["POST"])  # this submits rating and checks for suspension
+def rating():
     try:
-        query=request.json()
-        suspensiocount=query.get("complaintdetails")
+        query=request.json
+        rating=query.get("rating")
+        username=query.get("username")
 
+        if rating is None:
+            return jsonify({"error": "Rating is required"}), 400
+        if not username:
+            return jsonify({"error": "Username is required"}), 400
 
-       
-        if not suspensiocount :
-            return jsonify({"error": "Complaint details and product ID are required"}), 400
+        user_response = supabase.table("users").select("*").eq("username", username).execute()
+        if not user_response.data or len(user_response.data) == 0:
+            return jsonify({"error": "User not found"}), 404
+        userid = user_response.data[0]["userid"]
+        now=datetime.now()
+        today=now.date().isoformat()
+        current_time=now.time().isoformat() 
 
-      
         user_response=supabase.auth.get_user()
-
         if not user_response or not hasattr(user_response, "user") or not user_response.user:
             return jsonify({"error": "Authentication failed"}), 401
 
         user=user_response.user
         email=user.email
 
+        user_query = supabase.table("users").select("userid").eq("email", email).execute()
+        if not user_query.data or len(user_query.data) == 0:
+            return jsonify({"error": "User not found"}), 404
         
-        suspended_result=supabase.table("users").select("userid").eq("email", email).execute()
+        #needs to check who is rating it 
+        ratedby= user_query.data[0]["userid"]
 
-        if not suspended_result.data or len(suspended_result.data) == 0:
-            return jsonify({"error":"User not found"}), 404
+        #inserts in rating table
+        rating_result=supabase.table("ratings").insert({
+            "userid": userid, 
+            "rating":rating,
+            "ratedby":ratedby,
+            "created_at":current_time,
+            "created_date":today
 
-        suspendedid=suspended_result.data[0].get("userid") 
+        }).execute()
 
+        ratings_query=supabase.table("ratings").select("rating").eq("userid", userid).execute()
+        if not ratings_query.data or len(ratings_query.data) == 0:
+            return jsonify({"error": "No ratings found for this user"}), 404
+        
+        #get rating average
+        ratings = []
+        for r in ratings_query.data:
+            ratings.append(r["rating"])
 
+        length=len(ratings)
+        avg_rating=sum(ratings)/length
 
+        #updates usertable
+        rating_update=supabase.table("users").update({"rating":avg_rating}).eq("userid", userid).execute()
+        if "error" in rating_update or not rating_update.data:
+            return jsonify({"error": rating_update.get("error", "Failed to update product status")}), 500
+        
+        #checks for ban     
+        if length>=3:#has to have atleast 3 reviews
+            if avg_rating<2 or avg_rating>4:#conditions
+                suspension_bool= True
+        
+                insert_suspension=supabase.table("user_suspensions").insert({
+                    "userid": userid,
+                    "is_suspended": suspension_bool,
+                    "suspended_at": current_time,
+                    "suspended_date": today
+                }).execute()
 
+                if not insert_suspension.data or len(insert_suspension.data) == 0:
+                    return jsonify({"error": "No suspensions added for this user"}), 404
+
+        #gets all suspension count for the user
+        suspension_query= supabase.table("user_suspensions").select("*").eq("userid", userid).execute()
+        if not suspension_query.data or len(suspension_query.data) == 0:
+            logging.info(f"No suspension record found for user {userid}. Continuing...")
+            suspension_count = 0 
+        else:
+            suspension_count = len(suspension_query.data)
+
+        #three suspension count and they are then susepended
+        if suspension_count>=3:
+            update_suspended=supabase.table("users").update({"suspended":True}).eq("userid", userid).execute()
+        
+            if "error" in update_suspended or not update_suspended.data:
+                return jsonify({"error": update_suspended.get("error", "Failed to update product status")}), 500
+
+        
+        return jsonify({"message": "Review posted successfully"}), 201
 
 
     except Exception as e:
-        logging.error(f"Error posting superuser: {str(e)}")
+        logging.error(f"Error posting posting review: {str(e)}")
         return jsonify({"error": str(e)}), 500
-
 
 
 if __name__ == "__main__":
