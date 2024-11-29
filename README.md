@@ -35,7 +35,7 @@
   <h3 align="center">big-bidness</h3>
 
   <p align="center">
-    An awesome README template to jumpstart your projects!
+    Sell, Bid, make bidness
     <br />
     <a href="https://github.com/othneildrew/Best-README-Template"><strong>Explore the docs »</strong></a>
     <br />
