@@ -649,9 +649,11 @@ def rating():
         for r in ratings_query.data:
             created_at=r["created_at"]
             created_date=r["created_date"]
-            if created_date>=suspended_date:
-                if created_at>=suspended_at:
+            if suspended_date is not None and suspended_at is not None:
+                if created_date>=suspended_date and created_at >= suspended_at:
                     ratings.append(r["rating"])
+            else:
+                ratings.append(r["rating"])
 
         if len(ratings)==0:
             recent_avg=0
@@ -696,6 +698,24 @@ def rating():
     except Exception as e:
         logging.error(f"Error posting posting review: {str(e)}")
         return jsonify({"error": str(e)}), 500
+
+@app.route("/get-suspended", methods=["GET"])
+def getsuspended():
+    try:
+       
+        suspended=supabase.table("user_suspensions").select("*").eq("is_suspended",True).execute()
+
+       
+        if suspended.data:
+            return jsonify({"Suspended": suspended.data}), 200
+        else:
+            return jsonify({"Suspended": []}), 200
+
+    except Exception as e:
+        logging.error(f"Error fetching suspended: {str(e)}")
+        return jsonify({"error": str(e)}), 500
+
+
 
 
 if __name__ == "__main__":
