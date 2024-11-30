@@ -19,8 +19,9 @@
 *** https://www.markdownguide.org/basic-syntax/#reference-style-links
 -->
 [![Contributors][contributors-shield]][contributors-url]
-[![Stargazers][stars-shield]][stars-url]
+[![Issues][issues-shield]][issues-url]
 [![MIT License][license-shield]][license-url]
+[![Stargazers][stars-shield]][stars-url]
 
 
 
@@ -28,13 +29,13 @@
 <br />
 <div align="center">
   <a href="https://github.com/othneildrew/Best-README-Template">
-    <img src="images/logo.png" alt="Logo" width="80" height="80">
+    <img src="./big-bidness/public/assets/sampleLogo.png" alt="Logo" width="80" height="80">
   </a>
 
   <h3 align="center">big-bidness</h3>
 
   <p align="center">
-    An awesome README template to jumpstart your projects!
+    Sell, Bid, make bidness
     <br />
     <a href="https://github.com/othneildrew/Best-README-Template"><strong>Explore the docs »</strong></a>
     <br />
@@ -243,12 +244,13 @@ Use this space to list resources you find helpful and would like to give credit 
 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
-[contributors-shield]: https://img.shields.io/github/contributors/othneildrew/Best-README-Template.svg?style=for-the-badge
+[contributors-shield]: https://img.shields.io/github/contributors/BVasquez07/big-bidness
 [contributors-url]: https://github.com/BVasquez07/big-bidness/graphs/contributors
-[forks-shield]: https://img.shields.io/github/forks/othneildrew/Best-README-Template.svg?style=for-the-badge
-[stars-shield]: https://img.shields.io/github/stars/othneildrew/Best-README-Template.svg?style=for-the-badge
-[stars-url]: https://github.com/othneildrew/Best-README-Template/stargazers
-[license-shield]: https://img.shields.io/github/license/othneildrew/Best-README-Template.svg?style=for-the-badge
+[stars-shield]: https://img.shields.io/github/stars/BVasquez07/big-bidness
+[stars-url]: https://github.com/BVasquez07/big-bidness/stargazers
+[issues-shield]: https://img.shields.io/github/issues/BVasquez07/big-bidness
+[issues-url]: https://github.com/BVasquez07/big-bidness/issues
+[license-shield]: https://img.shields.io/github/license/BVasquez07/big-bidness
 [license-url]: https://github.com/othneildrew/Best-README-Template/blob/master/LICENSE.txt
 [product-screenshot]: images/screenshot.png
 [Next.js]: https://img.shields.io/badge/next.js-000000?style=for-the-badge&logo=nextdotjs&logoColor=white
