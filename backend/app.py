@@ -130,15 +130,24 @@ def signin():
             return jsonify({"error": "Authentication failed"}), 401
 
         user=user_response.user
+        email = user.email  
+
+        user_query=supabase.table("users").select("userid").eq("email", email).execute()
+        user_data=user_query.data
+
+        if not user_data:
+            return jsonify({"error": "Seller not found"}), 404
+
+        userid=user_data[0]["userid"]
 
         # check suspended status
-        suspended_result=supabase.table("users").select("email", "suspended").eq("email", user.email).execute()
+        suspended_result=supabase.table("user_suspensions").select("userid", "is_suspended").eq("userid", userid).execute()
         suspended_data=suspended_result.data if suspended_result.data else []
 
         if not suspended_data:
-            return jsonify({"error": "No suspended record found"}), 404
-
-        suspended_status=suspended_data[0]["suspended"]
+            suspended_status= False
+        else:
+            suspended_status=suspended_data[0]["suspended"]
          #suspended conditions
         if suspended_status is True:
             return jsonify({"error": "Suspended. Pay up"}), 403
@@ -184,10 +193,7 @@ def signin():
         )
 
         #extract the top 4 ratings
-        ratings = [r["rating"] for r in ratings_sorted[:4]]
-        avg_rating = sum(ratings) / len(ratings) if ratings else 0
-
-        ratings = [r["rating"] for r in ratings_sorted[:4]]
+        ratings = [r["rating"] for r in ratings_sorted[:3]]
         avg_rating = sum(ratings) / len(ratings) if ratings else 0
 
         balance_result = supabase.table("users").select("accountbalance").eq("email", email).execute()
@@ -589,6 +595,7 @@ def rating():
         today=now.date().isoformat()
         current_time=now.time().isoformat() 
 
+
         user_response=supabase.auth.get_user()
         if not user_response or not hasattr(user_response, "user") or not user_response.user:
             return jsonify({"error": "Authentication failed"}), 401
@@ -613,56 +620,75 @@ def rating():
 
         }).execute()
 
-        ratings_query=supabase.table("ratings").select("rating").eq("userid", userid).execute()
+
+        suspension_query=supabase.table("user_suspensions").select("suspended_date", "suspended_at", "is_suspended").eq("userid", userid).execute()
+
+        if not suspension_query.data or len(suspension_query.data) == 0:
+            insert_suspension = supabase.table("user_suspensions").insert({
+                "userid": userid,
+                "is_suspended": False,
+                "suspended_at": current_time,
+                "suspended_date": today
+            }).execute()
+            if not insert_suspension.data or len(insert_suspension.data) == 0:
+                return jsonify({"error": "Failed to insert suspension for this user"}), 500
+
+
+        ratings_query=supabase.table("ratings").select("rating", "created_at","created_date").eq("userid", userid).execute()
         if not ratings_query.data or len(ratings_query.data) == 0:
             return jsonify({"error": "No ratings found for this user"}), 404
         
-        #get rating average
-        ratings = []
+        if suspension_query.data and len(suspension_query.data) > 0:
+            suspended_date= suspension_query.data[0]["suspended_date"]
+            suspended_at=suspension_query.data[0]["suspended_at"]
+        else:
+            suspended_date=None
+            suspended_at=None
+
+        ratings=[]
         for r in ratings_query.data:
-            ratings.append(r["rating"])
+            created_at = r["created_at"]
+            created_date = r["created_date"]
+            if created_date > suspended_date:
+                if created_at > suspended_at:
+                    ratings.append(r["rating"])
 
-        length=len(ratings)
-        avg_rating=sum(ratings)/length
+        if len(ratings)==0:
+            recent_avg=0
+        else:
+            recent_avg=sum(ratings)/len(ratings)
 
-        #updates usertable
-        rating_update=supabase.table("users").update({"rating":avg_rating}).eq("userid", userid).execute()
-        if "error" in rating_update or not rating_update.data:
-            return jsonify({"error": rating_update.get("error", "Failed to update product status")}), 500
-        
-        #checks for ban     
-        if length>=3:#has to have atleast 3 reviews
-            if avg_rating<2 or avg_rating>4:#conditions
-                suspension_bool= True
-        
-                insert_suspension=supabase.table("user_suspensions").insert({
-                    "userid": userid,
-                    "is_suspended": suspension_bool,
+
+        if len(ratings)>=3:
+            if recent_avg < 2 or recent_avg > 4:
+                update_suspension = supabase.table("user_suspensions").update({
+                    "is_suspended": True,
                     "suspended_at": current_time,
                     "suspended_date": today
-                }).execute()
+                }).eq("userid", userid).execute()
+                if not update_suspension.data or len(update_suspension.data) == 0:
+                    return jsonify({"error": "Failed to update suspension for this user"}), 500
 
-                if not insert_suspension.data or len(insert_suspension.data) == 0:
-                    return jsonify({"error": "No suspensions added for this user"}), 404
 
-        #gets all suspension count for the user
-        suspension_query= supabase.table("user_suspensions").select("*").eq("userid", userid).execute()
-        if not suspension_query.data or len(suspension_query.data) == 0:
-            logging.info(f"No suspension record found for user {userid}. Continuing...")
-            suspension_count = 0 
+        #updates usertable
+        total_ratings_query=supabase.table("ratings").select("*").eq("userid", userid).execute()
+        all_ratings = []
+        for r in total_ratings_query.data:
+            all_ratings.append(r["rating"])
+        
+        if len(all_ratings)!=0:
+            total_avg= sum(all_ratings)/len(all_ratings)
         else:
-            suspension_count = len(suspension_query.data)
+            total_avg=0
 
-        #three suspension count and they are then susepended
-        if suspension_count>=3:
-            update_suspended=supabase.table("users").update({"suspended":True}).eq("userid", userid).execute()
-        
-            if "error" in update_suspended or not update_suspended.data:
-                return jsonify({"error": update_suspended.get("error", "Failed to update product status")}), 500
 
-        
+
+        rating_update=supabase.table("users").update({"rating":total_avg}).eq("userid", userid).execute()
+        if "error" in rating_update or not rating_update.data:
+            return jsonify({"error":"Failed to update  status"}), 500
+
+
         return jsonify({"message": "Review posted successfully"}), 201
-
 
     except Exception as e:
         logging.error(f"Error posting posting review: {str(e)}")
