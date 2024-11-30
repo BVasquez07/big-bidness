@@ -117,67 +117,117 @@ def register():
 def signin():
     try:
         query=request.json
-        email=query.get('email')
-        password=query.get('password')
-
-
+        email=query.get("email")
+        password=query.get("password")
 
         if not email or not password:
             return jsonify({"error": "Please provide email and password"}), 400
-        
+
         #uses supabase authorization to login as this gives a acccess token
         user_response=supabase.auth.sign_in_with_password({"email": email, "password": password})
 
         if not user_response or not hasattr(user_response, 'user') or not user_response.user:
             return jsonify({"error": "Authentication failed"}), 401
-        
-        user=user_response.user 
 
+        user=user_response.user
+
+        # check suspended status
         suspended_result=supabase.table("users").select("email", "suspended").eq("email", user.email).execute()
-        suspended_data=suspended_result.data
+        suspended_data=suspended_result.data if suspended_result.data else []
 
         if not suspended_data:
             return jsonify({"error": "No suspended record found"}), 404
-        
-        suspended_status = suspended_data[0]["suspended"]
-        
-        #suspended conditions
-        if suspended_status==True:
+
+        suspended_status=suspended_data[0]["suspended"]
+         #suspended conditions
+        if suspended_status is True:
             return jsonify({"error": "Suspended. Pay up"}), 403
-        
+
         #finds info from approval table
-        approval_result = supabase.table("approvals").select("email", "applicationdetails").eq("email", user.email).execute()
-        approval_data = approval_result.data
+        approval_result=supabase.table("approvals").select("email", "applicationdetails").eq("email", user.email).execute()
+        approval_data=approval_result.data if approval_result.data else []
 
         if not approval_data:
             return jsonify({"error": "No approval record found"}), 404
-        
+
+
         approval_status = approval_data[0]["applicationdetails"]
-        
+
         #approval conditions
         if approval_status=="Approval Pending":
             return jsonify({"error": "Approval Needed"}), 403
         elif approval_status=="Approval Rejected":
             return jsonify({"error": "Approval Rejected"}), 403
-        
-        #gets access token
+
+        # get access token
         access_token=user_response.session.access_token
         if not access_token:
-            return jsonify({"error": "Verify you email. Check your email"}), 401
+            return jsonify({"error": "Verify your email. Check your inbox"}), 401
+
+        # get userid
+        user_result=supabase.table("users").select("userid").eq("email", user.email).execute()
+        user_data=user_result.data if user_result.data else []
+
+        if not user_data:
+            return jsonify({"error": "User ID not found"}), 404
+
+        userid = user_data[0]['userid']
+
+        #get ratings with created_at and created_date
+        rating_result = supabase.table("ratings").select("rating, created_at, created_date").eq("userid", userid).execute()
+        rating_data = rating_result.data if rating_result.data else []
+
+        #sort by created_at and created_date
+        ratings_sorted = sorted(
+            rating_data, 
+            key=lambda r: (r.get("created_at", ""), r.get("created_date", ""))
+        )
+
+        #extract the top 4 ratings
+        ratings = [r["rating"] for r in ratings_sorted[:4]]
+        avg_rating = sum(ratings) / len(ratings) if ratings else 0
+
+        ratings = [r["rating"] for r in ratings_sorted[:4]]
+        avg_rating = sum(ratings) / len(ratings) if ratings else 0
+
+        balance_result = supabase.table("users").select("accountbalance").eq("email", email).execute()
+        balance_data = balance_result.data if balance_result.data else []
+        balance = balance_data[0].get("accountbalance", 0) if balance_data else 0
+
+        complaints_result=supabase.table("complaints").select("*").eq("sellerid", userid).execute()
+        total_complaints=len(complaints_result.data) if complaints_result.data else 0
+
+        role = "User"
+
+        #update role based on conditions
+        if len(rating_data)>=5:
+            if 2 <= avg_rating <= 4 and balance >= 5000 and total_complaints == 0:
+                role = "Vip"
+            else:
+                role = "User"
+
+            update_result = supabase.table("users").update({"role": role}).eq("userid", userid).execute()
+
+            if not update_result.data:  
+                return jsonify({"error": "Failed to update user role"}), 500
+
+
 
         return jsonify({
             "message": "Login Successful!",
             "user": {
                 "id": user.id,
                 "email": user.email,
-                "role": user.role
+                "role": role
             },
             "access_token": access_token
         }), 200
 
+
     except Exception as e:
         logging.error(f"Error during signin: {str(e)}")
         return jsonify({"error": str(e)}), 500
+
 
 
 
