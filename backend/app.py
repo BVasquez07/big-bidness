@@ -647,16 +647,18 @@ def rating():
 
         ratings=[]
         for r in ratings_query.data:
-            created_at = r["created_at"]
-            created_date = r["created_date"]
-            if created_date > suspended_date:
-                if created_at > suspended_at:
+            created_at=r["created_at"]
+            created_date=r["created_date"]
+            if created_date>=suspended_date:
+                if created_at>=suspended_at:
                     ratings.append(r["rating"])
 
         if len(ratings)==0:
             recent_avg=0
         else:
             recent_avg=sum(ratings)/len(ratings)
+        print(f"Ratings: {ratings}")
+        print(f"Recent avg: {recent_avg}")
 
 
         if len(ratings)>=3:
@@ -668,6 +670,7 @@ def rating():
                 }).eq("userid", userid).execute()
                 if not update_suspension.data or len(update_suspension.data) == 0:
                     return jsonify({"error": "Failed to update suspension for this user"}), 500
+                print("we updated")
 
 
         #updates usertable
