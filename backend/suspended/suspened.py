@@ -39,7 +39,7 @@ def updatesuspended():
         if not email or not password:
             return jsonify({"error": "Please provide email and password"}), 400
 
-        #uses supabase authorization to login as this gives a acccess token
+        #get user to login and add their credit card
         user_response=supabase.auth.sign_in_with_password({"email": email, "password": password})
 
         if not user_response or not hasattr(user_response, 'user') or not user_response.user:
