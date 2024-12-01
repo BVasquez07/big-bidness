@@ -7,14 +7,7 @@ from config import supabase
 from dotenv import load_dotenv
 import logging
 from datetime import datetime
-from auth.auth import register, signin
-from user.user import personalinfo, userinfo
-from suspended.suspened import getsuspended,updatesuspended
-from rating.rating import rating
-from product.product import product_post,update_product_post,getproducts
-from complaints.complaint import postcomplaint,getproductcomplaint,getsellercomplaint
-from bid.bid import postbid,getproductbid
-from auth.auth import hello,register,signin
+from routes import *
 
 
 app = Flask(__name__)
@@ -23,46 +16,46 @@ CORS(app)
 
 @app.route("/")
 def hello():
-    return 
+    return jsonify({"res": "Hello World!"})
 
 
 
         
 @app.route("/register", methods=["POST"])
 def register_route():
-    return register()
+    return auth.register() 
     
 
 
     
 @app.route("/signin", methods=["POST"])#checks all condtions, if everythign is okay, logs in
 def signin_route():
-    return signin()
+    return auth.signin()
 
 
 
 
 @app.route("/personalinfo", methods=["GET"])#this gets the user info 
 def personalinfo_route():
-    return personalinfo()
+    return user.personalinfo()
     
 @app.route("/userinfo", methods=["GET"])#gets any user info the user clicks ons
 def userinfo_route():
-    return userinfo
+    return user.userinfo
 
 
 @app.route("/post", methods=["POST"])#posting product
 def product_post_route():
-    return product_post()
+    return product.product_post()
 
 
 @app.route("/update-post", methods=["POST"])#upadte lisiting status
 def update_product_post_route():
-    return update_product_post()
+    return product.update_product_post()
 
 @app.route("/get-all-products", methods=["GET"])#get all products for the front page
 def getproducts_route():
-    return getproducts()
+    return product.getproducts()
 
 
 
@@ -70,42 +63,42 @@ def getproducts_route():
 
 @app.route("/postcomplaint", methods=["POST"])#get all complaints
 def postcomplaint_route():
-    return postcomplaint()
+    return complaints.postcomplaint()
 
 
 @app.route("/get-product-complaint", methods=["GET"])#get complainst based on product only
 def getproductcomplaint_route():
-    return getproductcomplaint()
+    return complaints.getproductcomplaint()
 
 
 @app.route("/get-seller-complaint", methods=["GET"])#get onlby seller complaint
 def getsellercomplaint_route():
-    return getsellercomplaint()
+    return complaints.getsellercomplaint()
 
 @app.route("/postbid", methods=["POST"])#bid for proudct
 def postbid_route():
-    return postbid()
+    return bid.postbid()
 
 
 
 @app.route("/get-product-bid", methods=["GET"])#get all the bid that are not expired
 def getproductbid_route():
-    return getproductbid()
+    return bid.getproductbid()
 
 
 
 @app.route("/submitrating", methods=["POST"])  # this submits rating and checks for suspension
 def rating_route():
-    return rating()
+    return rating.rating()
 
 @app.route("/get-suspended", methods=["GET"])
 def getsuspended_route():
-    return getsuspended()
+    return suspended.getsuspended()
 
 
 @app.route("/update-suspended", methods=["POST"])
 def updatesuspended_route():
-    return updatesuspended()
+    return suspended.updatesuspended()
 
 
 if __name__ == "__main__":
