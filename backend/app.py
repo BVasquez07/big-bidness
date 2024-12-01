@@ -39,11 +39,6 @@ def register():
         email=query.get("email")
         username=query.get("username")
         password=query.get("password")
-        role=query.get("role", "User")
-        vipstatus=query.get("vipstatus", False)
-        accountbalance=query.get("accountbalance", 0.0)
-        suspended=query.get("suspended", False)
-        rating=query.get("rating", 0.00)
         question=query.get("question")
         answer=query.get("answer")
         
@@ -69,11 +64,9 @@ def register():
             "email": email,
             "username": username,
             "password": password,
-            "role": role,
-            "vipstatus": vipstatus,
-            "accountbalance": accountbalance,
-            "suspended": suspended,
-            "rating": rating,
+            "role": "User",
+            "accountbalance":0.0,
+            "rating": 0.00,
         }).execute()
 
         if hasattr(new_user, 'error') and new_user.error:
