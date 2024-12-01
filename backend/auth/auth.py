@@ -127,7 +127,7 @@ def signin():
             suspended_status=suspended_data[0]["suspended"]
          #suspended conditions
         if suspended_status is True:
-            return jsonify({"error": "Suspended. Pay up"}), 403
+            return jsonify({"error": "Account Suspended", "redirect_to": "/suspended"}), 403
 
         #finds info from approval table
         approval_result=supabase.table("approvals").select("email", "applicationdetails").eq("email", user.email).execute()

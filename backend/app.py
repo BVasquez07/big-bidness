@@ -9,7 +9,7 @@ import logging
 from datetime import datetime
 from auth.auth import register, signin
 from user.user import personalinfo, userinfo
-from suspended.suspened import getsuspended
+from suspended.suspened import getsuspended,updatesuspended
 from rating.rating import rating
 from product.product import product_post,update_product_post,getproducts
 from complaints.complaint import postcomplaint,getproductcomplaint,getsellercomplaint
@@ -103,6 +103,9 @@ def getsuspended_route():
     return getsuspended()
 
 
+@app.route("/update-suspended", methods=["POST"])
+def updatesuspended_route():
+    return updatesuspended()
 
 
 if __name__ == "__main__":
