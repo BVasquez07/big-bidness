@@ -9,6 +9,7 @@ from datetime import datetime
 
 
 
+
 def hello():
     return "Hello World!"
 
@@ -212,4 +213,19 @@ def signin():
         return jsonify({"error": str(e)}), 500
 
 
+def access_token():
+    try:
+        token = request.headers.get("Authorization")
+        if not token:
+            return jsonify({"error": "Authentication token is missing"}), 401
+        user_auth=supabase.auth.get_user(token)
+        if not user_auth or not hasattr(user_auth,'user') or not user_auth.user:
+            return jsonify({"error":"Authentication failed"}), 401
 
+        user = user_auth.user
+        email = user.email  
+        return email
+    
+    except Exception as e:
+        logging.error(f"Error during token: {str(e)}")
+        return jsonify({"error": str(e)}), 500

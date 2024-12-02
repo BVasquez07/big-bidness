@@ -7,7 +7,7 @@ import os
 import logging
 from datetime import datetime
 from routes.suspened import issuspended
-
+from routes.auth import access_token
 
 
 
@@ -29,17 +29,7 @@ def rating():
         userid = user_response.data[0]["userid"]
         now=datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
-
-        token = request.headers.get("Authorization")
-        if not token:
-            return jsonify({"error": "Authentication token is missing"}), 401
-
-        user_response=supabase.auth.get_user(token)
-        if not user_response or not hasattr(user_response, "user") or not user_response.user:
-            return jsonify({"error": "Authentication failed"}), 401
-
-        user=user_response.user
-        email=user.email
+        email=access_token()
 
         user_query = supabase.table("users").select("userid").eq("email", email).execute()
         if not user_query.data or len(user_query.data) == 0:

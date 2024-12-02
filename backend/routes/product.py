@@ -15,7 +15,6 @@ def product_post():
         imageurl=query.get("imageurl")
         min_price=query.get("min_price")
         max_price=query.get("max_price")
-        status=query.get("listingstatus", "available")
         price=query.get("price")
 
         if not product_name or not price:
@@ -46,7 +45,7 @@ def product_post():
             "imageurl": imageurl,
             "min_price": min_price,
             "max_price": max_price,
-            "listingstatus": status,
+            "is_available": True,
             "price": price
         
         
@@ -110,7 +109,7 @@ def update_product_post():
 
 
 #get all products for the front page
-def getproducts():
+def getproducts():#logic needs work by anas
     try:
        
         products=supabase.table("products").select("*").execute()

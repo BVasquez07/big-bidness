@@ -6,6 +6,7 @@ from flask_cors import CORS
 import os
 import logging
 from datetime import datetime
+from routes.auth import access_token
 
 
 
@@ -16,10 +17,13 @@ def postbid():
         query=request.json
         product_id=query.get("product_id")
         bidamount=query.get("bidamount")
-        biddeadline = query.get("biddeadline")
+        bidtime= query.get("bidtime")
+        biddate=query.get("biddate")
 
         if not bidamount or not product_id:
             return jsonify({"error": "Complaint details and product ID are required"}), 400
+        
+        biddeadline = datetime.strptime(f"{biddate} {bidtime}", '%Y-%m-%d %H:%M:%S')
 
         token = request.headers.get("Authorization")
         if not token:
@@ -37,17 +41,23 @@ def postbid():
             return jsonify({"error": "User not found"}), 404
 
         userid = user_query.data[0]["userid"]
+        product_query=supabase.table("products").select("is_available").eq("productid",product_id ).execute()
+        product_bool= product_query.data[0]["is_available"]
+        if product_bool:
+            bid_result=supabase.table("bids").insert({
+                "product_id": product_id, 
+                "userid": userid, 
+                "bidamount":bidamount,
+                "biddeadline": biddeadline.strftime('%Y-%m-%d %H:%M:%S'),
+                "bid_accepted":False
 
-        bid_result=supabase.table("bids").insert({
-            "product_id": product_id, 
-            "userid": userid, 
-            "bidamount":bidamount,
-            "biddeadline": biddeadline
 
-        }).execute()
+            }).execute()
 
-        if not bid_result.data or len(bid_result.data) == 0:
-            return jsonify({"error": "Failed to insert the bid"}), 500
+            if not bid_result.data or len(bid_result.data) == 0:
+                return jsonify({"error": "Failed to insert the bid"}), 500
+        else:
+            return jsonify({"message": "Product no longer availabe"}), 201
 
 
         return jsonify({"message": "Bid posted successfully", "bid_id": bid_result.data[0]["bidid"]}), 201
@@ -69,15 +79,13 @@ def getproductbid():
             return jsonify({"error": "Product ID is required"}), 400
 
         now=datetime.now()
-        today=now.date().isoformat()
-        current_time=now.time().isoformat() 
+
 
         bid_result = (
             supabase.table("bids")
             .select("*")
             .eq("product_id", product_id)
-            .lte("enddate", today)
-            .lte("biddeadline", current_time)
+            .gte("biddeadline", now.strftime('%Y-%m-%d %H:%M:%S'))  #
             .execute()
         )
 
@@ -90,4 +98,14 @@ def getproductbid():
         logging.error(f"Error fetching bids: {str(e)}")
         return jsonify({"error": str(e)}), 500
 
+def acceptbid():
+    try:
+        email=access_token()
 
+    
+
+
+
+    except Exception as e:
+        logging.error(f"Error fetching bids: {str(e)}")
+        return jsonify({"error": str(e)}), 500
