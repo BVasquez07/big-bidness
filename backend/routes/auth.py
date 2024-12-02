@@ -166,11 +166,11 @@ def signin():
         #sort by created_at and created_date
         ratings_sorted = sorted(
             rating_data, 
-            key=lambda r: (r.get("created_at", ""), r.get("created_date", ""))
+            key=lambda r: (r.get("created_at"))
         )
 
         #extract the top 4 ratings
-        ratings = [r["rating"] for r in ratings_sorted[:3]]
+        ratings = [r["rating"] for r in ratings_sorted[:4]]
         avg_rating = sum(ratings) / len(ratings) if ratings else 0
 
         balance_result = supabase.table("users").select("accountbalance").eq("email", email).execute()

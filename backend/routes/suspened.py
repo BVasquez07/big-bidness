@@ -8,25 +8,22 @@ import logging
 from datetime import datetime
 
 
-def issuspended(userid,suspension_query,current_time,today):
+def issuspended(userid,suspension_query,now):
     try:
-        ratings_query=supabase.table("ratings").select("rating", "created_at","created_date").eq("userid", userid).execute()
+        ratings_query=supabase.table("ratings").select("rating", "created_at").eq("userid", userid).execute()
         if not ratings_query.data or len(ratings_query.data) == 0:
             return jsonify({"error": "No ratings found for this user"}), 404
         print(ratings_query.data)
         if suspension_query.data and len(suspension_query.data) > 0:
-            suspended_date= suspension_query.data[0]["suspended_date"]
             suspended_at=suspension_query.data[0]["suspended_at"]
         else:
-            suspended_date=None
             suspended_at=None
 
         ratings=[]
         for r in ratings_query.data:
             created_at=r["created_at"]
-            created_date=r["created_date"]
-            if suspended_date is not None and suspended_at is not None:
-                if created_date>=suspended_date and created_at >= suspended_at:
+            if suspended_at is not None:
+                if created_at >= suspended_at:
                     ratings.append(r["rating"])
             else:
                 ratings.append(r["rating"])
@@ -43,8 +40,7 @@ def issuspended(userid,suspension_query,current_time,today):
             if recent_avg < 2 or recent_avg > 4:
                 update_suspension = supabase.table("user_suspensions").update({
                     "is_suspended": True,
-                    "suspended_at": current_time,
-                    "suspended_date": today
+                    "suspended_at": now
                 }).eq("userid", userid).execute()
                 if not update_suspension.data or len(update_suspension.data) == 0:
                     return jsonify({"error": "Failed to update suspension for this user"}), 500
@@ -114,8 +110,7 @@ def updatesuspended():
 
         update_suspension = supabase.table("user_suspensions").update({
             "is_suspended": False,
-            "suspended_at": current_time,
-            "suspended_date": today
+            "suspended_at": now,
             }).eq("userid", userid).execute()
         if not update_suspension.data or len(update_suspension.data) == 0:
             return jsonify({"error": "Failed to update suspension for this user"}), 500

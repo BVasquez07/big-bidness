@@ -27,9 +27,8 @@ def rating():
         if not user_response.data or len(user_response.data) == 0:
             return jsonify({"error": "User not found"}), 404
         userid = user_response.data[0]["userid"]
-        now=datetime.now()
-        today=now.date().isoformat()
-        current_time=now.time().isoformat() 
+        now=datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
 
         token = request.headers.get("Authorization")
         if not token:
@@ -54,25 +53,23 @@ def rating():
             "userid": userid, 
             "rating":rating,
             "ratedby":ratedby,
-            "created_at":current_time,
-            "created_date":today
+            "created_at":now,
 
         }).execute()
 
 
-        suspension_query=supabase.table("user_suspensions").select("suspended_date", "suspended_at", "is_suspended").eq("userid", userid).execute()
+        suspension_query=supabase.table("user_suspensions").select("suspended_at", "is_suspended").eq("userid", userid).execute()
 
         if not suspension_query.data or len(suspension_query.data) == 0:
             insert_suspension = supabase.table("user_suspensions").insert({
                 "userid": userid,
                 "is_suspended": False,
-                "suspended_at": current_time,
-                "suspended_date": today
+                "suspended_at": now
             }).execute()
             if not insert_suspension.data or len(insert_suspension.data) == 0:
                 return jsonify({"error": "Failed to insert suspension for this user"}), 500
         
-        is_suspended=issuspended(userid,suspension_query,current_time,today)
+        is_suspended=issuspended(userid,suspension_query,now)
         if is_suspended:
             logging.info("User has been suspended.")
 
