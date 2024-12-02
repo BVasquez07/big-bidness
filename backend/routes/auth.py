@@ -118,13 +118,13 @@ def signin():
         userid=user_data[0]["userid"]
 
         # check suspended status
-        suspended_result=supabase.table("user_suspensions").select("userid", "is_suspended").eq("userid", userid).execute()
+        suspended_result=supabase.table("user_suspensions").select("is_suspended").eq("userid", userid).execute()
         suspended_data=suspended_result.data if suspended_result.data else []
 
         if not suspended_data:
             suspended_status= False
         else:
-            suspended_status=suspended_data[0]["suspended"]
+            suspended_status=suspended_data[0]["is_suspended"]
          #suspended conditions
         if suspended_status is True:
             return jsonify({"error": "Account Suspended", "redirect_to": "/suspended"}), 403
@@ -160,7 +160,7 @@ def signin():
         userid = user_data[0]['userid']
 
         #get ratings with created_at and created_date
-        rating_result = supabase.table("ratings").select("rating, created_at, created_date").eq("userid", userid).execute()
+        rating_result = supabase.table("ratings").select("rating, created_at").eq("userid", userid).execute()
         rating_data = rating_result.data if rating_result.data else []
 
         #sort by created_at and created_date
