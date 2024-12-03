@@ -100,6 +100,15 @@ def getsuspended_route():
 def updatesuspended_route():
     return suspended.updatesuspended()
 
+@app.route("/submittransaction", methods=["POST"])
+def submittransaction_route():
+    return transaction.submittransaction()
+
+@app.route("/acceptbid", methods=["POST"])
+def acceptbid_route():
+    return bid.acceptbid()
+
+
 
 if __name__ == "__main__":
     app.run(host="localhost", debug=True, port=8080)

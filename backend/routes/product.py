@@ -72,36 +72,17 @@ def product_post():
 def update_product_post():
     try:
         query=request.json
-        status=query.get("listingstatus")
         product_id=query.get("product_id")
 
         if not product_id:
             return jsonify({"error":"Product ID is required"}), 400
 
-        if status not in ["available","not available"]:
-            return jsonify({"error":"Invalid listing status. It should be 'available' or 'not available'"}), 400
-        token = request.headers.get("Authorization")
-        if not token:
-            return jsonify({"error": "Authentication token is missing"}), 401
-        user_auth=supabase.auth.get_user(token)
-        if not user_auth or not hasattr(user_auth,'user') or not user_auth.user:
-            return jsonify({"error":"Authentication failed"}), 401
-
-        user = user_auth.user
-        email = user.email  
-        seller_result = supabase.table("users").select("userid").eq("email", email).execute()
-        if not seller_result.data or len(seller_result.data) == 0:
-            return jsonify({"error": "Seller not found"}), 404
-
-        seller_data = seller_result.data[0] 
-        seller_id = seller_data["userid"] 
-
-        response=supabase.table("products").update({"listingstatus":status}).eq("productid", product_id).execute()
+        response=supabase.table("products").update({"is_available":False}).eq("productid", product_id).execute()
 
         if "error" in response or not response.data:
             return jsonify({"error": response.get("error", "Failed to update product status")}), 500
 
-        return jsonify({"message": f"Product status updated to {status} successfully"}), 200
+        return jsonify({"message": f"Product status updated to false successfully"}), 200
 
     except Exception as e:
         logging.error(f"Error during product updating: {str(e)}")
@@ -123,8 +104,6 @@ def getproducts():#logic needs work by anas
     except Exception as e:
         logging.error(f"Error fetching products: {str(e)}")
         return jsonify({"error": str(e)}), 500
-
-
 
 
 
