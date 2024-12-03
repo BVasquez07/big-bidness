@@ -7,7 +7,7 @@ import os
 import logging
 from datetime import datetime
 from routes.auth import access_token
-
+from routes.product import update_product_post
 
 
 #bid for proudct
@@ -156,8 +156,14 @@ def acceptbid():
         }).execute()
 
 
+
         if not bid_response.data or len(bid_response.data) == 0:
             return jsonify({"error": "did not accept bid"}), 404
+        
+        update_product=update_product_post()
+
+        if not update_product_post:
+            return jsonify({"error": "did not update product"}), 404
         
         return jsonify({"message": "Bid accepted successfully"}),200
         

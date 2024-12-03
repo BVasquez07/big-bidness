@@ -40,7 +40,10 @@ def postcomplaint():
         if isinstance(sellerid, str): 
             return jsonify({"error": "Seller ID is in UUID format, expected integer"}), 400
 
-       
+        valid_transaction = supabase.table("transactions").select("buyerid").eq("buyerid", buyerid).eq("sellerid",sellerid).execute()
+        if not valid_transaction.data or len(valid_transaction.data) == 0:
+            return jsonify({"error": "No valid transaction found for this rating"}), 400
+        
         complaint_result=supabase.table("complaints").insert({
             "buyerid": buyerid, 
             "sellerid": sellerid, 

@@ -27,6 +27,7 @@ def rating():
         if not user_response.data or len(user_response.data) == 0:
             return jsonify({"error": "User not found"}), 404
         userid = user_response.data[0]["userid"]
+        print(userid)
         now=datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
         email=access_token()
@@ -37,7 +38,11 @@ def rating():
         
         #needs to check who is rating it 
         ratedby= user_query.data[0]["userid"]
-
+        print(ratedby)
+        valid_transaction = supabase.table("transactions").select("buyerid").eq("buyerid", ratedby).eq("sellerid", userid).execute()
+        print(valid_transaction)
+        if not valid_transaction.data or len(valid_transaction.data) == 0:
+            return jsonify({"error": "No valid transaction found for this rating"}), 400
         #inserts in rating table
         rating_result=supabase.table("ratings").insert({
             "userid": userid, 
