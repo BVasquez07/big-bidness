@@ -6,6 +6,7 @@ from flask_cors import CORS
 import os
 import logging
 from datetime import datetime
+from routes.auth import access_token
 
 #posting product
 def product_post():
@@ -55,12 +56,12 @@ def product_post():
         if not insert_result.data:
             return jsonify({"error": "Failed to insert product"}), 500
 
-        inserted_product=supabase.table("products").select("productid").eq("sellerid", seller_id).eq("product_name", product_name).order("productid", desc=True).limit(1).execute()
+        inserted_product=supabase.table("products").select("product_id").eq("sellerid", seller_id).eq("product_name", product_name).order("product_id", desc=True).limit(1).execute()
 
-        if not inserted_product.data or "productid" not in inserted_product.data[0]:
+        if not inserted_product.data or "product_id" not in inserted_product.data[0]:
             return jsonify({"error": "Product ID not returned"}), 500
 
-        product_id = inserted_product.data[0]["productid"]
+        product_id = inserted_product.data[0]["product_id"]
 
         return jsonify({"message": "Product posted successfully!", "product_id": product_id}), 201
 
@@ -77,7 +78,7 @@ def update_product_post():
         if not product_id:
             return jsonify({"error":"Product ID is required"}), 400
 
-        response=supabase.table("products").update({"is_available":False}).eq("productid", product_id).execute()
+        response=supabase.table("products").update({"is_available":False}).eq("product_id", product_id).execute()
 
         if "error" in response or not response.data:
             return jsonify({"error": response.get("error", "Failed to update product status")}), 500
@@ -90,7 +91,7 @@ def update_product_post():
 
 
 #get all products for the front page
-def getproducts():#logic needs work by anas
+def getproducts():
     try:
        
         products=supabase.table("products").select("*").execute()
@@ -106,4 +107,45 @@ def getproducts():#logic needs work by anas
         return jsonify({"error": str(e)}), 500
 
 
+def user_completed_products():
+    try:
+        email=access_token()
+
+        user_query=supabase.table("users").select("userid").eq("email",email).execute()
+        if not user_query.data or len(user_query.data) == 0:
+            return jsonify({"error": "User not found"}), 404
+        userid=user_query.data[0]["userid"]
+
+        products=supabase.table("products").select("*").eq("sellerid",userid).eq("is_available",False).execute()
+
+        if products.data:
+            return jsonify({"products": products.data}), 200
+        else:
+            return jsonify({"products": []}), 200
+
+    except Exception as e:
+        logging.error(f"Error fetching products: {str(e)}")
+        return jsonify({"error": str(e)}), 500
+
+def user_current_products():
+    try:
+        email=access_token()
+
+        user_query=supabase.table("users").select("userid").eq("email",email).execute()
+        if not user_query.data or len(user_query.data) == 0:
+            return jsonify({"error": "User not found"}), 404
+        userid=user_query.data[0]["userid"]
+
+        products=supabase.table("products").select("*").eq("sellerid",userid).eq("is_available",True).execute()
+
+        if products.data:
+            return jsonify({"products": products.data}), 200
+        else:
+            return jsonify({"products": []}), 200
+
+
+
+    except Exception as e:
+        logging.error(f"Error fetching products: {str(e)}")
+        return jsonify({"error": str(e)}), 500
 

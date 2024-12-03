@@ -27,14 +27,16 @@ def postcomplaint():
         if not buyer_result.data or len(buyer_result.data) == 0:
             return jsonify({"error":"User not found"}), 404
 
-        buyerid=buyer_result.data[0].get("userid") 
+        buyerid=buyer_result.data[0].get("userid")
+        print(buyerid) 
         
-        product_result=supabase.table("products").select("sellerid").eq("productid", product_id).execute()
+        product_result=supabase.table("products").select("sellerid").eq("product_id", product_id).execute()
 
         if not product_result.data or len(product_result.data) == 0:
             return jsonify({"error": "Product not found"}), 404
 
         sellerid = product_result.data[0].get("sellerid")
+        print(buyerid)
 
        
         if isinstance(sellerid, str): 

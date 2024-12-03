@@ -8,7 +8,7 @@ import logging
 from datetime import datetime
 from routes.auth import access_token
 from routes.product import update_product_post
-
+from routes.accountbalance import updatebalance
 
 #bid for proudct
 def postbid():
@@ -24,26 +24,17 @@ def postbid():
         
         biddeadline = datetime.strptime(biddeadline, '%Y-%m-%d %H:%M:%S')
 
-        token = request.headers.get("Authorization")
-        if not token:
-            return jsonify({"error": "Authentication token is missing"}), 401
-        user_response=supabase.auth.get_user(token)
-
-        if not user_response or not hasattr(user_response, "user") or not user_response.user:
-            return jsonify({"error": "Authentication failed"}), 401
-
-        user=user_response.user
-        email=user.email
+        email=access_token()
 
         user_query = supabase.table("users").select("userid").eq("email", email).execute()
         if not user_query.data or len(user_query.data) == 0:
             return jsonify({"error": "User not found"}), 404
 
         userid = user_query.data[0]["userid"]
-        product_query=supabase.table("products").select("is_available").eq("productid",product_id ).execute()
+        product_query=supabase.table("products").select("is_available").eq("product_id",product_id ).execute()
         product_bool= product_query.data[0]["is_available"]
 
-        seller_query=supabase.table("products").select("sellerid").eq("productid",product_id).execute()
+        seller_query=supabase.table("products").select("sellerid").eq("product_id",product_id).execute()
         sellerid=seller_query.data[0]["sellerid"]
         if product_bool:
             bid_result=supabase.table("bids").insert({
@@ -101,6 +92,62 @@ def getproductbid():
         logging.error(f"Error fetching bids: {str(e)}")
         return jsonify({"error": str(e)}), 500
 
+def getuserbid():
+    try:
+        email=access_token()
+        user_query = supabase.table("users").select("userid").eq("email", email).execute()
+        if not user_query.data or len(user_query.data) == 0:
+            return jsonify({"error": "User not found"}), 404
+        userid=user_query.data[0]["userid"]
+
+        now=datetime.now()
+
+        bid_result = (
+            supabase.table("bids")
+            .select("*")
+            .eq("userid", userid)
+            .gte("biddeadline", now.strftime('%Y-%m-%d %H:%M:%S'))  #
+            .execute()
+        )
+
+        if not bid_result.data or len(bid_result.data) == 0:
+            return jsonify({"bids": []}), 200
+        
+        return jsonify({"bids": bid_result.data}), 200
+
+    except Exception as e:
+        logging.error(f"Error fetching bids: {str(e)}")
+        return jsonify({"error": str(e)}), 500
+
+def getpastbid():
+    try:
+        email=access_token()
+        user_query = supabase.table("users").select("userid").eq("email", email).execute()
+        if not user_query.data or len(user_query.data) == 0:
+            return jsonify({"error": "User not found"}), 404
+        userid=user_query.data[0]["userid"]
+
+        now=datetime.now()
+
+        bid_result = (
+            supabase.table("bids")
+            .select("*")
+            .eq("userid", userid)
+            .lt("biddeadline", now.strftime('%Y-%m-%d %H:%M:%S'))  #
+            .execute()
+        )
+
+        if not bid_result.data or len(bid_result.data) == 0:
+            return jsonify({"bids": []}), 200
+        
+        return jsonify({"bids": bid_result.data}), 200
+
+    except Exception as e:
+        logging.error(f"Error fetching bids: {str(e)}")
+        return jsonify({"error": str(e)}), 500
+
+
+
 def acceptbid():
     try:
         
@@ -118,7 +165,7 @@ def acceptbid():
             return jsonify({"error": "User not found"}), 404
 
         signinid = signin_query.data[0]["userid"]
-        product_query=supabase.table("products").select("is_available").eq("productid",product_id ).execute()
+        product_query=supabase.table("products").select("is_available").eq("product_id",product_id ).execute()
         product_bool= product_query.data[0]["is_available"]
         print(product_bool)
 
@@ -145,9 +192,20 @@ def acceptbid():
             logging.error("Product not available for bid acceptance.")
             return jsonify({"error": "Product not available"}), 400
 
+
+
+        account_info=supabase.table("users").select("accountbalance").eq("email",email).execute()
+        if not account_info.data or len(account_info.data) == 0:
+            return jsonify({"error": "Account not found"}), 404
+        
+        account_balance=account_info.data[0]["accountbalance"]
+
+
+        if account_balance < price:
+            return jsonify({"error": "Insufficient balance"}), 400
         
         bid_response=supabase.table("transactions").insert({
-            "productid":product_id,
+            "product_id":product_id,
             "sellerid":sellerid,
             "buyerid":buyerid,
             "buytime":now,
@@ -162,8 +220,14 @@ def acceptbid():
         
         update_product=update_product_post()
 
-        if not update_product_post:
+        if not update_product:
             return jsonify({"error": "did not update product"}), 404
+        
+        update_balance=updatebalance(price)
+        if not update_balance:
+            return jsonify({"error": "Inussficent balance"}), 403
+
+        return jsonify({"message": "Transaction posted successfully"}), 201
         
         return jsonify({"message": "Bid accepted successfully"}),200
         

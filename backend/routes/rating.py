@@ -27,7 +27,7 @@ def rating():
         if not user_response.data or len(user_response.data) == 0:
             return jsonify({"error": "User not found"}), 404
         userid = user_response.data[0]["userid"]
-        print(userid)
+
         now=datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
         email=access_token()
@@ -38,9 +38,7 @@ def rating():
         
         #needs to check who is rating it 
         ratedby= user_query.data[0]["userid"]
-        print(ratedby)
         valid_transaction = supabase.table("transactions").select("buyerid").eq("buyerid", ratedby).eq("sellerid", userid).execute()
-        print(valid_transaction)
         if not valid_transaction.data or len(valid_transaction.data) == 0:
             return jsonify({"error": "No valid transaction found for this rating"}), 400
         #inserts in rating table
@@ -51,6 +49,8 @@ def rating():
             "created_at":now,
 
         }).execute()
+        if not rating_result.data or len(rating_result.data) == 0:
+            return jsonify({"error": "Failed to insert suspension for this user"}), 500
 
 
         suspension_query=supabase.table("user_suspensions").select("suspended_at", "is_suspended").eq("userid", userid).execute()
@@ -68,22 +68,33 @@ def rating():
         if is_suspended:
             logging.info("User has been suspended.")
 
+            
+        product_query=supabase.table("transactions").select("product_id").eq("sellerid",userid).eq("buyerid",ratedby).execute()
+        product_id=product_query.data[0]["product_id"]
+       
+        update_rate_bool = supabase.table("transactions").update({"rating_posted": True}).eq("product_id", product_id).execute()
+        if not update_rate_bool.data or len(update_rate_bool.data) == 0:
+            return jsonify({"error": "Failed to insert suspension for this user"}), 500
+
+
         #updates usertable
-        total_ratings_query=supabase.table("ratings").select("*").eq("userid", userid).execute()
-        all_ratings = []
-        for r in total_ratings_query.data:
-            all_ratings.append(r["rating"])
-        
+        total_ratings_query = supabase.table("ratings").select("*").eq("userid", userid).execute()
+        all_ratings = [r["rating"] for r in total_ratings_query.data]
+
+        # Calculate the average rating
         if len(all_ratings)!=0:
-            total_avg= sum(all_ratings)/len(all_ratings)
+            total_avg = sum(all_ratings) / len(all_ratings)
         else:
-            total_avg=0
+            total_avg = 0
+
+        rating_update=supabase.table("users").update({"rating": total_avg}).eq("userid", userid).execute()
+
+        if not rating_update.data or len(rating_update.data) == 0:
+            return jsonify({"error": f"Failed to update rating. Status Code: {rating_update.status_code}"}), 500
+
+        logging.info(f"User rating updated successfully. New rating: {total_avg}")
 
 
-
-        rating_update=supabase.table("users").update({"rating":total_avg}).eq("userid", userid).execute()
-        if "error" in rating_update or not rating_update.data:
-            return jsonify({"error":"Failed to update  status"}), 500
 
 
         return jsonify({"message": "Review posted successfully"}), 201
