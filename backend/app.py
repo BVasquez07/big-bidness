@@ -53,6 +53,14 @@ def product_post_route():
 def update_product_post_route():
     return product.update_product_post()
 
+@app.route("/user-current-products", methods=["GET"])
+def userproducts_route():
+    return product.user_current_products()
+
+@app.route("/user-completed-products", methods=["GET"])
+def user_completed_route():
+    return product.user_completed_products()
+
 @app.route("/get-all-products", methods=["GET"])#get all products for the front page
 def getproducts_route():
     return product.getproducts()
@@ -63,17 +71,17 @@ def getproducts_route():
 
 @app.route("/postcomplaint", methods=["POST"])#get all complaints
 def postcomplaint_route():
-    return complaints.postcomplaint()
+    return complaint.postcomplaint()
 
 
 @app.route("/get-product-complaint", methods=["GET"])#get complainst based on product only
 def getproductcomplaint_route():
-    return complaints.getproductcomplaint()
+    return complaint.getproductcomplaint()
 
 
 @app.route("/get-seller-complaint", methods=["GET"])#get onlby seller complaint
 def getsellercomplaint_route():
-    return complaints.getsellercomplaint()
+    return complaint.getsellercomplaint()
 
 @app.route("/postbid", methods=["POST"])#bid for proudct
 def postbid_route():
@@ -99,6 +107,32 @@ def getsuspended_route():
 @app.route("/update-suspended", methods=["POST"])
 def updatesuspended_route():
     return suspended.updatesuspended()
+
+@app.route("/submittransaction", methods=["POST"])
+def submittransaction_route():
+    return transaction.submittransaction()
+
+@app.route("/acceptbid", methods=["POST"])
+def acceptbid_route():
+    return bid.acceptbid()
+
+@app.route("/addbalance", methods=["POST"])
+def addbalance_route():
+    return accountbalance.addbalance()
+
+@app.route("/getuserbid", methods=["GET"])
+def getuserbid_route():
+    return bid.getuserbid()
+
+
+@app.route("/getpastbid", methods=["GET"])
+def getpastbid_route():
+    return bid.getpastbid()
+
+
+
+
+
 
 
 if __name__ == "__main__":

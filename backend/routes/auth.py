@@ -9,6 +9,7 @@ from datetime import datetime
 
 
 
+
 def hello():
     return "Hello World!"
 
@@ -118,13 +119,13 @@ def signin():
         userid=user_data[0]["userid"]
 
         # check suspended status
-        suspended_result=supabase.table("user_suspensions").select("userid", "is_suspended").eq("userid", userid).execute()
+        suspended_result=supabase.table("user_suspensions").select("is_suspended").eq("userid", userid).execute()
         suspended_data=suspended_result.data if suspended_result.data else []
 
         if not suspended_data:
             suspended_status= False
         else:
-            suspended_status=suspended_data[0]["suspended"]
+            suspended_status=suspended_data[0]["is_suspended"]
          #suspended conditions
         if suspended_status is True:
             return jsonify({"error": "Account Suspended", "redirect_to": "/suspended"}), 403
@@ -160,17 +161,17 @@ def signin():
         userid = user_data[0]['userid']
 
         #get ratings with created_at and created_date
-        rating_result = supabase.table("ratings").select("rating, created_at, created_date").eq("userid", userid).execute()
+        rating_result = supabase.table("ratings").select("rating, created_at").eq("userid", userid).execute()
         rating_data = rating_result.data if rating_result.data else []
 
         #sort by created_at and created_date
         ratings_sorted = sorted(
             rating_data, 
-            key=lambda r: (r.get("created_at", ""), r.get("created_date", ""))
+            key=lambda r: (r.get("created_at"))
         )
 
         #extract the top 4 ratings
-        ratings = [r["rating"] for r in ratings_sorted[:3]]
+        ratings = [r["rating"] for r in ratings_sorted[:4]]
         avg_rating = sum(ratings) / len(ratings) if ratings else 0
 
         balance_result = supabase.table("users").select("accountbalance").eq("email", email).execute()
@@ -212,4 +213,19 @@ def signin():
         return jsonify({"error": str(e)}), 500
 
 
+def access_token():
+    try:
+        token = request.headers.get("Authorization")
+        if not token:
+            return jsonify({"error": "Authentication token is missing"}), 401
+        user_auth=supabase.auth.get_user(token)
+        if not user_auth or not hasattr(user_auth,'user') or not user_auth.user:
+            return jsonify({"error":"Authentication failed"}), 401
 
+        user = user_auth.user
+        email = user.email  
+        return email
+    
+    except Exception as e:
+        logging.error(f"Error during token: {str(e)}")
+        return jsonify({"error": str(e)}), 500
