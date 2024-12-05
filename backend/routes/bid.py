@@ -62,7 +62,21 @@ def postbid():
         logging.error(f"Error posting bid: {str(e)}")
         return jsonify({"error": str(e)}), 500
 
+def getallbids():
+    try:
+       
 
+        now=datetime.now()
+        bid=supabase.table("bids").select("*").gte("biddeadline", now.strftime('%Y-%m-%d %H:%M:%S')).execute()
+       
+        if bid.data:
+            return jsonify({"products": bid.data}), 200
+        else:
+            return jsonify({"products": []}), 200
+
+    except Exception as e:
+        logging.error(f"Error fetching products: {str(e)}")
+        return jsonify({"error": str(e)}), 500
 
 
 #get all the bid that are not expired
@@ -79,7 +93,7 @@ def getproductbid():
             supabase.table("bids")
             .select("*")
             .eq("product_id", product_id)
-            .gte("biddeadline", now.strftime('%Y-%m-%d %H:%M:%S'))  #
+            .gte("biddeadline", now.strftime('%Y-%m-%d %H:%M:%S'))  
             .execute()
         )
 

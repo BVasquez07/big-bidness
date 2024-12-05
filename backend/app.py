@@ -48,23 +48,34 @@ def userinfo_route():
 def product_post_route():
     return product.product_post()
 
+@app.route("/vippost", methods=["POST"])#posting product
+def vip_product_post_route():
+    return vip.vip_product_post()
+
 
 @app.route("/update-post", methods=["POST"])#upadte lisiting status
 def update_product_post_route():
     return product.update_product_post()
 
-@app.route("/user-current-products", methods=["GET"])
-def userproducts_route():
-    return product.user_current_products()
+@app.route("/update-vip-post", methods=["POST"])#upadte lisiting status
+def update_product_vip_post_route():
+    return vip.update_product_post()
 
-@app.route("/user-completed-products", methods=["GET"])
-def user_completed_route():
-    return product.user_completed_products()
+@app.route("/vipuser-current-products", methods=["GET"])
+def vipuserproducts_route():
+    return vip.vipuser_current_products()
+
+@app.route("/vipuser-completed-products", methods=["GET"])
+def vipuser_completed_route():
+    return vip.vipuser_completed_products()
 
 @app.route("/get-all-products", methods=["GET"])#get all products for the front page
 def getproducts_route():
     return product.getproducts()
 
+@app.route("/get-all-vip-products", methods=["GET"])
+def getvipproducts_route():
+    return vip.getvipproducts()
 
 
 
@@ -123,7 +134,9 @@ def addbalance_route():
 @app.route("/getuserbid", methods=["GET"])
 def getuserbid_route():
     return bid.getuserbid()
-
+@app.route("/getallbids", methods=["GET"])
+def getallbid_route():
+    return bid.getallbids()
 
 @app.route("/getpastbid", methods=["GET"])
 def getpastbid_route():
