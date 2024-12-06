@@ -75,7 +75,3 @@ def updatebalance(product_price):
 
     
 
-
-
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500

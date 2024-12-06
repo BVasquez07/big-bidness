@@ -32,10 +32,6 @@ def register_route():
 def signin_route():
     return auth.signin()
 
-@app.route("/signout", methods=["POST"])
-def signout_route():
-    return auth.signout()
-
 
 @app.route("/grant-admin", methods=["POST"])
 def grant_admin_route():
