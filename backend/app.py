@@ -32,7 +32,18 @@ def register_route():
 def signin_route():
     return auth.signin()
 
+@app.route("/signout", methods=["POST"])
+def signout_route():
+    return auth.signout()
 
+
+@app.route("/grant-admin", methods=["POST"])
+def grant_admin_route():
+    return admin.grant_admin()
+
+@app.route("/approve-user", methods=["POST"])
+def approve_user_route():
+    return admin.approve_user()
 
 
 @app.route("/personalinfo", methods=["GET"])#this gets the user info 
