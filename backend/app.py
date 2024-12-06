@@ -154,9 +154,9 @@ def getpastbid_route():
     return bid.getpastbid()
 
 
-
-
-
+@app.route("/query", methods=["GET"])
+def query_products_route():
+    return product.query_products()
 
 
 if __name__ == "__main__":
