@@ -11,7 +11,7 @@ export const Navbar = () => {
 
   return (
     <div className="bg-white">
-      <div className="w-full h-16 flex mx-auto px-3 py-4 justify-between items-center shadow-black shadow-lg lg:px-8 border-b border-gray-300">
+      <div className="w-full h-16 flex mx-auto px-3 py-4 justify-between items-center lg:px-8 border-b border-gray-300">
         <Link href="/" className="text-xl font-bold">
           Big Bidness
         </Link>
