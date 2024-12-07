@@ -1,7 +1,5 @@
 from config import supabase
-from flask import Flask, abort, jsonify, request
-from flask_cors import CORS
-import os
+from flask import jsonify, request
 import logging
 from datetime import datetime
 from routes.auth import access_token

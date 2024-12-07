@@ -1,12 +1,8 @@
-from flask import Flask, abort, jsonify, request
+from flask import Flask, jsonify, request
 from flask_cors import CORS
 import sys
 import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-from config import supabase
-from dotenv import load_dotenv
-import logging
-from datetime import datetime
 from routes import *
 
 
@@ -17,8 +13,6 @@ CORS(app)
 @app.route("/")
 def hello():
     return jsonify({"res": "Hello World!"})
-
-
 
         
 @app.route("/register", methods=["POST"])
