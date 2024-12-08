@@ -28,7 +28,7 @@ def signin_route():
 
 
 @app.route("/signout", methods=["POST"])#checks all condtions, if everythign is okay, logs in
-def signouy_route():
+def signout_route():
     return auth.signout()
 
 @app.route("/grant-admin", methods=["POST"])
@@ -173,6 +173,10 @@ def updatequittingsys_route():
 @app.route("/updateinvquittingsys", methods=["GET"])
 def updateinvquittingsys_route():
     return quitSys.updatequitsysinvoluntary() 
+
+@app.route("/valid-token", methods=["GET"])
+def valid_token_route():
+    return auth.valid_token()
 
 if __name__ == "__main__":
     app.run(host="localhost", debug=True, port=8080)
