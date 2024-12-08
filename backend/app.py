@@ -154,6 +154,14 @@ def getpastbid_route():
 def query_products_route():
     return product.query_products()
 
+@app.route("/getquittingsys", methods=["GET"])
+def getquittingsys_route():
+    return quitSys.getquittingsysvoluntary() 
+
+@app.route("/getinvquittingsys", methods=["GET"])
+def getinvquittingsys_route():
+    return quitSys.getquittingsysinvoluntary() 
+
 
 if __name__ == "__main__":
     app.run(host="localhost", debug=True, port=8080)
