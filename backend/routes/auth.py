@@ -2,18 +2,38 @@ from config import supabase
 import logging
 from flask import jsonify, request
 
+"""
+expected input:
+{
+    firstName: <string>,
+    lastName: <string>,
+    email: <string>,
+    userName: <string>,
+    password: <string>,
+    question: <string>,
+    mathAnswer: <string>
+}
 
+expected output:
+{
+    "error": <error message>
+}
+OR
+{
+    "message": "User signed up successfully and is awaiting approval. Please check email for authorization"
+}
+"""
 def register():
     try:
         #parameters
         query=request.json
-        firstname=query.get("firstname")
-        lastname=query.get("lastname")
+        firstname=query.get("firstName")
+        lastname=query.get("lastName")
         email=query.get("email")
-        username=query.get("username")
+        username=query.get("userName")
         password=query.get("password")
         question=query.get("question")
-        answer=query.get("answer")
+        answer=query.get("mathAnswer")
         
         #checks the table if username is already in use
         username_check = supabase.table("users").select("username").eq("username", username).execute() 
@@ -70,7 +90,7 @@ def register():
             raise Exception("Failed to insert approval entry. No data returned.")
 
 
-        return jsonify({"message": "User signed up successfully and is awaiting approval.Please check email for authorization"}), 200
+        return jsonify({"message": "User signed up successfully and is awaiting approval. Please check email for authorization"}), 200
 
     except Exception as e:
         logging.error(f"Error during signup: {str(e)}")
@@ -247,4 +267,15 @@ def access_token():
         logging.error(f"Error during token: {str(e)}")
         return jsonify({"error": str(e)}), 500
 
+
+
+def signout():
+    try:
+        response=supabase.auth.sign_out()
+        logging.info("User successfully signed out.")
+        return jsonify({"message": "User signed out successfully"}), 200
+
+    except Exception as e:
+        logging.exception("Error during signout:")
+        return jsonify({"error": "An error occurred during signout"}), 500
 

@@ -71,7 +71,7 @@ const LoginForm = () => {
                 setTimeout(() => {
                     setSuccess(null);
                     window.location.href = "/";
-                }, 3000);
+                }, 1750);
             }
         }).catch((error) => {
             setError(error.message);

@@ -26,10 +26,10 @@ def register_route():
 def signin_route():
     return auth.signin()
 
-@app.route("/signout", methods=["POST"])
-def signout_route():
-    return auth.signout()
 
+@app.route("/signout", methods=["POST"])#checks all condtions, if everythign is okay, logs in
+def signouy_route():
+    return auth.signout()
 
 @app.route("/grant-admin", methods=["POST"])
 def grant_admin_route():
@@ -46,7 +46,7 @@ def personalinfo_route():
     
 @app.route("/userinfo", methods=["GET"])#gets any user info the user clicks ons
 def userinfo_route():
-    return user.userinfo
+    return user.userinfo()
 
 
 @app.route("/post", methods=["POST"])#posting product
@@ -66,9 +66,9 @@ def update_product_post_route():
 def update_product_vip_post_route():
     return vip.update_product_post()
 
-@app.route("/vipuser-current-products", methods=["GET"])
-def vipuserproducts_route():
-    return vip.vipuser_current_products()
+@app.route("/user-current-products", methods=["GET"])
+def userproducts_route():
+    return product.user_current_products()
 
 @app.route("/vipuser-completed-products", methods=["GET"])
 def vipuser_completed_route():
@@ -82,8 +82,9 @@ def getproducts_route():
 def getvipproducts_route():
     return vip.getvipproducts()
 
-
-
+@app.route("/approval-list", methods=["GET"])
+def approval_list_route():
+    return admin.approval_list()
 
 @app.route("/postcomplaint", methods=["POST"])#get all complaints
 def postcomplaint_route():
@@ -132,6 +133,11 @@ def submittransaction_route():
 def acceptbid_route():
     return bid.acceptbid()
 
+@app.route("/updatebalance", methods=["POST"])
+def updatebalance():
+    newPrice = request.json.get("newPrice")
+    return accountbalance.changeBalance(newPrice)
+
 @app.route("/addbalance", methods=["POST"])
 def addbalance_route():
     return accountbalance.addbalance()
@@ -154,4 +160,4 @@ def query_products_route():
 
 
 if __name__ == "__main__":
-    app.run(host="localhost", debug=True, port=8080)
+    app.run(host="localhost", debug=True, port=5000)
