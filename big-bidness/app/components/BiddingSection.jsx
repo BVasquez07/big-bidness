@@ -97,7 +97,10 @@ const BiddingSection = () => {
   };
 
   const handleSubmitBid = () => {
-    if (bidInput > 0) {
+    const highestBid = Math.max(...bids.map(bid => bid.bidAmount)); // Get the highest current bid
+    if (bidInput <= highestBid) {
+      alert(`Your bid must be higher than the current highest bid of $${highestBid}.`);
+    } else if (bidInput > 0) {
       // Handle placing bid (you could update the state or make an API call)
       alert(`Bid of $${bidInput} placed successfully!`);
       setBids([...bids, { username: 'Your Name', date: new Date().toISOString(), bidAmount: bidInput, rating: 5 }]);
@@ -107,12 +110,15 @@ const BiddingSection = () => {
     }
   };
 
+  // Sort bids by bidAmount in descending order
+  const sortedBids = bids.sort((a, b) => b.bidAmount - a.bidAmount);
+
   return (
-    <section className="bg-white dark:bg-gray-900 py-8 lg:py-16 antialiased">
+    <section className="bg-white dark:bg-gray-900 py-0 lg:py-0 antialiased">
       <div className="max-w-7xl mx-auto">
         <h2 className="text-lg lg:text-2xl font-bold text-gray-900 dark:text-white mb-6">Current Bids</h2>
-        <div className="mb-6">
-          {bids.map((bid, index) => (
+        <div className="mb-6 max-h-[400px] overflow-y-auto">
+          {sortedBids.map((bid, index) => (
             <Bid
               key={index}
               username={bid.username}

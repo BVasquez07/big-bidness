@@ -1,6 +1,7 @@
 import React from "react";
 import Comments from "@/app/components/Comments";
 import BiddingSection from "@/app/components/BiddingSection";
+import PersonalInfo from "@/app/components/PersonalInfo";
 
 // Dummy data for illustration
 const data = [
@@ -65,13 +66,13 @@ const ItemPage = async ({ params }) => {
             <img
               src={item.image}
               alt={item.name}
-              className="w-full h-auto rounded-lg object-cover"
+              className="w-full h-[555px] rounded-lg object-cover"
             />
           </div>
 
           {/* Right side: Bidding Section */}
           <div className="flex flex-col justify-start">
-            <div className="p-4 border rounded-lg mb-6">
+            <div className="p-4 border rounded-lg mb-6 h-[555px]">
               <BiddingSection />
             </div>
           </div>
@@ -81,6 +82,7 @@ const ItemPage = async ({ params }) => {
         <div className="mt-6">
           <Comments />
         </div>
+        <PersonalInfo />
       </div>
     </div>
   );

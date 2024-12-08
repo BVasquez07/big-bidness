@@ -9,7 +9,7 @@ const Comment = ({ username, date, text }) => (
           {username}
         </p>
         <p className="text-sm text-gray-600 dark:text-gray-400">
-          <time pubdate datetime={date} title={date}>
+          <time pubdate="true" dateTime={date} title={date}>
             {new Date(date).toLocaleDateString()}
           </time>
         </p>
