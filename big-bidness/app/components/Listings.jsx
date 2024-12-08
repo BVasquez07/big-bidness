@@ -5,7 +5,7 @@ export const Listings = ({ searchInput }) => {
   const data = [
     {
       id: 1,
-      image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTABbXr4i-QODqhy7tofHYmTYh05rYPktzacw&s",
+      image: "https://www.pexels.com/photo/black-fujifilm-dslr-camera-90946/",
       name: "Item 1",
       price: 100
     },
