@@ -26,10 +26,10 @@ def register_route():
 def signin_route():
     return auth.signin()
 
-@app.route("/signout", methods=["POST"])
-def signout_route():
-    return auth.signout()
 
+@app.route("/signout", methods=["POST"])#checks all condtions, if everythign is okay, logs in
+def signouy_route():
+    return auth.signout()
 
 @app.route("/grant-admin", methods=["POST"])
 def grant_admin_route():
@@ -82,8 +82,9 @@ def getproducts_route():
 def getvipproducts_route():
     return vip.getvipproducts()
 
-
-
+@app.route("/approval-list", methods=["GET"])
+def approval_list_route():
+    return admin.approval_list()
 
 @app.route("/postcomplaint", methods=["POST"])#get all complaints
 def postcomplaint_route():
