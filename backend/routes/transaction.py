@@ -66,7 +66,7 @@ def submittransaction():
         if not update_post:
             return jsonify({"error": "Product is not available for purchase"}), 403
         
-        update_balance=updatebalance(price)
+        update_balance=updatebalance(price,sellerid)
         if not update_balance:
             return jsonify({"error": "Inussficent balance"}), 403
 
