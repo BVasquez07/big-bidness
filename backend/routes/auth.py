@@ -1,18 +1,6 @@
-from flask import jsonify
 from config import supabase
 import logging
-from flask import Flask, abort, jsonify, request
-from flask_cors import CORS
-import os
-import logging
-from datetime import datetime
-
-
-
-
-def hello():
-    return "Hello World!"
-
+from flask import jsonify, request
 
 
 def register():
@@ -91,7 +79,29 @@ def register():
 
 
     
-#checks all condtions, if everythign is okay, logs in
+'''
+expected input:
+{
+    "email": "
+    "password": "
+}
+
+expected output:
+{
+    "error": <error message>,
+    (only for suspension)"redirected_to": /suspended
+}
+OR
+{
+    "message": "Login Successful!",
+    "user": {
+        "id": user.id,
+        "email": user.email,
+        "role": role
+    },
+    "access_token": access_token
+}
+'''
 def signin():
     try:
         query=request.json
@@ -106,16 +116,15 @@ def signin():
 
         if not user_response or not hasattr(user_response, 'user') or not user_response.user:
             return jsonify({"error": "Authentication failed"}), 401
-        print(user_response)
 
-        user=user_response.user
+        user = user_response.user
         email = user.email  
 
         user_query=supabase.table("users").select("userid").eq("email", email).execute()
         user_data=user_query.data
 
         if not user_data:
-            return jsonify({"error": "Seller not found"}), 404
+            return jsonify({"error": "User not found"}), 404
 
         userid=user_data[0]["userid"]
 

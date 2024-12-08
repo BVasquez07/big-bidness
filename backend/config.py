@@ -1,10 +1,6 @@
-from flask import Flask, abort, jsonify, request
-from flask_cors import CORS
 import os
 from supabase import create_client, Client
 from dotenv import load_dotenv
-import logging
-from datetime import datetime
 
 load_dotenv()
 

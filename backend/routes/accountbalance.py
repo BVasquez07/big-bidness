@@ -1,11 +1,6 @@
 from config import supabase
-from flask import Flask, abort, jsonify, request
-from flask_cors import CORS
-import os
-import logging
-from datetime import datetime
+from flask import jsonify, request
 from routes.auth import access_token
-from routes.product import update_product_post
 
 
 def addbalance():
