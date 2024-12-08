@@ -158,6 +158,21 @@ def getpastbid_route():
 def query_products_route():
     return product.query_products()
 
+@app.route("/getquittingsys", methods=["GET"])
+def getquittingsys_route():
+    return quitSys.getquittingsysvoluntary() 
+
+@app.route("/getinvquittingsys", methods=["GET"])
+def getinvquittingsys_route():
+    return quitSys.getquittingsysinvoluntary() 
+
+@app.route("/updatequittingsys", methods=["GET"])
+def updatequittingsys_route():
+    return quitSys.updatequitsysvoluntary() 
+
+@app.route("/updateinvquittingsys", methods=["GET"])
+def updateinvquittingsys_route():
+    return quitSys.updatequitsysinvoluntary() 
 
 @app.route("/valid-token", methods=["GET"])
 def valid_token_route():

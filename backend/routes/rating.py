@@ -27,7 +27,6 @@ def rating():
         now=datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
         email=access_token()
-
         user_query = supabase.table("users").select("userid").eq("email", email).execute()
         if not user_query.data or len(user_query.data) == 0:
             return jsonify({"error": "User not found"}), 404
