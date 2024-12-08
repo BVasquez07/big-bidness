@@ -1,11 +1,16 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 
 export const Navbar = () => {
-  const token = localStorage.getItem('token');
-  const role = localStorage.getItem('role');
+  const [token, setToken] = useState('');
+  const [role, setRole] = useState('');
   const [isToggle, setIsToggle] = useState(false);
+
+  useEffect(() => {
+    setToken(localStorage.getItem('token'));
+    setRole(localStorage.getItem('role'));
+  }, []);
 
   function toggleNav() {
     setIsToggle(!isToggle);
