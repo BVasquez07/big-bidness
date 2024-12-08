@@ -1,31 +1,39 @@
-from flask import jsonify
 from config import supabase
 import logging
-from flask import Flask, abort, jsonify, request
-from flask_cors import CORS
-import os
-import logging
-from datetime import datetime
+from flask import jsonify, request
 
+"""
+expected input:
+{
+    firstName: <string>,
+    lastName: <string>,
+    email: <string>,
+    userName: <string>,
+    password: <string>,
+    question: <string>,
+    mathAnswer: <string>
+}
 
-
-
-def hello():
-    return "Hello World!"
-
-
-
+expected output:
+{
+    "error": <error message>
+}
+OR
+{
+    "message": "User signed up successfully and is awaiting approval. Please check email for authorization"
+}
+"""
 def register():
     try:
         #parameters
         query=request.json
-        firstname=query.get("firstname")
-        lastname=query.get("lastname")
+        firstname=query.get("firstName")
+        lastname=query.get("lastName")
         email=query.get("email")
-        username=query.get("username")
+        username=query.get("userName")
         password=query.get("password")
         question=query.get("question")
-        answer=query.get("answer")
+        answer=query.get("mathAnswer")
         
         #checks the table if username is already in use
         username_check = supabase.table("users").select("username").eq("username", username).execute() 
@@ -82,7 +90,7 @@ def register():
             raise Exception("Failed to insert approval entry. No data returned.")
 
 
-        return jsonify({"message": "User signed up successfully and is awaiting approval.Please check email for authorization"}), 200
+        return jsonify({"message": "User signed up successfully and is awaiting approval. Please check email for authorization"}), 200
 
     except Exception as e:
         logging.error(f"Error during signup: {str(e)}")
@@ -91,7 +99,29 @@ def register():
 
 
     
-#checks all condtions, if everythign is okay, logs in
+'''
+expected input:
+{
+    "email": "
+    "password": "
+}
+
+expected output:
+{
+    "error": <error message>,
+    (only for suspension)"redirected_to": /suspended
+}
+OR
+{
+    "message": "Login Successful!",
+    "user": {
+        "id": user.id,
+        "email": user.email,
+        "role": role
+    },
+    "access_token": access_token
+}
+'''
 def signin():
     try:
         query=request.json
@@ -106,16 +136,15 @@ def signin():
 
         if not user_response or not hasattr(user_response, 'user') or not user_response.user:
             return jsonify({"error": "Authentication failed"}), 401
-        print(user_response)
 
-        user=user_response.user
+        user = user_response.user
         email = user.email  
 
         user_query=supabase.table("users").select("userid").eq("email", email).execute()
         user_data=user_query.data
 
         if not user_data:
-            return jsonify({"error": "Seller not found"}), 404
+            return jsonify({"error": "User not found"}), 404
 
         userid=user_data[0]["userid"]
 

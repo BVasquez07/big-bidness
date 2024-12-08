@@ -7,7 +7,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import CardTemplate from './card-template';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
+
+import { ErrorAlert } from "./error";
+
 import {
     Form,
     FormControl,
@@ -38,6 +40,9 @@ const LoginForm = () => {
         },
     });
 
+    const [error, setError] = useState(null);
+    const [success, setSuccess] = useState(null);
+
 
     // Create a form object
     const form = useForm({
@@ -47,60 +52,100 @@ const LoginForm = () => {
 
     // Define the form submission handler (this is where you would send the form data to the server)
     const onSubmit = (data) => {
-        console.log("Submitted data", data);
+        fetch("http://localhost:8080/signin", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(data),
+        })
+        .then( response => response.json())
+        .then((data) => {
+            if (data.error) {
+                setError(data.error);
+            } else {
+                setError(null);
+                setSuccess("Login successful");
+                localStorage.setItem("token", data.access_token);
+                localStorage.setItem("role", data.user.role);
+                setTimeout(() => {
+                    setSuccess(null);
+                    window.location.href = "/";
+                }, 1750);
+            }
+        }).catch((error) => {
+            setError(error.message);
+        });
     };
 
 
     // Render the form
     return (
-        <section className="h-screen flex items-center justify-center">
-        <CardTemplate
-            title = "Login to your account"
-            label = "Please enter your email and password to login"
-            backButtonHref = "/auth/register"
-            backButtonText1 = "Don't have an account?"
-            backButtonText2 = "Sign up here"
-        >
-
-            <Form {...form} >
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                    <div className="space-y-4">
-
-                        <FormField
-                            control = {form.control}
-                            name = "email"
-                            render = {({field}) => (
-                                <FormItem>
-                                    <FormLabel htmlFor="email">Email</FormLabel>
-                                    <FormControl>
-                                        <Input {...field} type="email" />
-                                    </FormControl>
-                                    <FormMessage>{form.formState.errors.email?.message}</FormMessage>
-                                </FormItem>
-                            )}
-                        />
-
-                        <FormField
-                            control = {form.control}
-                            name = "password"
-                            render = {({field}) => (
-                                <FormItem>
-                                    <FormLabel htmlFor="password">Password</FormLabel>
-                                    <FormControl>
-                                        <Input {...field} type="password" />
-                                    </FormControl>
-                                    <FormMessage>{form.formState.errors.password?.message}</FormMessage>
-                                </FormItem>
-                            )}
-                        />
+        <div>
+            <div className="w-full flex justify-center z-50">
+            {error && (
+                <div className="shadow max-w-md w-full text-center">
+                    <ErrorAlert errorMessage={error} />
+                </div>
+            )}
+            {success && (
+                <div className="shadow max-w-md w-full text-center">
+                    <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative" role="alert">
+                        <strong className="font-bold">{success}</strong>
                     </div>
+                </div>
+            )}
+            </div>
 
-                    <Button type="submit" className="w-full">Login</Button>
-                </form>
+            <section className="py-44 flex justify-center">
+                <CardTemplate
+                    title = "Login to your account"
+                    label = "Please enter your email and password to login"
+                    backButtonHref = "/auth/register"
+                    backButtonText1 = "Don't have an account?"
+                    backButtonText2 = "Sign up here"
+                >
 
-            </Form>
-        </CardTemplate>
-        </section>
+                    <Form {...form} >
+                        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                            <div className="space-y-4">
+
+                                <FormField
+                                    control = {form.control}
+                                    name = "email"
+                                    render = {({field}) => (
+                                        <FormItem>
+                                            <FormLabel htmlFor="email">Email</FormLabel>
+                                            <FormControl>
+                                                <Input {...field} type="email" />
+                                            </FormControl>
+                                            <FormMessage>{form.formState.errors.email?.message}</FormMessage>
+                                        </FormItem>
+                                    )}
+                                />
+
+                                <FormField
+                                    control = {form.control}
+                                    name = "password"
+                                    render = {({field}) => (
+                                        <FormItem>
+                                            <FormLabel htmlFor="password">Password</FormLabel>
+                                            <FormControl>
+                                                <Input {...field} type="password" />
+                                            </FormControl>
+                                            <FormMessage>{form.formState.errors.password?.message}</FormMessage>
+                                        </FormItem>
+                                    )}
+                                />
+                            </div>
+
+                            <Button type="submit" className="w-full">Login</Button>
+                        </form>
+
+                    </Form>
+                </CardTemplate>
+            </section>
+        </div>
     );
     }
 

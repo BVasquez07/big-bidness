@@ -58,28 +58,30 @@ export default function activity() {
   return (
     <div>
         <h1 className='pl-4 text-4xl pb-8 font-bold pt-4'>Activity</h1>
-        <div>
-            <div className='pl-4 text-2xl font-semibold'>Active Bids</div>
-            <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 lg:grid-cols-4 gap-6 p-4'>
-                {activeBids}
+        <div className='px-8'>
+            <div>
+                <div className='text-2xl font-semibold'>Active Bids</div>
+                <div className='px-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 lg:grid-cols-4 gap-6 p-4'>
+                    {activeBids}
+                </div>
             </div>
-        </div>
-        <div>
-            <div className='pl-4 text-2xl font-semibold'>Active Listings</div>
-            <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 lg:grid-cols-4 gap-6 p-4'>
-                {activeListings}
+            <div>
+                <div className='text-2xl font-semibold'>Active Listings</div>
+                <div className='px-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 lg:grid-cols-4 gap-6 p-4'>
+                    {activeListings}
+                </div>
             </div>
-        </div>
-        <div>
-            <div className='pl-4 text-2xl font-semibold'>Completed Bids</div>
-            <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 lg:grid-cols-4 gap-6 p-4'>
-                {completedBids}
+            <div>
+                <div className='text-2xl font-semibold'>Completed Bids</div>
+                <div className='px-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 lg:grid-cols-4 gap-6 p-4'>
+                    {completedBids}
+                </div>
             </div>
-        </div>
-        <div>
-            <div className='pl-4 text-2xl font-semibold'>Completed Listings</div>
-            <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 lg:grid-cols-4 gap-6 p-4'>
-                {completedListings}
+            <div>
+                <div className='text-2xl font-semibold'>Completed Listings</div>
+                <div className='px-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 lg:grid-cols-4 gap-6 p-4'>
+                    {completedListings}
+                </div>
             </div>
         </div>
     </div>
