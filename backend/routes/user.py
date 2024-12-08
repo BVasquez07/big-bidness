@@ -32,7 +32,7 @@ def userinfo():
         if not username:
             return jsonify({"error": "Username is required"}), 400
 
-        user_query = supabase.table("users").select("*").eq("username", username).execute()
+        user_query = supabase.table("users").select("username","firstname","lastname","rating").eq("username", username).execute()
         if not user_query.data or len(user_query.data) == 0:
             return jsonify({"error": "User not found"}), 404
 
