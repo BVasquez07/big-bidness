@@ -95,6 +95,27 @@ def changeBalance(product_price):
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+        
+
+def changeBalance(product_price):
+    try:
+        email=access_token()
+        if not email:
+            return jsonify({"error": "Invalid access token"}), 401
+        
+        account_info=supabase.table("users").select("accountbalance").eq("email",email).execute()
+        if not account_info.data or len(account_info.data) == 0:
+            return jsonify({"error": "Account not found"}), 404
+        
+        update_balance=supabase.table("users").update({"accountbalance": product_price}).eq("email", email).execute()
+        if not update_balance.data or len(update_balance.data) == 0:
+            return jsonify({"error": "Failed to update account balance"}), 500
+        
+
+        return jsonify({"message": "Account balance posted successfully"}), 201
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 
 

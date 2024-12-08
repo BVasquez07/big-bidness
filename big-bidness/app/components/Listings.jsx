@@ -28,7 +28,7 @@ export const Listings = ({ searchInput }) => {
     const filteredData = data.filter((item) => 
       item.product_name.toLowerCase().includes(searchInput.toLowerCase())
     );
-    const items = filteredData.map((item, index) => <Item data={item} key={index} />);
+    const items = filteredData.map((item) => <Item data={item} key={item.product_id} />);
 
     return (
       <div className="bg-white grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 justify-items-center p-8">
