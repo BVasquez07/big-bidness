@@ -167,21 +167,23 @@ def user_current_products():
 
 def query_products():
     try:
-        query=request.json
-        text=query.get("text")
-        if not text:
-            return jsonify({"error": "Missing 'text' parameter in request"}), 400
+        query=request.args
+        text=query.get("product_title")
         
-        query_response = (
-            supabase.table("products")
-            .select("product_name")
-            .text_search("product_name",text, options={"config": "english"})
-            .execute()
-        )
-        if not query_response.data:
-            return jsonify({"error": "Failed to find product"}), 400
-        
-        return jsonify({"products": query_response.data}), 200
+        if text:
+            query_response = (
+                supabase.table("products")
+                .select("product_name")
+                .text_search("product_name",text, options={"config": "english"})
+                .execute()
+            )
+
+            if not query_response.data:
+                return jsonify({"error": "Failed to find product"}), 400
+            
+            return jsonify({"products": query_response.data}), 200
+        else:
+            return getproducts()
         
     except Exception as e:
         logging.error(f"Error fetching products: {str(e)}")

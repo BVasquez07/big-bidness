@@ -1,8 +1,29 @@
-import React, { useState } from 'react';
+'use client'
+import React, { useState, useEffect} from 'react';
 import { Item } from './Item';
 
 export const Listings = ({ searchInput }) => {
-  const data = [
+  
+  const [data, setData] = useState([]);
+  let emptyInput;
+  
+  useEffect(() => {
+    setTimeout(() => 
+    {
+    if (searchInput.trim() !== '')
+      {
+        fetch("http://localhost:8080/query?product_title=" + searchInput)
+        .then(info => info.json())
+        .then((res) => {setData(res);})
+        .catch((error) => console.log(error));
+      } 
+      else {
+        setData([]);
+      }
+    }, 500);
+  }, [searchInput]);
+
+  const test = [
     {
       id: 1,
       image: "https://www.pexels.com/photo/black-fujifilm-dslr-camera-90946/",
