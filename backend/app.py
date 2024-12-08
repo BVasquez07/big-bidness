@@ -27,6 +27,10 @@ def signin_route():
     return auth.signin()
 
 
+@app.route("/signout", methods=["POST"])#checks all condtions, if everythign is okay, logs in
+def signouy_route():
+    return auth.signout()
+
 @app.route("/grant-admin", methods=["POST"])
 def grant_admin_route():
     return admin.grant_admin()

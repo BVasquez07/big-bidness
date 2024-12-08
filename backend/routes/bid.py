@@ -233,13 +233,13 @@ def acceptbid():
         if not update_product:
             return jsonify({"error": "did not update product"}), 404
         
-        update_balance=updatebalance(price)
+        update_balance=updatebalance(price,sellerid)
         if not update_balance:
             return jsonify({"error": "Inussficent balance"}), 403
 
         return jsonify({"message": "Transaction posted successfully"}), 201
         
-        return jsonify({"message": "Bid accepted successfully"}),200
+
         
 
 
