@@ -173,8 +173,8 @@ def query_products():
         if text:
             query_response = (
                 supabase.table("products")
-                .select("product_name")
-                .text_search("product_name",text, options={"config": "english"})
+                .select("*")
+                .text_search("product_name", text, options={"config": "english"})
                 .execute()
             )
 

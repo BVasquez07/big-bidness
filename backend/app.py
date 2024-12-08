@@ -66,9 +66,9 @@ def update_product_post_route():
 def update_product_vip_post_route():
     return vip.update_product_post()
 
-@app.route("/vipuser-current-products", methods=["GET"])
-def vipuserproducts_route():
-    return vip.vipuser_current_products()
+@app.route("/user-current-products", methods=["GET"])
+def userproducts_route():
+    return product.user_current_products()
 
 @app.route("/vipuser-completed-products", methods=["GET"])
 def vipuser_completed_route():
