@@ -34,7 +34,7 @@ def addbalance():
         return jsonify({"error": str(e)}), 500
     
 
-def updatebalance(product_price):
+def updatebalance(product_price,sellerid):
     try:
         email=access_token()
         if not email:
@@ -52,11 +52,23 @@ def updatebalance(product_price):
 
 
         new_price=account_balance-product_price
+
+
+        seller_account_info=supabase.table("users").select("accountbalance").eq("userid",sellerid).execute()
+        if not seller_account_info.data or len(seller_account_info.data) == 0:
+            return jsonify({"error": "Account not found"}), 404
+        
+        seller_account_balance=seller_account_info.data[0]["accountbalance"]
+
+        seller_newprice=seller_account_balance+product_price
                 
         update_balance=supabase.table("users").update({"accountbalance": new_price}).eq("email", email).execute()
         if not update_balance.data or len(update_balance.data) == 0:
             return jsonify({"error": "Failed to update account balance"}), 500
         
+        seller_update_balance=supabase.table("users").update({"accountbalance": seller_newprice}).eq("userid", sellerid).execute()
+        if not update_balance.data or len(update_balance.data) == 0:
+            return jsonify({"error": "Failed to update account balance"}), 500
 
         return jsonify({"message": "Account balance posted successfully"}), 201
 
@@ -88,7 +100,3 @@ def changeBalance(product_price):
 
     
 
-
-
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
