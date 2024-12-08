@@ -268,3 +268,14 @@ def access_token():
         return jsonify({"error": str(e)}), 500
 
 
+
+def signout():
+    try:
+        response=supabase.auth.sign_out()
+        logging.info("User successfully signed out.")
+        return jsonify({"message": "User signed out successfully"}), 200
+
+    except Exception as e:
+        logging.exception("Error during signout:")
+        return jsonify({"error": "An error occurred during signout"}), 500
+
