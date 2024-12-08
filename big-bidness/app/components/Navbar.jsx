@@ -1,11 +1,18 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 
 export const Navbar = () => {
-  const token = localStorage.getItem('token');
-  const role = localStorage.getItem('role');
+  const [token, setToken] = useState(null);
+  const [role, setRole] = useState(null);
   const [isToggle, setIsToggle] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setToken(localStorage.getItem('token'));
+      setRole(localStorage.getItem('role'));
+    }
+  }, []);
 
   function toggleNav() {
     setIsToggle(!isToggle);
@@ -27,9 +34,11 @@ export const Navbar = () => {
                 <Link href="/activity" className="text-black hover:bg-black hover:text-white rounded-md px-1 py-1">
                   Activity
                 </Link>
-                {(role === 'Admin') && (<Link href="/admin-portal" className="text-black hover:bg-black hover:text-white rounded-md px-1 py-1">
-                  Admin Portal
-                </Link>)}
+                {role === 'Admin' && (
+                  <Link href="/admin-portal" className="text-black hover:bg-black hover:text-white rounded-md px-1 py-1">
+                    Admin Portal
+                  </Link>
+                )}
                 <Link href="/settings" className="text-black hover:bg-black hover:text-white rounded-md px-1 py-1">
                   Settings
                 </Link>
@@ -66,9 +75,11 @@ export const Navbar = () => {
                 <Link href="/activity" className="text-black block bg-zinc-100 hover:bg-black hover:text-white rounded-lg p-2">
                   Activity
                 </Link>
-                {(role === 'Admin') && (<Link href="/admin-portal" className="text-black block bg-zinc-100 hover:bg-black hover:text-white rounded-lg p-2">
-                  Admin Portal
-                </Link>)}
+                {role === 'Admin' && (
+                  <Link href="/admin-portal" className="text-black block bg-zinc-100 hover:bg-black hover:text-white rounded-lg p-2">
+                    Admin Portal
+                  </Link>
+                )}
                 <Link href="/settings" className="text-black block bg-zinc-100 hover:bg-black hover:text-white rounded-lg p-2">
                   Settings
                 </Link>

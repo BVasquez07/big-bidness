@@ -1,7 +1,15 @@
 'use client';
 import React, { useState } from 'react';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"; // Adjust import if needed
 
-const Bid = ({ username, date, avatar, bidAmount, rating }) => {
+const Bid = ({ username, date, bidAmount, rating }) => {
   const renderStars = () => {
     const fullStars = Math.floor(rating);
     const halfStar = rating % 1 !== 0;
@@ -9,7 +17,6 @@ const Bid = ({ username, date, avatar, bidAmount, rating }) => {
 
     return (
       <div className="flex items-center">
-        {/* Render full stars */}
         {[...Array(fullStars)].map((_, index) => (
           <svg
             key={`full-${index}`}
@@ -21,7 +28,6 @@ const Bid = ({ username, date, avatar, bidAmount, rating }) => {
             <path d="M10 15l-5.16 3.24L6.67 12 2 7.76l6.08-.52L10 2l2.92 5.24 6.08.52-4.67 4.24L15.16 18z" />
           </svg>
         ))}
-        {/* Render half star if applicable */}
         {halfStar && (
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -32,7 +38,6 @@ const Bid = ({ username, date, avatar, bidAmount, rating }) => {
             <path d="M10 15l-5.16 3.24L6.67 12 2 7.76l6.08-.52L10 2l2.92 5.24 6.08.52-4.67 4.24L15.16 18z" />
           </svg>
         )}
-        {/* Render empty stars */}
         {[...Array(emptyStars)].map((_, index) => (
           <svg
             key={`empty-${index}`}
@@ -45,7 +50,6 @@ const Bid = ({ username, date, avatar, bidAmount, rating }) => {
             <path d="M10 15l-5.16 3.24L6.67 12 2 7.76l6.08-.52L10 2l2.92 5.24 6.08.52-4.67 4.24L15.16 18z" />
           </svg>
         ))}
-        {/* Display numerical rating */}
         <span className="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">
           {rating.toFixed(1)}
         </span>
@@ -56,19 +60,11 @@ const Bid = ({ username, date, avatar, bidAmount, rating }) => {
   return (
     <article className="p-6 text-base bg-white rounded-lg dark:bg-gray-900 border border-gray-300 mb-0">
       <div className="flex items-center">
-        {/* Avatar */}
-        <img
-          src={avatar}
-          alt={`${username}'s avatar`}
-          className="w-12 h-12 rounded-full mr-4"
-        />
         <div className="flex flex-col flex-grow">
-          {/* Name and Bid */}
           <div className="flex justify-between mb-2">
             <p className="text-lg text-gray-900 dark:text-white font-bold">{username}</p>
             <p className="text-lg text-gray-900 dark:text-white font-bold">${bidAmount}</p>
           </div>
-          {/* Rating and Date */}
           <div className="flex justify-between items-end">
             <div>{renderStars()}</div>
             <p className="text-sm text-gray-600 dark:text-gray-400">
@@ -85,28 +81,31 @@ const Bid = ({ username, date, avatar, bidAmount, rating }) => {
 
 const BiddingSection = () => {
   const [bids, setBids] = useState([
-    {
-      username: 'Michael Gough',
-      date: '2022-02-08',
-      avatar: 'https://flowbite.com/docs/images/people/profile-picture-2.jpg',
-      bidAmount: 250,
-      rating: 4.5,
-    },
-    {
-      username: 'Jese Leos',
-      date: '2022-02-12',
-      avatar: 'https://flowbite.com/docs/images/people/profile-picture-5.jpg',
-      bidAmount: 300,
-      rating: 4.0,
-    },
-    {
-      username: 'Bonnie Green',
-      date: '2022-03-12',
-      avatar: 'https://flowbite.com/docs/images/people/profile-picture-3.jpg',
-      bidAmount: 350,
-      rating: 4.8,
-    },
+    { username: 'Michael Gough', date: '2022-02-08', bidAmount: 250, rating: 4.5 },
+    { username: 'Jese Leos', date: '2022-02-12', bidAmount: 300, rating: 4.0 },
+    { username: 'Bonnie Green', date: '2022-03-12', bidAmount: 350, rating: 4.8 },
   ]);
+
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [bidInput, setBidInput] = useState("");
+
+  const openDialog = () => setIsDialogOpen(true);
+  const closeDialog = () => setIsDialogOpen(false);
+
+  const handleBidChange = (e) => {
+    setBidInput(e.target.value);
+  };
+
+  const handleSubmitBid = () => {
+    if (bidInput > 0) {
+      // Handle placing bid (you could update the state or make an API call)
+      alert(`Bid of $${bidInput} placed successfully!`);
+      setBids([...bids, { username: 'Your Name', date: new Date().toISOString(), bidAmount: bidInput, rating: 5 }]);
+      closeDialog();
+    } else {
+      alert("Please enter a valid bid amount.");
+    }
+  };
 
   return (
     <section className="bg-white dark:bg-gray-900 py-8 lg:py-16 antialiased">
@@ -118,20 +117,63 @@ const BiddingSection = () => {
               key={index}
               username={bid.username}
               date={bid.date}
-              avatar={bid.avatar}
               bidAmount={bid.bidAmount}
               rating={bid.rating}
             />
           ))}
         </div>
-        <div className="mt-auto">
-          <button
-            type="submit"
-            className="inline-flex items-center justify-center py-3 px-5 text-md font-medium text-center text-white bg-black rounded-lg focus:ring-4 focus:ring-black-200 dark:focus:ring-black-900 hover:bg-black-800 w-full"
-          >
-            Place Your Bid
-          </button>
-        </div>
+
+        {/* Dialog for Place Your Bid */}
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogTrigger asChild>
+            <button
+              type="button"
+              onClick={openDialog}
+              className="inline-flex items-center justify-center py-3 px-5 text-md font-medium text-center text-white bg-black rounded-lg focus:ring-4 focus:ring-black-200 dark:focus:ring-black-900 hover:bg-black-800 w-full"
+            >
+              Place Your Bid
+            </button>
+          </DialogTrigger>
+
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Confirm Your Bid</DialogTitle>
+              <DialogDescription>
+                Please enter the amount you want to bid.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="mt-4">
+              <form>
+                <label htmlFor="bidInput" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Enter Bid Amount
+                </label>
+                <input
+                  type="number"
+                  id="bidInput"
+                  value={bidInput}
+                  onChange={handleBidChange}
+                  min="1"
+                  className="mt-2 p-2 w-full border border-gray-300 rounded-md dark:bg-gray-800 dark:text-white"
+                  placeholder="Enter your bid"
+                />
+              </form>
+            </div>
+            <div className="mt-4 flex justify-end">
+              <button
+                onClick={closeDialog}
+                className="py-2 px-4 text-white bg-gray-500 rounded-md mr-2"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSubmitBid}
+                className="py-2 px-4 text-white bg-black rounded-md"
+              >
+                Confirm
+              </button>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </section>
   );

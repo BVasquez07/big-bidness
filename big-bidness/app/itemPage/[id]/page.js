@@ -40,8 +40,9 @@ const getItemById = (id) => {
   return data.find((item) => item.id === parseInt(id));
 };
 
-const ItemPage = ({ params }) => {
-  const { id } = params;
+// Use async for dynamic params
+const ItemPage = async ({ params }) => {
+  const { id } = await params;  // Await params before using them
 
   if (!id) return <div>Loading...</div>;
 

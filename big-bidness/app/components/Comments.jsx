@@ -1,12 +1,11 @@
 'use client';
 import React, { useState } from 'react';
 
-const Comment = ({ username, date, avatar, text }) => (
+const Comment = ({ username, date, text }) => (
   <article className="p-6 text-base bg-white rounded-lg dark:bg-gray-900 border border-gray-300 mb-4">
     <footer className="flex justify-between items-center mb-2">
       <div className="flex items-center">
         <p className="inline-flex items-center mr-3 text-sm text-gray-900 dark:text-white font-semibold">
-          <img className="mr-2 w-6 h-6 rounded-full" src={avatar} alt={username} />
           {username}
         </p>
         <p className="text-sm text-gray-600 dark:text-gray-400">
@@ -47,40 +46,35 @@ const Comment = ({ username, date, avatar, text }) => (
 
 const Comments = () => {
   const [commentText, setCommentText] = useState('');
+  const [comments, setComments] = useState([
+    { username: 'Michael Gough', date: '2022-02-08', text: 'Very straight-to-point article. Really worth time reading.' },
+    { username: 'Jese Leos', date: '2022-02-12', text: 'Much appreciated! Glad you liked it ☺️' },
+    { username: 'Bonnie Green', date: '2022-03-12', text: 'Great insights! Keep sharing. Thanks for the article.' },
+  ]);
 
   const handlePostComment = (e) => {
     e.preventDefault();
-    console.log('Posted comment:', commentText);
-    setCommentText('');
+    const newComment = {
+      username: 'Your Name', // Replace with the actual username, if needed
+      date: new Date().toISOString(),
+      text: commentText,
+    };
+    setComments([newComment, ...comments]); // Add new comment at the top
+    setCommentText(''); // Clear the text area
   };
 
   return (
     <section className="bg-white dark:bg-gray-900 py-8 lg:py-16 antialiased">
-    <div className="max-w-7xl mx-auto">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-lg lg:text-2xl font-bold text-gray-900 dark:text-white">Comments</h2>
-      </div>
+      <div className="max-w-7xl mx-auto">
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-lg lg:text-2xl font-bold text-gray-900 dark:text-white">Comments</h2>
+        </div>
 
-        {/* Example of existing comments */}
+        {/* Render comments dynamically */}
         <div className="mb-6">
-          <Comment
-            username="Michael Gough"
-            date="2022-02-08"
-            avatar="https://flowbite.com/docs/images/people/profile-picture-2.jpg"
-            text="Very straight-to-point article. Really worth time reading. Thank you! But tools are just the instruments for the UX designers. The knowledge of the design tools are as important as the creation of the design strategy."
-          />
-          <Comment
-            username="Jese Leos"
-            date="2022-02-12"
-            avatar="https://flowbite.com/docs/images/people/profile-picture-5.jpg"
-            text="Much appreciated! Glad you liked it ☺️"
-          />
-          <Comment
-            username="Bonnie Green"
-            date="2022-03-12"
-            avatar="https://flowbite.com/docs/images/people/profile-picture-3.jpg"
-            text="Great insights! Keep sharing. Thanks for the article."
-          />
+          {comments.map((comment, index) => (
+            <Comment key={index} username={comment.username} date={comment.date} text={comment.text} />
+          ))}
         </div>
 
         <form className="mb-6" onSubmit={handlePostComment}>
