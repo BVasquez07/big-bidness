@@ -4,7 +4,7 @@ import Link from 'next/link';
 
 export const Item = ({ data }) => {
   return (
-    <Link href={`/itemPage/${data.id}`} className="block cursor-pointer">
+    <Link href={`/itemPage/${data.product_id}`} className="block cursor-pointer">
     <Card className="mt-6 w-[350px] h-[450px] m-2 border border-gray-300 rounded-lg shadow-md">
       <div className="relative h-[250px] overflow-hidden rounded-t-lg">
         <img 
