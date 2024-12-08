@@ -58,7 +58,7 @@ const Bid = ({ username, date, bidAmount, rating }) => {
   };
 
   return (
-    <article className="p-6 text-base bg-white rounded-lg dark:bg-gray-900 border border-gray-300 mb-0">
+    <article className="p-6 text-base bg-white dark:bg-gray-900 border border-gray-300 mb-0">
       <div className="flex items-center">
         <div className="flex flex-col flex-grow">
           <div className="flex justify-between mb-2">
