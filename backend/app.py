@@ -46,7 +46,7 @@ def personalinfo_route():
     
 @app.route("/userinfo", methods=["GET"])#gets any user info the user clicks ons
 def userinfo_route():
-    return user.userinfo
+    return user.userinfo()
 
 
 @app.route("/post", methods=["POST"])#posting product
@@ -131,6 +131,11 @@ def submittransaction_route():
 @app.route("/acceptbid", methods=["POST"])
 def acceptbid_route():
     return bid.acceptbid()
+
+@app.route("/updatebalance", methods=["POST"])
+def updatebalance():
+    newPrice = request.json.get("newPrice")
+    return accountbalance.changeBalance(newPrice)
 
 @app.route("/addbalance", methods=["POST"])
 def addbalance_route():
