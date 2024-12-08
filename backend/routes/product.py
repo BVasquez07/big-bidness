@@ -4,6 +4,27 @@ from flask import jsonify, request
 from routes.auth import access_token
 
 #posting product
+"""
+expected json format:
+{
+    "productname": "product name",
+    "imageurl": "image url",
+    "min_price": "min price",
+    "max_price": "max price",
+    "price": "price",
+    "listing_type": "listing type"
+}
+
+returns:
+{
+    "message": "Product posted successfully!",
+    "product_id": "product id"
+}
+OR
+{
+    "error": "error message"
+} 
+"""
 def product_post():
     try:
         query=request.json
@@ -12,6 +33,7 @@ def product_post():
         min_price=query.get("min_price")
         max_price=query.get("max_price")
         price=query.get("price")
+        listing_type = query.get("listing_type")
 
         if not product_name or not price and not min_price and not max_price:
             return jsonify({"error": "Product name and price are required"}), 400
@@ -35,17 +57,14 @@ def product_post():
         seller_id=seller_data[0]["userid"]
 
         insert_result = supabase.table("products").insert({
-
             "sellerid": seller_id,
             "product_name": product_name,
             "imageurl": imageurl,
             "min_price": min_price,
             "max_price": max_price,
             "is_available": True,
-            "price": price
-        
-        
-        
+            "price": price,
+            "listing_type": listing_type
         }).execute()
 
         if not insert_result.data:
