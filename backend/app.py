@@ -166,6 +166,13 @@ def getquittingsys_route():
 def getinvquittingsys_route():
     return quitSys.getquittingsysinvoluntary() 
 
+@app.route("/updatequittingsys", methods=["GET"])
+def updatequittingsys_route():
+    return quitSys.updatequitsysvoluntary() 
+
+@app.route("/updateinvquittingsys", methods=["GET"])
+def updateinvquittingsys_route():
+    return quitSys.updatequitsysinvoluntary() 
 
 if __name__ == "__main__":
     app.run(host="localhost", debug=True, port=8080)
