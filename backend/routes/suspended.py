@@ -20,7 +20,7 @@ def issuspended(userid,suspension_query,now):
         ratings=[]
         for r in ratings_query.data:
             created_at=r["created_at"]
-            if suspended_at is not None:
+            if suspended_at is not None:##possible issue around here.....
                 if created_at > suspended_at: #previously >= but this causes user suspension to be triggered when user has 2 ratings since the initial 3rd rating will be ofc equal to suspended_at.
                     ratings.append(r["rating"])
             else:
