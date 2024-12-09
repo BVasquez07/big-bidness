@@ -1,8 +1,10 @@
 from config import supabase
 import logging
 from flask import jsonify, request
+from routes.quitSys import deleteQuitSysInvoluntary
 from datetime import datetime
 from routes.auth import access_token
+
 
 def issuspended(userid,suspension_query,now):
     try:
@@ -18,7 +20,7 @@ def issuspended(userid,suspension_query,now):
         ratings=[]
         for r in ratings_query.data:
             created_at=r["created_at"]
-            if suspended_at is not None:
+            if suspended_at is not None:##possible issue around here.....
                 if created_at > suspended_at: #previously >= but this causes user suspension to be triggered when user has 2 ratings since the initial 3rd rating will be ofc equal to suspended_at.
                     ratings.append(r["rating"])
             else:
@@ -38,19 +40,21 @@ def issuspended(userid,suspension_query,now):
                     "is_suspended": True,
                     "suspended_at": now
                 }).eq("userid", userid).execute()
+                if not update_suspension.data or len(update_suspension.data) == 0:
+                        return jsonify({"error": "Failed to update suspension for this user"}), 500
                 
                 prev_suspension_count = supabase.table("users").select("suspension_count").eq("userid", userid).execute() ##fetch the previous suspension count
                 if not prev_suspension_count.data or len(prev_suspension_count.data) == 0:
-                    return jsonify({"error": "Failed to fetch previous suspension count"}), 500    
-                user_response_update = supabase.table("users").update({"suspension_count": prev_suspension_count.data[0]["suspension_count"] + 1}).eq("userid", userid).execute() ##increment & update
+                    return jsonify({"error": "Failed to fetch previous suspension count"}), 500   
                 
-                if not update_suspension.data or len(update_suspension.data) == 0:
-                    return jsonify({"error": "Failed to update suspension for this user"}), 500
-                if not user_response_update.data or len(user_response_update.data) == 0:
-                    return jsonify({"error": "Failed to update suspension for this user"}), 500
-    
+                if prev_suspension_count.data[0]["suspension_count"] < 3: ##check if user has been suspended less than 3 times
+                    user_response_update = supabase.table("users").update({"suspension_count": prev_suspension_count.data[0]["suspension_count"] + 1}).eq("userid", userid).execute() ##increment & update
+                    if not user_response_update.data or len(user_response_update.data) == 0:
+                        return jsonify({"error": "Failed to update suspension for this user"}), 500
+                else:
+                    return deleteQuitSysInvoluntary(userid)
                 return True 
-            return False 
+        return False 
     except Exception as e:
         logging.error(f"Error submiting suspended: {str(e)}")
         return jsonify({"error": str(e)}), 500

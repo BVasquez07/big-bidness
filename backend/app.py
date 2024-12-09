@@ -175,19 +175,15 @@ def query_products_route():
 
 @app.route("/getquittingsys", methods=["GET"])
 def getquittingsys_route():
-    return quitSys.getquittingsysvoluntary() 
+    return quitSys.getquittingsys() 
 
-@app.route("/getinvquittingsys", methods=["GET"])
-def getinvquittingsys_route():
-    return quitSys.getquittingsysinvoluntary() 
-
-@app.route("/updatequittingsys", methods=["GET"])
+@app.route("/updatequitsys", methods=["POST"])
 def updatequittingsys_route():
     return quitSys.updatequitsysvoluntary() 
 
-@app.route("/updateinvquittingsys", methods=["GET"])
-def updateinvquittingsys_route():
-    return quitSys.updatequitsysinvoluntary() 
+@app.route("/deletefromsys", methods=["POST"])
+def deletequittingsys_route():
+    return quitSys.deleteQuitSysvoluntary() 
 
 @app.route("/valid-token", methods=["GET"])
 def valid_token_route():
