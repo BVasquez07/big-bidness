@@ -47,6 +47,8 @@ const ItemPage = () => {
   const item = data.length > 0 ? data[0] : null;
 
   if (!item) return <div>Item not found</div>;
+  console.log(item)
+  console.log(item.product_id)
 
   return (
     <div className="flex justify-center p-6 px-8">

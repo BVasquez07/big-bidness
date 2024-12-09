@@ -1,4 +1,4 @@
-'use client'
+'use client';
 import React, { useState, useEffect } from 'react';
 
 const Comment = ({ username, date, text }) => (
@@ -21,7 +21,7 @@ const Comment = ({ username, date, text }) => (
 
 const Comments = ({ product_id, userInfo }) => {
   const [commentText, setCommentText] = useState('');
-  const [comments, setComments] = useState([]);
+  const [comments, setComments] = useState([]); // Ensure it's an array
   const [token, setToken] = useState('');
 
   useEffect(() => {
@@ -30,22 +30,22 @@ const Comments = ({ product_id, userInfo }) => {
 
   useEffect(() => {
     const fetchComments = async () => {
-      const response = await fetch('http://localhost:5000/get_product_comment', {
-        method: 'POST',
+      const response = await fetch(`http://localhost:5000/get-proudct-comment?product_id=${product_id}`, {
+        method: 'GET',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': token,
         },
-        body: JSON.stringify({ product_id: product_id }),
       });
       const data = await response.json();
-      setComments(data.complaints);
+      console.log(data);
+      setComments(data.comment || []); // Ensure it's always an array
     };
 
     if (product_id) {
       fetchComments();
     }
-  }, [product_id]);
+  }, [product_id, token]); // Added token as dependency
 
   const handlePostComment = async (e) => {
     e.preventDefault();
@@ -91,9 +91,13 @@ const Comments = ({ product_id, userInfo }) => {
         </div>
 
         <div className="mb-6">
-          {comments.map((comment, index) => (
-            <Comment key={index} username={comment.username} date={comment.date} text={comment.text} />
-          ))}
+          {comments.length === 0 ? (
+            <p>No comments yet.</p>
+          ) : (
+            comments.map((comment, index) => (
+              <Comment key={index} username={comment.username} date={comment.date} text={comment.text} />
+            ))
+          )}
         </div>
 
         <form className="mb-6" onSubmit={handlePostComment}>
