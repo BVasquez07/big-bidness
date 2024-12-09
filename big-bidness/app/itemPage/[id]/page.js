@@ -1,7 +1,6 @@
 import React from "react";
 import Comments from "@/app/components/Comments";
 import BiddingSection from "@/app/components/BiddingSection";
-import PersonalInfo from "@/app/components/PersonalInfo";
 
 // Dummy data for illustration
 const data = [
@@ -41,9 +40,8 @@ const getItemById = (id) => {
   return data.find((item) => item.id === parseInt(id));
 };
 
-// Use async for dynamic params
 const ItemPage = async ({ params }) => {
-  const { id } = await params;  // Await params before using them
+  const { id } = await params;
 
   if (!id) return <div>Loading...</div>;
 
@@ -66,13 +64,13 @@ const ItemPage = async ({ params }) => {
             <img
               src={item.image}
               alt={item.name}
-              className="w-full h-[555px] rounded-lg object-cover"
+              className="w-full h-auto rounded-lg object-cover"
             />
           </div>
 
           {/* Right side: Bidding Section */}
           <div className="flex flex-col justify-start">
-            <div className="p-4 border rounded-lg mb-6 h-[555px]">
+            <div className="p-0 border rounded-lg mb-0">
               <BiddingSection />
             </div>
           </div>
@@ -82,7 +80,6 @@ const ItemPage = async ({ params }) => {
         <div className="mt-6">
           <Comments />
         </div>
-        <PersonalInfo />
       </div>
     </div>
   );

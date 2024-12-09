@@ -1,8 +1,8 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 const Comment = ({ username, date, text }) => (
-  <article className="p-6 text-base bg-white rounded-lg dark:bg-gray-900 border border-gray-300 mb-4">
+  <article className="p-6 text-base bg-white rounded-lg dark:bg-gray-900 border border-gray-300 mb-0">
     <footer className="flex justify-between items-center mb-2">
       <div className="flex items-center">
         <p className="inline-flex items-center mr-3 text-sm text-gray-900 dark:text-white font-semibold">
@@ -51,11 +51,36 @@ const Comments = () => {
     { username: 'Jese Leos', date: '2022-02-12', text: 'Much appreciated! Glad you liked it ☺️' },
     { username: 'Bonnie Green', date: '2022-03-12', text: 'Great insights! Keep sharing. Thanks for the article.' },
   ]);
+  const [UserInfo, setUserInfo] = useState({})
+    const [token, setToken] = useState('')
+
+    useEffect(() => {
+        setToken(localStorage.getItem('token'));
+    }, []);
+
+    useEffect(() => {
+        const getUserInfo = async () => {
+            const userinfo = await fetch('http://localhost:5000/personalinfo', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `${token}`
+                }
+            })
+            const data = await userinfo.json()
+            setUserInfo(data['user'])
+            console.log(data['user'])
+        }
+        if (token) {
+            console.log({'token': token})
+            getUserInfo()
+        }
+    }, [token]);
 
   const handlePostComment = (e) => {
     e.preventDefault();
     const newComment = {
-      username: 'Your Name', // Replace with the actual username, if needed
+      username: UserInfo.firstname + ' ' + UserInfo.lastname, 
       date: new Date().toISOString(),
       text: commentText,
     };

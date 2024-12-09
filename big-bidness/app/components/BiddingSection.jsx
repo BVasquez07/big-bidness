@@ -1,5 +1,5 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -85,9 +85,33 @@ const BiddingSection = () => {
     { username: 'Jese Leos', date: '2022-02-12', bidAmount: 300, rating: 4.0 },
     { username: 'Bonnie Green', date: '2022-03-12', bidAmount: 350, rating: 4.8 },
   ]);
-
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [bidInput, setBidInput] = useState("");
+  const [UserInfo, setUserInfo] = useState({})
+    const [token, setToken] = useState('')
+
+    useEffect(() => {
+        setToken(localStorage.getItem('token'));
+    }, []);
+
+    useEffect(() => {
+        const getUserInfo = async () => {
+            const userinfo = await fetch('http://localhost:5000/personalinfo', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `${token}`
+                }
+            })
+            const data = await userinfo.json()
+            setUserInfo(data['user'])
+            console.log(data['user'])
+        }
+        if (token) {
+            console.log({'token': token})
+            getUserInfo()
+        }
+    }, [token]);
 
   const openDialog = () => setIsDialogOpen(true);
   const closeDialog = () => setIsDialogOpen(false);
@@ -101,9 +125,8 @@ const BiddingSection = () => {
     if (bidInput <= highestBid) {
       alert(`Your bid must be higher than the current highest bid of $${highestBid}.`);
     } else if (bidInput > 0) {
-      // Handle placing bid (you could update the state or make an API call)
       alert(`Bid of $${bidInput} placed successfully!`);
-      setBids([...bids, { username: 'Your Name', date: new Date().toISOString(), bidAmount: bidInput, rating: 5 }]);
+      setBids([...bids, { username: UserInfo.firstname + ' ' + UserInfo.lastname, date: new Date().toISOString(), bidAmount: parseInt(bidInput), rating: UserInfo.rating }]);
       closeDialog();
     } else {
       alert("Please enter a valid bid amount.");
@@ -114,74 +137,65 @@ const BiddingSection = () => {
   const sortedBids = bids.sort((a, b) => b.bidAmount - a.bidAmount);
 
   return (
-    <section className="bg-white dark:bg-gray-900 py-0 lg:py-0 antialiased">
-      <div className="max-w-7xl mx-auto">
-        <h2 className="text-lg lg:text-2xl font-bold text-gray-900 dark:text-white mb-6">Current Bids</h2>
-        <div className="mb-6 max-h-[400px] overflow-y-auto">
-          {sortedBids.map((bid, index) => (
-            <Bid
-              key={index}
-              username={bid.username}
-              date={bid.date}
-              bidAmount={bid.bidAmount}
-              rating={bid.rating}
+    <section className="bg-white dark:bg-gray-900 relative border border-gray-300 rounded-md shadow-md h-[555px] flex flex-col">
+  <h2 className="text-lg lg:text-2xl font-bold text-gray-900 dark:text-white p-4 border-b border-gray-300 sticky top-0 bg-white dark:bg-gray-900 z-10">
+    Current Bids
+  </h2>
+  <div className="overflow-y-auto flex-grow p-0">
+    {sortedBids.map((bid, index) => (
+      <Bid
+        key={index}
+        username={bid.username}
+        date={bid.date}
+        bidAmount={bid.bidAmount}
+        rating={bid.rating}
+      />
+    ))}
+  </div>
+  <div className="sticky bottom-0 p-4 bg-white dark:bg-gray-900 border-t border-gray-300">
+    <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+      <DialogTrigger asChild>
+        <button
+          type="button"
+          onClick={openDialog}
+          className="w-full py-3 px-5 text-md font-medium text-center text-white bg-black rounded-lg focus:ring-4 focus:ring-black-200 dark:focus:ring-black-900 hover:bg-black-800"
+        >
+          Place Your Bid
+        </button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Confirm Your Bid</DialogTitle>
+          <DialogDescription>Please enter the amount you want to bid.</DialogDescription>
+        </DialogHeader>
+        <div className="mt-4">
+          <form>
+            <label htmlFor="bidInput" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+              Enter Bid Amount
+            </label>
+            <input
+              type="number"
+              id="bidInput"
+              value={bidInput}
+              onChange={handleBidChange}
+              min="1"
+              className="mt-2 p-2 w-full border border-gray-300 rounded-md dark:bg-gray-800 dark:text-white"
+              placeholder="Enter your bid"
             />
-          ))}
+          </form>
         </div>
-
-        {/* Dialog for Place Your Bid */}
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
-            <button
-              type="button"
-              onClick={openDialog}
-              className="inline-flex items-center justify-center py-3 px-5 text-md font-medium text-center text-white bg-black rounded-lg focus:ring-4 focus:ring-black-200 dark:focus:ring-black-900 hover:bg-black-800 w-full"
-            >
-              Place Your Bid
-            </button>
-          </DialogTrigger>
-
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Confirm Your Bid</DialogTitle>
-              <DialogDescription>
-                Please enter the amount you want to bid.
-              </DialogDescription>
-            </DialogHeader>
-            <div className="mt-4">
-              <form>
-                <label htmlFor="bidInput" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Enter Bid Amount
-                </label>
-                <input
-                  type="number"
-                  id="bidInput"
-                  value={bidInput}
-                  onChange={handleBidChange}
-                  min="1"
-                  className="mt-2 p-2 w-full border border-gray-300 rounded-md dark:bg-gray-800 dark:text-white"
-                  placeholder="Enter your bid"
-                />
-              </form>
-            </div>
-            <div className="mt-4 flex justify-end">
-              <button
-                onClick={closeDialog}
-                className="py-2 px-4 text-white bg-gray-500 rounded-md mr-2"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleSubmitBid}
-                className="py-2 px-4 text-white bg-black rounded-md"
-              >
-                Confirm
-              </button>
-            </div>
-          </DialogContent>
-        </Dialog>
-      </div>
-    </section>
+        <div className="mt-4 flex justify-end">
+          <button onClick={closeDialog} className="py-2 px-4 text-white bg-gray-500 rounded-md mr-2">
+            Cancel
+          </button>
+          <button onClick={handleSubmitBid} className="py-2 px-4 text-white bg-black rounded-md">
+            Confirm
+          </button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  </div>
+</section>
   );
 };
 
