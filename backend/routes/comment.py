@@ -49,8 +49,7 @@ def postcomment():
     
 def get_product_comment():
     try:
-        query=request.get_json()
-        product_id=query.get("product_id")
+        product_id=request.args.get("product_id")
 
 
         comment_result = supabase.table("comments").select("*").eq("product_id", product_id).execute()
