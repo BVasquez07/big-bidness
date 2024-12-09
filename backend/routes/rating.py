@@ -61,7 +61,7 @@ def rating():
                 return jsonify({"error": "Failed to insert suspension for this user"}), 500
         
         is_suspended=issuspended(userid,suspension_query,now)
-        if type(is_suspended)!=bool: # here it would mean that the user has been deleted from the system due to multiple suspensions
+        if type(is_suspended) != bool: # here it would mean that the user has been deleted from the system due to multiple suspensions
             return jsonify({"message": "The user has been deleted due to too many suspension from bad ratings"}), 201
 
             
