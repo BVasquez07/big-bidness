@@ -100,6 +100,11 @@ def getproductcomplaint_route():
 def getsellercomplaint_route():
     return complaint.getsellercomplaint()
 
+@app.route("/get-all-complaint", methods=["GET"])
+def getallcomplaint_route():
+    return complaint.getallcomplaint()
+
+
 @app.route("/postbid", methods=["POST"])#bid for proudct
 def postbid_route():
     return bid.postbid()
@@ -120,8 +125,11 @@ def rating_route():
 def getsuspended_route():
     return suspended.getsuspended()
 
-
 @app.route("/update-suspended", methods=["POST"])
+def admin_suspenion_upadte_route():
+    return suspended.admin_suspenion_upadte()
+
+@app.route("/update-pay-suspended", methods=["POST"])
 def updatesuspended_route():
     return suspended.updatesuspended()
 

@@ -2,7 +2,7 @@ from config import supabase
 import logging
 from flask import jsonify, request
 from datetime import datetime
-from routes.suspened import issuspended
+from backend.routes.suspended import issuspended
 from routes.auth import access_token
 
 

@@ -98,3 +98,19 @@ def getsellercomplaint():
     except Exception as e:
         logging.error(f"Error fetching complaints: {str(e)}")
         return jsonify({"error": str(e)}), 500
+
+
+def getallcomplaint():
+    try:
+
+        complaints_result = supabase.table("complaints").select("*").execute()
+
+
+        if not complaints_result.data or len(complaints_result.data) == 0:
+            return jsonify({"complaints": []}), 200
+
+        return jsonify({"complaints": complaints_result.data}), 200
+
+    except Exception as e:
+        logging.error(f"Error fetching complaints: {str(e)}")
+        return jsonify({"error": str(e)}), 500
