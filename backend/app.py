@@ -86,10 +86,17 @@ def getvipproducts_route():
 def approval_list_route():
     return admin.approval_list()
 
-@app.route("/postcomplaint", methods=["POST"])#get all complaints
+@app.route("/postcomplaint", methods=["POST"])
 def postcomplaint_route():
     return complaint.postcomplaint()
 
+@app.route("/postcomment", methods=["POST"])
+def postcomment_route():
+    return comment.postcomment()
+
+@app.route("/get-proudct-comment", methods=["GET"])
+def get_product_comment_route():
+    return comment.get_product_comment()
 
 @app.route("/get-product-complaint", methods=["GET"])#get complainst based on product only
 def getproductcomplaint_route():
