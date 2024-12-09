@@ -1,4 +1,4 @@
-'use client';
+'use client'
 import React, { useState, useEffect } from 'react';
 
 const Comment = ({ username, date, text }) => (
@@ -14,78 +14,92 @@ const Comment = ({ username, date, text }) => (
           </time>
         </p>
       </div>
-      <button
-        id={`dropdownCommentButton`}
-        data-dropdown-toggle={`dropdownComment`}
-        className="inline-flex items-center p-2 text-sm font-medium text-center text-gray-500 dark:text-gray-400 bg-white rounded-lg hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-gray-50 dark:bg-gray-900 dark:hover:bg-gray-700 dark:focus:ring-gray-600"
-        type="button"
-      >
-        <svg className="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 3">
-          <path d="M2 0a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3Zm6.041 0a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM14 0a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3Z" />
-        </svg>
-        <span className="sr-only">Comment settings</span>
-      </button>
     </footer>
     <p className="text-gray-500 dark:text-gray-400">{text}</p>
-    <div className="flex items-center mt-4 space-x-4">
-      <button type="button" className="flex items-center text-sm text-gray-500 hover:underline dark:text-gray-400 font-medium">
-        <svg className="mr-1.5 w-3.5 h-3.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 18">
-          <path
-            stroke="currentColor"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth="2"
-            d="M5 5h5M5 8h2m6-3h2m-5 3h6m2-7H2a1 1 0 0 0-1 1v9a1 1 0 0 0 1 1h3v5l5-5h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1Z"
-          />
-        </svg>
-        Reply
-      </button>
-    </div>
   </article>
 );
 
-const Comments = () => {
+const Comments = ({ product_id }) => {
+  console.log(product_id);
   const [commentText, setCommentText] = useState('');
-  const [comments, setComments] = useState([
-    { username: 'Michael Gough', date: '2022-02-08', text: 'Very straight-to-point article. Really worth time reading.' },
-    { username: 'Jese Leos', date: '2022-02-12', text: 'Much appreciated! Glad you liked it ☺️' },
-    { username: 'Bonnie Green', date: '2022-03-12', text: 'Great insights! Keep sharing. Thanks for the article.' },
-  ]);
-  const [UserInfo, setUserInfo] = useState({})
-    const [token, setToken] = useState('')
+  const [comments, setComments] = useState([]);
+  const [userInfo, setUserInfo] = useState({});
+  const [token, setToken] = useState('');
 
-    useEffect(() => {
-        setToken(localStorage.getItem('token'));
-    }, []);
+  useEffect(() => {
+    setToken(localStorage.getItem('token'));
+  }, []);
 
-    useEffect(() => {
-        const getUserInfo = async () => {
-            const userinfo = await fetch('http://localhost:5000/personalinfo', {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `${token}`
-                }
-            })
-            const data = await userinfo.json()
-            setUserInfo(data['user'])
-            console.log(data['user'])
-        }
-        if (token) {
-            console.log({'token': token})
-            getUserInfo()
-        }
-    }, [token]);
+  useEffect(() => {
+    const getUserInfo = async () => {
+        const userinfo = await fetch('http://localhost:5000/personalinfo', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': token,
+            }
+        })
+        const data = await userinfo.json()
+        setUserInfo(data['user'])
+    }
+    if (token) {
+        getUserInfo()
+    }
+  }, [token]);
 
-  const handlePostComment = (e) => {
+  useEffect(() => {
+    const fetchComments = async () => {
+      const response = await fetch('http://localhost:5000/get_product_comment', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': token,
+        },
+        body: JSON.stringify({ product_id: product_id }),
+      });
+      const data = await response.json();
+      setComments(data.complaints);
+    };
+
+    if (product_id) {
+      fetchComments();
+    }
+  }, [product_id]);
+
+  const handlePostComment = async (e) => {
     e.preventDefault();
     const newComment = {
-      username: UserInfo.firstname + ' ' + UserInfo.lastname, 
-      date: new Date().toISOString(),
       text: commentText,
+      product_id: product_id,
     };
-    setComments([newComment, ...comments]); // Add new comment at the top
-    setCommentText(''); // Clear the text area
+
+    try {
+      const response = await fetch('http://localhost:5000/postcomment', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': token,
+        },
+        body: JSON.stringify(newComment),
+      });
+      const data = await response.json();
+
+      if (data.message === 'comment posted successfully') {
+        setComments([
+          {
+            username: `${userInfo.firstname} ${userInfo.lastname}`,
+            date: new Date().toISOString(),
+            text: commentText,
+          },
+          ...comments,
+        ]);
+        setCommentText('');
+      } else {
+        console.error('Error posting comment:', data.error);
+      }
+    } catch (err) {
+      console.error('Error:', err);
+    }
   };
 
   return (
@@ -95,7 +109,6 @@ const Comments = () => {
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Comments</h2>
         </div>
 
-        {/* Render comments dynamically */}
         <div className="mb-6">
           {comments.map((comment, index) => (
             <Comment key={index} username={comment.username} date={comment.date} text={comment.text} />
@@ -104,9 +117,6 @@ const Comments = () => {
 
         <form className="mb-6" onSubmit={handlePostComment}>
           <div className="py-2 px-4 mb-4 bg-white rounded-lg rounded-t-lg border border-gray-200 dark:bg-gray-800 dark:border-gray-700">
-            <label htmlFor="comment" className="sr-only">
-              Your comment
-            </label>
             <textarea
               id="comment"
               rows="6"

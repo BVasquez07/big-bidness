@@ -79,7 +79,7 @@ const Bid = ({ username, date, bidAmount, rating }) => {
   );
 };
 
-const BiddingSection = () => {
+const BiddingSection = ({ productId }) => {
   const [bids, setBids] = useState([
     { username: 'Michael Gough', date: '2022-02-08', bidAmount: 250, rating: 4.5 },
     { username: 'Jese Leos', date: '2022-02-12', bidAmount: 300, rating: 4.0 },
