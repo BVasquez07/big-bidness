@@ -2,7 +2,7 @@ from config import supabase
 import logging
 from flask import jsonify, request
 from datetime import datetime
-
+from routes.auth import access_token
 
 def issuspended(userid,suspension_query,now):
     try:
@@ -117,6 +117,37 @@ def updatesuspended():
             return jsonify({"error": "Failed to update suspension for this user"}), 500
 
         return jsonify({"message": "50 dollars paid.You can sign in now"}), 200
+    except Exception as e:
+        logging.error(f"Error fetching suspended: {str(e)}")
+        return jsonify({"error": str(e)}), 500
+
+
+def admin_suspenion_upadte():
+    try:
+        query=request.json
+        suspended_id=query.get("userid")
+        email=access_token()
+
+        requester_response=supabase.table("users").select("role, userid").eq("email", email).single().execute()
+        if not requester_response.data:
+            return jsonify({"error": "Requester not found"}), 404
+
+        admin_role=requester_response.data.get("role")
+        if admin_role!="Admin":
+            return jsonify({"error": "Unauthorized action. Admin privileges required."}), 403
+
+
+        user_response = supabase.table("users").select("*").eq("userid", suspended_id).execute()
+        now=datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+        update_suspension = supabase.table("user_suspensions").update({
+            "is_suspended": False,
+            "suspended_at": now,
+            }).eq("userid", suspended_id).execute()
+        if not update_suspension.data or len(update_suspension.data) == 0:
+            return jsonify({"error": "Failed to update suspension for this user"}), 500
+
+        return jsonify({"message": "User is unsuspended"}), 200
     except Exception as e:
         logging.error(f"Error fetching suspended: {str(e)}")
         return jsonify({"error": str(e)}), 500
