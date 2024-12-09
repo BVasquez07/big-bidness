@@ -79,7 +79,7 @@ const Bid = ({ username, date, bidAmount, rating }) => {
   );
 };
 
-const BiddingSection = ({ productId }) => {
+const BiddingSection = ({ product_id, userInfo }) => {
   const [bids, setBids] = useState([
     { username: 'Michael Gough', date: '2022-02-08', bidAmount: 250, rating: 4.5 },
     { username: 'Jese Leos', date: '2022-02-12', bidAmount: 300, rating: 4.0 },
@@ -87,31 +87,7 @@ const BiddingSection = ({ productId }) => {
   ]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [bidInput, setBidInput] = useState("");
-  const [UserInfo, setUserInfo] = useState({})
-    const [token, setToken] = useState('')
 
-    useEffect(() => {
-        setToken(localStorage.getItem('token'));
-    }, []);
-
-    useEffect(() => {
-        const getUserInfo = async () => {
-            const userinfo = await fetch('http://localhost:5000/personalinfo', {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `${token}`
-                }
-            })
-            const data = await userinfo.json()
-            setUserInfo(data['user'])
-            console.log(data['user'])
-        }
-        if (token) {
-            console.log({'token': token})
-            getUserInfo()
-        }
-    }, [token]);
 
   const openDialog = () => setIsDialogOpen(true);
   const closeDialog = () => setIsDialogOpen(false);
@@ -126,7 +102,7 @@ const BiddingSection = ({ productId }) => {
       alert(`Your bid must be higher than the current highest bid of $${highestBid}.`);
     } else if (bidInput > 0) {
       alert(`Bid of $${bidInput} placed successfully!`);
-      setBids([...bids, { username: UserInfo.firstname + ' ' + UserInfo.lastname, date: new Date().toISOString(), bidAmount: parseInt(bidInput), rating: UserInfo.rating }]);
+      setBids([...bids, { username: userInfo.firstname + ' ' + userInfo.lastname, date: new Date().toISOString(), bidAmount: parseInt(bidInput), rating: userInfo.rating }]);
       closeDialog();
     } else {
       alert("Please enter a valid bid amount.");

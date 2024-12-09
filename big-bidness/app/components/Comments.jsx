@@ -19,33 +19,14 @@ const Comment = ({ username, date, text }) => (
   </article>
 );
 
-const Comments = ({ product_id }) => {
-  console.log(product_id);
+const Comments = ({ product_id, userInfo }) => {
   const [commentText, setCommentText] = useState('');
   const [comments, setComments] = useState([]);
-  const [userInfo, setUserInfo] = useState({});
   const [token, setToken] = useState('');
 
   useEffect(() => {
     setToken(localStorage.getItem('token'));
   }, []);
-
-  useEffect(() => {
-    const getUserInfo = async () => {
-        const userinfo = await fetch('http://localhost:5000/personalinfo', {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': token,
-            }
-        })
-        const data = await userinfo.json()
-        setUserInfo(data['user'])
-    }
-    if (token) {
-        getUserInfo()
-    }
-  }, [token]);
 
   useEffect(() => {
     const fetchComments = async () => {

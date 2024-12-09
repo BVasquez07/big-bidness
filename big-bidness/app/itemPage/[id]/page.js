@@ -4,8 +4,31 @@ import React, { useState, useEffect } from "react";
 import Comments from "@/app/components/Comments";
 import BiddingSection from "@/app/components/BiddingSection";
 
-const ItemPage = () => { // Destructure searchInput from props
+const ItemPage = () => { 
   const [data, setData] = useState([]);
+  const [userInfo, setUserInfo] = useState({});
+  const [token, setToken] = useState('');
+
+  useEffect(() => {
+    setToken(localStorage.getItem('token'));
+  }, []);
+
+  useEffect(() => {
+    const getUserInfo = async () => {
+        const userinfo = await fetch('http://localhost:5000/personalinfo', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': token,
+            }
+        })
+        const data = await userinfo.json()
+        setUserInfo(data['user'])
+    }
+    if (token) {
+        getUserInfo()
+    }
+  }, [token]);
 
   useEffect(() => {
     fetch("http://localhost:5000/query?product_title=", { method: "GET" })
@@ -55,14 +78,14 @@ const ItemPage = () => { // Destructure searchInput from props
           {/* Right side: Bidding Section */}
           <div className="flex flex-col justify-start">
             <div className="p-0 border rounded-lg mb-0 h-[555px]">
-              <BiddingSection product_id={item.product_id}/>
+              <BiddingSection product_id={item.product_id} userInfo={userInfo}/>
             </div>
           </div>
         </div>
 
         {/* Comment Section (full-width, below the grid) */}
         <div className="mt-6">
-          <Comments product_id={item.product_id}/>
+          <Comments product_id={item.product_id} userInfo={userInfo}/>
         </div>
       </div>
     </div>
