@@ -2,7 +2,7 @@ from config import supabase
 import logging
 from flask import jsonify, request
 from datetime import datetime
-from routes.suspened import issuspended
+from backend.routes.suspended import issuspended
 from routes.auth import access_token
 
 
@@ -26,7 +26,8 @@ def rating():
 
         now=datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
-        email=access_token()
+        #email=access_token()
+        email="ishmampower890@gmail.com"
         user_query = supabase.table("users").select("userid").eq("email", email).execute()
         if not user_query.data or len(user_query.data) == 0:
             return jsonify({"error": "User not found"}), 404
@@ -60,8 +61,8 @@ def rating():
                 return jsonify({"error": "Failed to insert suspension for this user"}), 500
         
         is_suspended=issuspended(userid,suspension_query,now)
-        if is_suspended:
-            logging.info("User has been suspended.")
+        if type(is_suspended) != bool: # here it would mean that the user has been deleted from the system due to multiple suspensions
+            return jsonify({"message": "The user has been deleted due to too many suspension from bad ratings"}), 201
 
             
         product_query=supabase.table("transactions").select("product_id").eq("sellerid",userid).eq("buyerid",ratedby).execute()

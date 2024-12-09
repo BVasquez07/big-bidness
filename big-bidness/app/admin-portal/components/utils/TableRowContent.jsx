@@ -6,6 +6,10 @@ import {Actions, XAction} from "./Actions";
 
 export default function TableRowContent ({ArrOfObj, addActions=false, xOnly=false}){
     const [allTableItems, setAllTableItems] = useState(ArrOfObj);
+    //we need to load in coimplaints from the server they are stored in a complaints table
+    //we need to load in the apps and users who applied to the system
+    //we need to load in the suspended users
+    //we need to load in the apps for quitting the system
 
     return(
         allTableItems.map(

@@ -86,10 +86,17 @@ def getvipproducts_route():
 def approval_list_route():
     return admin.approval_list()
 
-@app.route("/postcomplaint", methods=["POST"])#get all complaints
+@app.route("/postcomplaint", methods=["POST"])
 def postcomplaint_route():
     return complaint.postcomplaint()
 
+@app.route("/postcomment", methods=["POST"])
+def postcomment_route():
+    return comment.postcomment()
+
+@app.route("/get-proudct-comment", methods=["GET"])
+def get_product_comment_route():
+    return comment.get_product_comment()
 
 @app.route("/get-product-complaint", methods=["GET"])#get complainst based on product only
 def getproductcomplaint_route():
@@ -99,6 +106,11 @@ def getproductcomplaint_route():
 @app.route("/get-seller-complaint", methods=["GET"])#get onlby seller complaint
 def getsellercomplaint_route():
     return complaint.getsellercomplaint()
+
+@app.route("/get-all-complaint", methods=["GET"])
+def getallcomplaint_route():
+    return complaint.getallcomplaint()
+
 
 @app.route("/postbid", methods=["POST"])#bid for proudct
 def postbid_route():
@@ -120,8 +132,11 @@ def rating_route():
 def getsuspended_route():
     return suspended.getsuspended()
 
-
 @app.route("/update-suspended", methods=["POST"])
+def admin_suspenion_upadte_route():
+    return suspended.admin_suspenion_upadte()
+
+@app.route("/update-pay-suspended", methods=["POST"])
 def updatesuspended_route():
     return suspended.updatesuspended()
 
@@ -160,19 +175,15 @@ def query_products_route():
 
 @app.route("/getquittingsys", methods=["GET"])
 def getquittingsys_route():
-    return quitSys.getquittingsysvoluntary() 
+    return quitSys.getquittingsys() 
 
-@app.route("/getinvquittingsys", methods=["GET"])
-def getinvquittingsys_route():
-    return quitSys.getquittingsysinvoluntary() 
-
-@app.route("/updatequittingsys", methods=["GET"])
+@app.route("/updatequitsys", methods=["POST"])
 def updatequittingsys_route():
     return quitSys.updatequitsysvoluntary() 
 
-@app.route("/updateinvquittingsys", methods=["GET"])
-def updateinvquittingsys_route():
-    return quitSys.updatequitsysinvoluntary() 
+@app.route("/deletefromsys", methods=["POST"])
+def deletequittingsys_route():
+    return quitSys.deleteQuitSysvoluntary() 
 
 @app.route("/valid-token", methods=["GET"])
 def valid_token_route():

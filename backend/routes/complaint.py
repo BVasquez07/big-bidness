@@ -98,3 +98,39 @@ def getsellercomplaint():
     except Exception as e:
         logging.error(f"Error fetching complaints: {str(e)}")
         return jsonify({"error": str(e)}), 500
+
+
+def getallcomplaint():
+    try:
+
+        complaints_result = supabase.table("complaints").select("*").execute()
+        if not complaints_result.data or len(complaints_result.data) == 0:
+            return jsonify({"complaints": []}), 200
+
+        complaints = []
+        for complaint in complaints_result.data:
+            product_id=complaint.get("product_id")
+            buyerid=complaint.get("buyerid")
+            sellerid=complaint.get("sellerid")
+        
+            product_result=supabase.table("products").select("product_name").eq("product_id", product_id).execute()
+            buyer_result=supabase.table("users").select("username").eq("userid", buyerid).execute()
+            seller_result=supabase.table("users").select("username").eq("userid", sellerid).execute()
+
+            product_name=product_result.data[0].get("product_name")
+            buyer_name=buyer_result.data[0].get("username")
+            seller_name=seller_result.data[0].get("username")
+
+
+            complaints.append({
+                "productname": product_name,
+                "buyername": buyer_name,
+                "sellername": seller_name,
+                "complaintdetails": complaint.get("complaintdetails")
+            })
+
+        return jsonify({"complaints": complaints}), 200
+
+    except Exception as e:
+        logging.error(f"Error fetching complaints: {str(e)}")
+        return jsonify({"error": str(e)}), 500
