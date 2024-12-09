@@ -37,20 +37,11 @@ const ItemPage = () => {
         if (res.error === "Failed to find product") {
           setData([]);
         } else {
-          console.log(res);
           setData(res['products']);
         }
       })
       .catch((error) => console.log(error));
   }, []);
-
-  console.log("Items in Listings:", data);
-    data.forEach((item, index) => {
-      console.log(`Item ${index + 1}:`, item);
-      console.log(`product_name: ${item.product_name}`);
-      console.log(`product_id: ${item.product_id}`);
-      console.log(`imageurl: ${item.imageurl}`);
-      console.log(`is_available: ${item.is_available}`);});
 
   // Get the item based on the ID (assuming you are fetching the correct item)
   const item = data.length > 0 ? data[0] : null;
@@ -63,6 +54,7 @@ const ItemPage = () => {
       <div className="w-full max-w-7xl">
         {/* Item Name - Positioned above the grid */}
         <h1 className="text-2xl font-bold mb-4">{item.product_name}</h1>
+        <p className="text-xl text-gray-700 mb-4">Price: ${item.price}</p>
 
         {/* Grid for Image and Bidding Section */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
