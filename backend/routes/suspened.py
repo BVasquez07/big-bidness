@@ -19,7 +19,7 @@ def issuspended(userid,suspension_query,now):
         for r in ratings_query.data:
             created_at=r["created_at"]
             if suspended_at is not None:
-                if created_at >= suspended_at:
+                if created_at > suspended_at: #previously >= but this causes user suspension to be triggered when user has 2 ratings since the initial 3rd rating will be ofc equal to suspended_at.
                     ratings.append(r["rating"])
             else:
                 ratings.append(r["rating"])
@@ -38,7 +38,15 @@ def issuspended(userid,suspension_query,now):
                     "is_suspended": True,
                     "suspended_at": now
                 }).eq("userid", userid).execute()
+                
+                prev_suspension_count = supabase.table("users").select("suspension_count").eq("userid", userid).execute() ##fetch the previous suspension count
+                if not prev_suspension_count.data or len(prev_suspension_count.data) == 0:
+                    return jsonify({"error": "Failed to fetch previous suspension count"}), 500    
+                user_response_update = supabase.table("users").update({"suspension_count": prev_suspension_count.data[0]["suspension_count"] + 1}).eq("userid", userid).execute() ##increment & update
+                
                 if not update_suspension.data or len(update_suspension.data) == 0:
+                    return jsonify({"error": "Failed to update suspension for this user"}), 500
+                if not user_response_update.data or len(user_response_update.data) == 0:
                     return jsonify({"error": "Failed to update suspension for this user"}), 500
     
                 return True 
@@ -50,10 +58,7 @@ def issuspended(userid,suspension_query,now):
 
 def getsuspended():
     try:
-       
         suspended=supabase.table("user_suspensions").select("*").eq("is_suspended",True).execute()
-
-       
         if suspended.data:
             return jsonify({"Suspended": suspended.data}), 200
         else:
