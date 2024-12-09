@@ -4,7 +4,7 @@ from flask import jsonify, request
 from datetime import datetime
 from backend.routes.suspended import issuspended
 from routes.auth import access_token
-
+from datetime import datetime, date
 
 
 
@@ -55,7 +55,7 @@ def rating():
             insert_suspension = supabase.table("user_suspensions").insert({
                 "userid": userid,
                 "is_suspended": False,
-                "suspended_at": now
+                "suspended_at": datetime.combine(date.min, datetime.min.time()).isoformat() # edit here
             }).execute()
             if not insert_suspension.data or len(insert_suspension.data) == 0:
                 return jsonify({"error": "Failed to insert suspension for this user"}), 500
