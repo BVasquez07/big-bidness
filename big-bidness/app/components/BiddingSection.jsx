@@ -137,15 +137,15 @@ const BiddingSection = ({ product_id, userInfo, is_available }) => {
   };
 
   return (
-    <section className="bg-white dark:bg-gray-900 relative border border-gray-300 rounded-md shadow-md h-[555px] flex flex-col">
-      <h2 className="text-lg lg:text-2xl font-bold text-gray-900 dark:text-white p-4 border-b border-gray-300 sticky top-0 bg-white dark:bg-gray-900 z-10">
+    <section className="bg-white dark:bg-gray-900 relative border border-gray-500 h-[555px] flex flex-col">
+      <h2 className="text-lg lg:text-2xl font-bold text-gray-900 dark:text-white p-4 border-b border-gray-500 sticky top-0 bg-white dark:bg-gray-900 z-10">
         Current Bids
       </h2>
       <div className="overflow-y-auto flex-grow p-0">
         {sortedBids.map((bid, index) => (
           <div
             key={index}
-            className="border p-2 mb-0 flex justify-between items-center"
+            className="border-b border-gray-300 p-2 mb-0 flex justify-between items-center"
           >
             {/* Left side: Name and Rating */}
             <div className="flex flex-col items-start">
@@ -165,7 +165,7 @@ const BiddingSection = ({ product_id, userInfo, is_available }) => {
           </div>
         ))}
       </div>
-      <div className="sticky bottom-0 p-4 bg-white dark:bg-gray-900 border-t border-gray-300">
+      <div className="sticky bottom-0 p-4 bg-white dark:bg-gray-900 border-t border-gray-500">
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
             <button
