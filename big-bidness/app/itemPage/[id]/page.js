@@ -46,6 +46,7 @@ const ItemPage = ({ params }) => {
 
   // Get the item based on the ID (assuming you are fetching the correct item)
   const item = data.find((product) => String(product.product_id) === String(product_id));
+  // console.log(item)
 
   if (!item) return <div>Item not found</div>;
 
@@ -71,7 +72,7 @@ const ItemPage = ({ params }) => {
           {/* Right side: Bidding Section */}
           <div className="flex flex-col justify-start">
             <div className="p-0 border rounded-lg mb-0 h-[555px]">
-              <BiddingSection product_id={item.product_id} userInfo={userInfo}/>
+              <BiddingSection product_id={item.product_id} userInfo={userInfo} is_available={item.is_available}/>
             </div>
           </div>
         </div>
