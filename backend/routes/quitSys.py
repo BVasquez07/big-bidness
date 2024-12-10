@@ -7,7 +7,6 @@ def getquittingsys():
     try:
         quitting=supabase.table("voluntary_remove_user").select("removal_id, users(*), application, removed_at").execute()
         return jsonify({"Quitting": quitting.data}), 200
-        
     except Exception as e:
         logging.error(f"Error fetching suspended: {str(e)}")
         return jsonify({"error": str(e)}), 500

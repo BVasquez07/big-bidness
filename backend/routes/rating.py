@@ -4,7 +4,7 @@ from flask import jsonify, request
 from datetime import datetime
 from backend.routes.suspended import issuspended
 from routes.auth import access_token
-
+from datetime import datetime, date
 
 
 
@@ -26,8 +26,7 @@ def rating():
 
         now=datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
-        #email=access_token()
-        email="ishmampower890@gmail.com"
+        email=access_token()
         user_query = supabase.table("users").select("userid").eq("email", email).execute()
         if not user_query.data or len(user_query.data) == 0:
             return jsonify({"error": "User not found"}), 404
@@ -55,7 +54,7 @@ def rating():
             insert_suspension = supabase.table("user_suspensions").insert({
                 "userid": userid,
                 "is_suspended": False,
-                "suspended_at": now
+                "suspended_at": datetime.combine(date.min, datetime.min.time()).isoformat() # edit here
             }).execute()
             if not insert_suspension.data or len(insert_suspension.data) == 0:
                 return jsonify({"error": "Failed to insert suspension for this user"}), 500
