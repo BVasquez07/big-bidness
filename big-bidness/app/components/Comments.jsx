@@ -21,7 +21,7 @@ const Comment = ({ username, formattedDate, text }) => (
 
 const Comments = ({ product_id, userInfo }) => {
   const [commentText, setCommentText] = useState('');
-  const [comments, setComments] = useState([]); // Ensure it's an array
+  const [comments, setComments] = useState([]);
   const [token, setToken] = useState('');
 
   useEffect(() => {
@@ -30,31 +30,38 @@ const Comments = ({ product_id, userInfo }) => {
 
   useEffect(() => {
     const fetchComments = async () => {
-      const response = await fetch(`http://localhost:5000/get-proudct-comment?product_id=${product_id}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': token,
-        },
-      });
-      const data = await response.json();
+      try {
+        const response = await fetch(`http://localhost:5000/get-proudct-comment?product_id=${product_id}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': token,
+          },
+        });
+        const data = await response.json();
 
-      // Format the date for each comment and store it
-      const formattedComments = data.comment.map(comment => {
-        const readableDate = new Date(comment.created_at).toLocaleString(); // Format date
-        return {
-          ...comment,
-          formattedDate: readableDate, // Add the formatted date to the comment object
-        };
-      });
-
-      setComments(formattedComments || []); // Ensure it's always an array
+        // Check if data.comment is an array and contains data
+        if (Array.isArray(data.comment) && data.comment.length > 0) {
+          const formattedComments = data.comment.map(comment => {
+            const readableDate = new Date(comment.created_at).toLocaleString();
+            return {
+              ...comment,
+              formattedDate: readableDate,
+            };
+          });
+          setComments(formattedComments);
+        } else {
+          setComments([]); // If no comments, set an empty array
+        }
+      } catch (err) {
+        console.error("Error fetching comments:", err);
+      }
     };
 
-    if (product_id) {
+    if (product_id && token) {
       fetchComments();
     }
-  }, [product_id, token]); // Added token as dependency
+  }, [product_id, token]);
 
   const handlePostComment = async (e) => {
     e.preventDefault();
@@ -106,7 +113,7 @@ const Comments = ({ product_id, userInfo }) => {
               <Comment
                 key={index}
                 username={comment.username}
-                formattedDate={comment.formattedDate} // Pass formatted date directly
+                formattedDate={comment.formattedDate}
                 text={comment.text}
               />
             ))
