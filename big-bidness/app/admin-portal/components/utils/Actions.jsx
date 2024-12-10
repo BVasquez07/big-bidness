@@ -3,7 +3,7 @@ import { Check, X } from "lucide-react"
 
 function Actions({ onApprove, onReject }){
     return(
-        <div className="space-x-2">
+        <div className="space-x-2 grid grid-cols-2 sm:grid-cols-2 gap-2">
             <Button variant="outline" size="icon" className="bg-white-300" onClick={onApprove} >
                 <Check/>
             </Button>
