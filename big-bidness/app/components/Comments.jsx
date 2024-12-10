@@ -1,4 +1,4 @@
-'use client';
+'use client'; 
 import React, { useState, useEffect } from 'react';
 
 const Comment = ({ username, formattedDate, text }) => (
@@ -42,7 +42,6 @@ const Comments = ({ product_id, userInfo }) => {
       // Format the date for each comment and store it
       const formattedComments = data.comment.map(comment => {
         const readableDate = new Date(comment.created_at).toLocaleString(); // Format date
-        console.log('Formatted Date:', readableDate); // Log the formatted date for debugging
         return {
           ...comment,
           formattedDate: readableDate, // Add the formatted date to the comment object
@@ -78,7 +77,7 @@ const Comments = ({ product_id, userInfo }) => {
       if (data.message === 'comment posted successfully') {
         const newFormattedDate = new Date().toLocaleString();
         setComments([{
-          username: `${userInfo.firstname} ${userInfo.lastname}`,
+          username: `${userInfo.username}`,
           formattedDate: newFormattedDate,
           text: commentText,
         }, ...comments]);
@@ -102,7 +101,8 @@ const Comments = ({ product_id, userInfo }) => {
           {comments.length === 0 ? (
             <p>No comments yet.</p>
           ) : (
-            comments.map((comment, index) => (
+            // Reverse the comments array here to display newest on top
+            [...comments].reverse().map((comment, index) => (
               <Comment
                 key={index}
                 username={comment.username}
