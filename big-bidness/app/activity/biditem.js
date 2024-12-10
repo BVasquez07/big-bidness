@@ -1,6 +1,6 @@
 import React from 'react';
 
-export function Item({ data }) {
+export function BidItem({ data }) {
     const { product_details, bidamount, biddeadline, bid_accepted } = data;
     const isCompleted = bid_accepted;
 
@@ -18,13 +18,6 @@ export function Item({ data }) {
             {!isCompleted && (
                 <div className="text-gray-500 text-sm mt-1">
                     Expires: {new Date(biddeadline).toLocaleDateString()}
-                </div>
-            )}
-            {isCompleted && (
-                <div className="mt-2">
-                    <button className="px-4 py-1 bg-yellow-500 text-white text-sm rounded-lg shadow">
-                        {bid_accepted ? 'Rated' : 'Rate'}
-                    </button>
                 </div>
             )}
         </div>

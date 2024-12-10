@@ -1,16 +1,17 @@
 'use client';
 import React, { useEffect, useState } from 'react';
-import { Item } from './item';
+import { BidItem } from './biditem';
+import { ListingItem } from './listingItem';
 
 export default function Activity() {
     const [activeBids, setActiveBids] = useState([]);
     const [completedBids, setCompletedBids] = useState([]);
+    const [activeListings, setActiveListings] = useState([]);
     const [token, setToken] = useState('');
 
     useEffect(() => {
         const token = localStorage.getItem('token');
         if (token) {
-            console.log({ token });
             setToken(token);
         }
     });
@@ -34,7 +35,24 @@ export default function Activity() {
                             return !isExpired && (bid.bid_accepted || isAvailable);
                         });
                         setActiveBids(validBids.filter(bid => !bid.bid_accepted));
-                        setCompletedBids(validBids.filter(bid => bid.bid_accepted));
+                    } else {
+                        console.log('No bids found in the response');
+                    }
+                })
+                .catch(error => console.error('Error fetching bids:', error));
+        }
+        function fetchListings() {
+            fetch('http://localhost:8080/user-current-products', {
+                method: 'GET',
+                headers: {
+                    'Authorization': `${token}`
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    console.log(data);
+                    if (data.products) {
+                        setActiveListings(data.products);
                     } else {
                         console.log('No bids found in the response');
                     }
@@ -42,13 +60,16 @@ export default function Activity() {
                 .catch(error => console.error('Error fetching bids:', error));
         }
         if (token) {
-            console.log(token)
             fetchBids();
+            fetchListings();
         }
     }, [token]);
 
-    const mapFunction = (data) => {
-        return data.map((item) => <Item data={item} key={item.bidid} />);
+    const mapBids = (data) => {
+        return data.map((item) => <BidItem data={item} key={item.bidid} />);
+    };
+    const mapListings = (data) => {
+        return data.map((item) => <ListingItem data={item} key={item.product_id} />);
     };
 
     return (
@@ -58,14 +79,16 @@ export default function Activity() {
                 <div>
                     <div className='text-2xl font-semibold'>Active Bids</div>
                     <div className='px-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 lg:grid-cols-4 gap-6 p-4'>
-                        {mapFunction(activeBids)}
+                        {mapBids(activeBids)}
                     </div>
                 </div>
-                <div className='text-2xl font-semibold'>Completed Bids</div>
+                <div>
+                    <div className='text-2xl font-semibold'>Active Listings</div>
                     <div className='px-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 lg:grid-cols-4 gap-6 p-4'>
-                        {mapFunction(completedBids)}
+                        {mapListings(activeListings)}
                     </div>
                 </div>
+            </div>
         </div>
     );
 }
