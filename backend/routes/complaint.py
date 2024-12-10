@@ -109,6 +109,7 @@ def getallcomplaint():
 
         complaints = []
         for complaint in complaints_result.data:
+            complaintid=complaint.get("complaintid")
             product_id=complaint.get("product_id")
             buyerid=complaint.get("buyerid")
             sellerid=complaint.get("sellerid")
@@ -123,6 +124,7 @@ def getallcomplaint():
 
 
             complaints.append({
+                "complaintid":complaintid,
                 "productname": product_name,
                 "buyername": buyer_name,
                 "sellername": seller_name,
