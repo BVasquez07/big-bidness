@@ -104,13 +104,14 @@ def getproductbid():
             biddeadline=bid.get("biddeadline")
             bid_accepted=bid.get("bid_accepted")
             product_result=supabase.table("products").select("product_name").eq("product_id", product_id).execute()
-            buyer_result=supabase.table("users").select("username","firstname","lastname").eq("userid", buyerid).execute()
+            buyer_result=supabase.table("users").select("username","firstname","lastname","rating").eq("userid", buyerid).execute()
             seller_result=supabase.table("users").select("username").eq("userid", sellerid).execute()
 
             product_name=product_result.data[0].get("product_name")
             buyer_name=buyer_result.data[0].get("username")
             firstname=buyer_result.data[0].get("firstname")
             lastname=buyer_result.data[0].get("lastname")
+            buyer_rating=buyer_result.data[0].get("rating")
             seller_name=seller_result.data[0].get("username")
 
         
@@ -119,6 +120,7 @@ def getproductbid():
                 "buyername": buyer_name,
                 "fisrstname":firstname,
                 "lastname":lastname,
+                "buyer_rating":buyer_rating,
                 "buyerid":buyerid,
                 "sellername": seller_name,
                 "sellerid":sellerid,
