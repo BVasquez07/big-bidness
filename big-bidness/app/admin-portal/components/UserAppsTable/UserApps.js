@@ -7,7 +7,7 @@ import {
     TableRow,
     TableCell,
   } from "@/components/ui/table"
-import { Actions, XAction } from "../utils/Actions";
+import { Actions } from "../utils/Actions";
 import { useState, useEffect } from "react";
 
 export default function UserApps({}) {
@@ -32,6 +32,7 @@ export default function UserApps({}) {
             try {
                 const response = await fetch('http://localhost:8080/approval-list', {
                     headers: {
+                        'Content-Type': 'application/json',
                         'Authorization': `${token}`
                     }
                 });
@@ -49,7 +50,7 @@ export default function UserApps({}) {
     // function to approve a user using endpoint
     const handleApprove = async (username) => {
         try {
-            const response = await fetch('http://localhost:8080/approve-user', {
+            const response = await fetch('http://localhost:8080/approve-user', {  
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -92,7 +93,7 @@ export default function UserApps({}) {
         {loading ? (
           <TableRow>
             <TableCell colSpan={6} className="text-center">
-              Loading...
+                <div className="animate-pulse">Loading...</div>
             </TableCell>
           </TableRow>
         ) : (

@@ -7,17 +7,17 @@ function Actions({ onApprove, onReject }){
             <Button variant="outline" size="icon" className="bg-white-300" onClick={onApprove} >
                 <Check/>
             </Button>
-            <Button variant="outline" size="icon" className="bg-red-400" onClick={onReject}>
+            <Button variant="outline" size="icon" className="bg-red-300" onClick={onReject}>
                 <X/>
             </Button>
         </div>
     );
 }
 
-function XAction({}){
+function XAction({ onSuspend }){
     return(
         <div>
-            <Button variant="outline" size="icon" className="bg-red-300 ">
+            <Button variant="outline" size="icon" className="bg-red-300 " onClick={onSuspend}>
                 <X/>
             </Button>
         </div>
