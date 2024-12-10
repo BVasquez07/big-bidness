@@ -56,7 +56,8 @@ def submittransaction():
             "product_id": product_id,
             "buytime": now,
             "price": price,
-            "rating_posted":False
+            "buyer_rated":False,
+            "seller_rated":False
         }).execute()
         
         logging.info(f"Transaction result: {transaction_query.data}")
