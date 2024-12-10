@@ -7,7 +7,6 @@ import {
     TableRow,
     TableCell,
   } from "@/components/ui/table"
-import TableRowContent from "../utils/TableRowContent";
 import { Actions, XAction } from "../utils/Actions";
 import { useState, useEffect } from "react";
 import { set } from "zod";
@@ -77,7 +76,6 @@ export default function UserApps({}) {
     }
 
 
-    
     return(
         <Table>
             <TableCaption>A list of potential users wanting to do bidness</TableCaption>
@@ -106,8 +104,8 @@ export default function UserApps({}) {
               <TableCell>{item.email}</TableCell>
               <TableCell>{item.question}</TableCell>
               <TableCell>{item.answer}</TableCell>
-              <TableCell>
-              <Actions
+              <TableCell className="w-[100px]">
+                <Actions
                   onApprove={() => handleApprove(item.username)}
                   onReject={() => handleReject(item.username)}
                 />               
