@@ -104,6 +104,17 @@ def getallcomplaint():
     try:
 
         complaints_result = supabase.table("complaints").select("*").execute()
+<<<<<<< Updated upstream
+=======
+        product_id=complaints_result.data[0].get("product_id") 
+        buyerid=complaints_result.data[0].get("buyerid") 
+        sellerid=complaints_result.data[0].get("sellerid") 
+
+        product_name=supabase.table("products").select("productname").eq("product_id",product_id).execute()
+        buyername=supabase.table("users").select("username").eq("userid",buyerid).execute()
+        sellername=supabase.table("users").select("username").eq("userid",sellerid).execute()
+
+>>>>>>> Stashed changes
         if not complaints_result.data or len(complaints_result.data) == 0:
             return jsonify({"complaints": []}), 200
 
