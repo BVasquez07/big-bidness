@@ -157,6 +157,9 @@ def updatebalance():
 def addbalance_route():
     return accountbalance.addbalance()
 
+@app.route("/withdrawbalance", methods=["POST"])
+def withdrawbalance_route():
+    return accountbalance.withdrawbalance()
 @app.route("/getuserbid", methods=["GET"])
 def getuserbid_route():
     return bid.getuserbid()
