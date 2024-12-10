@@ -90,7 +90,7 @@ def register():
             raise Exception("Failed to insert approval entry. No data returned.")
 
 
-        return jsonify({"message": "User signed up successfully and is awaiting approval. Please check email for authorization"}), 200
+        return jsonify({"message": "User signed up successfully and is awaiting approval."}), 200
 
     except Exception as e:
         logging.error(f"Error during signup: {str(e)}")
