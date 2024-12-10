@@ -97,10 +97,12 @@ const BiddingSection = ({ product_id, userInfo, is_available }) => {
                 const newFormattedDate = new Date().toLocaleString();
                 setBids([
                     {
-                        username: `${userInfo.username}`,
+                        username: userInfo.username,
                         date: newFormattedDate,
                         bidAmount: parseInt(bidInput),
                         rating: userInfo.rating,
+                        firstname: userInfo.firstname,
+                        lastname: userInfo.lastname
                     },
                     ...bids,
                 ]);
