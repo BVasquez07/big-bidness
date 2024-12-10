@@ -104,17 +104,21 @@ def getproductbid():
             biddeadline=bid.get("biddeadline")
             bid_accepted=bid.get("bid_accepted")
             product_result=supabase.table("products").select("product_name").eq("product_id", product_id).execute()
-            buyer_result=supabase.table("users").select("username").eq("userid", buyerid).execute()
+            buyer_result=supabase.table("users").select("username","firstname","lastname").eq("userid", buyerid).execute()
             seller_result=supabase.table("users").select("username").eq("userid", sellerid).execute()
 
             product_name=product_result.data[0].get("product_name")
             buyer_name=buyer_result.data[0].get("username")
+            firstname=buyer_result.data[0].get("firstname")
+            lastname=buyer_result.data[0].get("lastname")
             seller_name=seller_result.data[0].get("username")
 
         
             bids.append({
                 "productname": product_name,
                 "buyername": buyer_name,
+                "fisrstname":firstname,
+                "lastname":lastname,
                 "buyerid":buyerid,
                 "sellername": seller_name,
                 "sellerid":sellerid,
@@ -158,18 +162,23 @@ def getuserbid():
             bidamount=bid.get("bidamount")
             biddeadline=bid.get("biddeadline")
             bid_accepted=bid.get("bid_accepted")
+
             product_result=supabase.table("products").select("product_name").eq("product_id", product_id).execute()
-            user_result=supabase.table("users").select("username").eq("userid", userid).execute()
+            user_result=supabase.table("users").select("username","firstname","lastname").eq("userid", userid).execute()
             seller_result=supabase.table("users").select("username").eq("userid", sellerid).execute()
 
             product_name=product_result.data[0].get("product_name")
             username=user_result.data[0].get("username")
+            firstname=user_result.data[0].get("firstname")
+            lastname=user_result.data[0].get("lastname")
             seller_name=seller_result.data[0].get("username")
 
         
             bids.append({
                 "productname": product_name,
                 "username": username,
+                "fisrstname":firstname,
+                "lastname":lastname,
                 "userid":userid,
                 "sellername": seller_name,
                 "sellerid":sellerid,
@@ -178,6 +187,7 @@ def getuserbid():
                 "bid_accepted":bid_accepted
                 
             })
+
 
         return jsonify({"bids": bids}), 200
         
@@ -214,18 +224,23 @@ def getpastbid():
             bidamount=bid.get("bidamount")
             biddeadline=bid.get("biddeadline")
             bid_accepted=bid.get("bid_accepted")
+
             product_result=supabase.table("products").select("product_name").eq("product_id", product_id).execute()
-            user_result=supabase.table("users").select("username").eq("userid", userid).execute()
+            user_result=supabase.table("users").select("username","firstname","lastname").eq("userid", userid).execute()
             seller_result=supabase.table("users").select("username").eq("userid", sellerid).execute()
 
             product_name=product_result.data[0].get("product_name")
             username=user_result.data[0].get("username")
+            firstname=user_result.data[0].get("firstname")
+            lastname=user_result.data[0].get("lastname")
             seller_name=seller_result.data[0].get("username")
 
         
             bids.append({
                 "productname": product_name,
                 "username": username,
+                "fisrstname":firstname,
+                "lastname":lastname,
                 "userid":userid,
                 "sellername": seller_name,
                 "sellerid":sellerid,
