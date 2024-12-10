@@ -4,10 +4,11 @@ import React, { useState, useEffect } from "react";
 import Comments from "@/app/components/Comments";
 import BiddingSection from "@/app/components/BiddingSection";
 
-const ItemPage = () => { 
+const ItemPage = ({ params }) => { 
   const [data, setData] = useState([]);
   const [userInfo, setUserInfo] = useState({});
   const [token, setToken] = useState('');
+  const { id: product_id } = React.use(params);
 
   useEffect(() => {
     setToken(localStorage.getItem('token'));
@@ -44,11 +45,9 @@ const ItemPage = () => {
   }, []);
 
   // Get the item based on the ID (assuming you are fetching the correct item)
-  const item = data.length > 0 ? data[0] : null;
+  const item = data.find((product) => String(product.product_id) === String(product_id));
 
   if (!item) return <div>Item not found</div>;
-  console.log(item)
-  console.log(item.product_id)
 
   return (
     <div className="flex justify-center p-6 px-8">

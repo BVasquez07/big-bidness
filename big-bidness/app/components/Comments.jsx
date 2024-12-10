@@ -1,7 +1,7 @@
 'use client';
 import React, { useState, useEffect } from 'react';
 
-const Comment = ({ username, date, text }) => (
+const Comment = ({ username, formattedDate, text }) => (
   <article className="p-6 text-base bg-white rounded-lg dark:bg-gray-900 border border-gray-300 mb-0">
     <footer className="flex justify-between items-center mb-2">
       <div className="flex items-center">
@@ -9,8 +9,8 @@ const Comment = ({ username, date, text }) => (
           {username}
         </p>
         <p className="text-sm text-gray-600 dark:text-gray-400">
-          <time pubdate="true" dateTime={date} title={date}>
-            {new Date(date).toLocaleDateString()}
+          <time pubdate="true" dateTime={formattedDate} title={formattedDate}>
+            {formattedDate}
           </time>
         </p>
       </div>
@@ -38,8 +38,18 @@ const Comments = ({ product_id, userInfo }) => {
         },
       });
       const data = await response.json();
-      console.log(data);
-      setComments(data.comment || []); // Ensure it's always an array
+
+      // Format the date for each comment and store it
+      const formattedComments = data.comment.map(comment => {
+        const readableDate = new Date(comment.created_at).toLocaleString(); // Format date
+        console.log('Formatted Date:', readableDate); // Log the formatted date for debugging
+        return {
+          ...comment,
+          formattedDate: readableDate, // Add the formatted date to the comment object
+        };
+      });
+
+      setComments(formattedComments || []); // Ensure it's always an array
     };
 
     if (product_id) {
@@ -66,14 +76,12 @@ const Comments = ({ product_id, userInfo }) => {
       const data = await response.json();
 
       if (data.message === 'comment posted successfully') {
-        setComments([
-          {
-            username: `${userInfo.firstname} ${userInfo.lastname}`,
-            date: new Date().toISOString(),
-            text: commentText,
-          },
-          ...comments,
-        ]);
+        const newFormattedDate = new Date().toLocaleString();
+        setComments([{
+          username: `${userInfo.firstname} ${userInfo.lastname}`,
+          formattedDate: newFormattedDate,
+          text: commentText,
+        }, ...comments]);
         setCommentText('');
       } else {
         console.error('Error posting comment:', data.error);
@@ -95,7 +103,12 @@ const Comments = ({ product_id, userInfo }) => {
             <p>No comments yet.</p>
           ) : (
             comments.map((comment, index) => (
-              <Comment key={index} username={comment.username} date={comment.date} text={comment.text} />
+              <Comment
+                key={index}
+                username={comment.username}
+                formattedDate={comment.formattedDate} // Pass formatted date directly
+                text={comment.text}
+              />
             ))
           )}
         </div>
