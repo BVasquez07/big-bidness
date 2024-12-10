@@ -13,28 +13,27 @@ const BiddingSection = ({ product_id, userInfo, is_available }) => {
   }, []);
 
   useEffect(() => {
-    // Fetch existing bids when component mounts
     const fetchBids = async () => {
       try {
-        const response = await fetch(`http://localhost:5000/getallbids?product_id=${product_id}`);
+        const response = await fetch(`http://localhost:5000/get-product-bid?product_id=${product_id}`);
         const data = await response.json();
-        console.log(data.products);
   
-        // Check if the fetched data contains bids and is an array
-        if (Array.isArray(data.products) && data.products.length > 0) {
-          // Format the bids as needed (e.g., format dates or process data)
-          const formattedBids = data.products.map(bid => {
-            // Use biddeadline for the formatted date
-            const readableDate = new Date(bid.biddeadline).toLocaleString();  // Format the date
-            return {
-              ...bid,
-              formattedDate: readableDate,  // Add formatted date
-            };
-          });
-          console.log(formattedBids);
-          setBids(formattedBids); // Update state with formatted bids
+        if (data.bids && Array.isArray(data.bids)) {
+          // Map backend data to the frontend format
+          const formattedBids = data.bids.map(bid => ({
+            username: bid.buyername, // Map 'buyername' to 'username'
+            date: new Date(bid.biddeadline).toLocaleString(), // Format the deadline
+            bidAmount: bid.bidamount, // Use 'bidamount' directly
+            bidDeadline: bid.biddeadline,
+            bidaccepted: bid.bid_accepted,
+            firstname: bid.fisrstname,
+            lastname: bid.lastname,
+            rating: bid.rating || "No Rating", // Use userInfo if available
+          }));
+          console.log(formattedBids); // Log for debugging
+          setBids(formattedBids); // Update the bids state
         } else {
-          setBids([]); // If no bids, set an empty array
+          setBids([]); // If no bids, clear the state
         }
       } catch (error) {
         console.error("Error fetching bids:", error);
@@ -42,9 +41,7 @@ const BiddingSection = ({ product_id, userInfo, is_available }) => {
     };
   
     fetchBids();
-  }, [product_id]);
-  
-  
+  }, [product_id, userInfo]); // Explicitly include all dependencies  
 
   const openDialog = () => setIsDialogOpen(true);
   const closeDialog = () => setIsDialogOpen(false);
@@ -128,8 +125,8 @@ const BiddingSection = ({ product_id, userInfo, is_available }) => {
         {sortedBids.map((bid, index) => (
           <div key={index}>
             {/* Display bid details here */}
-            <div>{bid.username} - ${bid.bidamount}</div>
-            <div>{new Date(bid.formattedDate).toLocaleString()}</div>
+            <div>{bid.firstname} {bid.lastname} ({bid.username}) - ${bid.bidAmount}</div>
+            <div>{new Date(bid.date).toLocaleString()}</div>
           </div>
         ))}
       </div>
