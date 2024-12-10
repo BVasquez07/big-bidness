@@ -62,11 +62,30 @@ def issuspended(userid,suspension_query,now):
 
 def getsuspended():
     try:
-        suspended=supabase.table("user_suspensions").select("*").eq("is_suspended",True).execute()
-        if suspended.data:
-            return jsonify({"Suspended": suspended.data}), 200
-        else:
-            return jsonify({"Suspended": []}), 200
+        suspended_result=supabase.table("user_suspensions").select("*").eq("is_suspended",True).execute()
+
+        suspended= []
+        for sus in suspended_result.data:
+            userid=sus.get("userid")
+            suspensionid=sus.get("suspensionid")
+            suspended_at=sus.get("suspended_at")
+            is_suspended=sus.get("is_suspended")
+
+        
+            user_result=supabase.table("users").select("username").eq("userid", userid).execute()
+
+            username=user_result.data[0].get("username")
+            suspended.append({
+                "userid":userid,
+                "username": username,
+                "suspensionid":suspensionid,
+                "suspended_at":suspended_at,
+                "is_suspended":is_suspended
+            })
+        if not suspended or len(suspended) == 0:
+            return jsonify({"suspended": []}), 200
+
+        return jsonify({"suspendded": suspended}), 200
 
     except Exception as e:
         logging.error(f"Error fetching suspended: {str(e)}")
