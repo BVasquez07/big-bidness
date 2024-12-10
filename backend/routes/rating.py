@@ -13,6 +13,7 @@ def rating():
         query=request.json
         rating=query.get("rating")
         username=query.get("username")
+        buyid=query.get("buyid")
 
         if rating is None:
             return jsonify({"error": "Rating is required"}), 400
@@ -34,14 +35,20 @@ def rating():
         #needs to check who is rating it 
         ratedby= user_query.data[0]["userid"]
 
-        valid_transaction=supabase.table("transactions").select("buyerid", "sellerid").eq("buyerid", ratedby).eq("sellerid", userid).execute()
+        valid_transaction=supabase.table("transactions").select("*").eq("buyerid", ratedby).eq("buyid", buyid).execute()
         if not valid_transaction.data or len(valid_transaction.data) == 0:
             # Check if the seller can rate the buyer (reverse case)
-            valid_transaction=supabase.table("transactions").select("buyerid", "sellerid").eq("buyerid", userid).eq("sellerid", ratedby).execute()
+            valid_transaction=supabase.table("transactions").select("*").eq("sellerid", ratedby).eq("buyid", buyid).execute()
             if not valid_transaction.data or len(valid_transaction.data) == 0:
                 return jsonify({"error": "No valid transaction found for this rating"}), 400
-            user_id = valid_transaction.data[0]["sellerid"]
-            buyer_id = valid_transaction.data[0]["buyerid"]
+            update_rate_bool = supabase.table("transactions").update({"seller_rated": True}).eq("buyid", buyid).execute()
+            if not update_rate_bool.data or len(update_rate_bool.data) == 0:
+                return jsonify({"error": "Failed to insert suspension for this user"}), 500
+        else:
+            update_rate_bool = supabase.table("transactions").update({"buyer_rated": True}).eq("buyid", buyid).execute()
+            if not update_rate_bool.data or len(update_rate_bool.data) == 0:
+                return jsonify({"error": "Failed to insert suspension for this user"}), 500
+
         #inserts in rating table
         rating_result=supabase.table("ratings").insert({
             "userid": userid, 
@@ -70,13 +77,9 @@ def rating():
             return jsonify({"message": "The user has been deleted due to too many suspension from bad ratings"}), 201
 
             
-        product_query=supabase.table("transactions").select("product_id").eq("sellerid",user_id).eq("buyerid",buyer_id).execute()
+        product_query=supabase.table("transactions").select("product_id").eq("buyid",buyid).execute()
         product_id=product_query.data[0]["product_id"]
        
-        update_rate_bool = supabase.table("transactions").update({"rating_posted": True}).eq("product_id", product_id).execute()
-        if not update_rate_bool.data or len(update_rate_bool.data) == 0:
-            return jsonify({"error": "Failed to insert suspension for this user"}), 500
-
 
         #updates usertable
         total_ratings_query = supabase.table("ratings").select("*").eq("userid", userid).execute()
