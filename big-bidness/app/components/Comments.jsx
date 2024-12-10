@@ -1,93 +1,127 @@
-'use client';
-import React, { useState } from 'react';
+'use client'; 
+import React, { useState, useEffect } from 'react';
 
-const Comment = ({ username, date, avatar, text }) => (
-  <article className="p-6 text-base bg-white rounded-lg dark:bg-gray-900 border border-gray-300 mb-4">
+const Comment = ({ username, formattedDate, text }) => (
+  <article className="p-6 text-base bg-white rounded-lg dark:bg-gray-900 border border-gray-300 mb-0">
     <footer className="flex justify-between items-center mb-2">
       <div className="flex items-center">
         <p className="inline-flex items-center mr-3 text-sm text-gray-900 dark:text-white font-semibold">
-          <img className="mr-2 w-6 h-6 rounded-full" src={avatar} alt={username} />
           {username}
         </p>
         <p className="text-sm text-gray-600 dark:text-gray-400">
-          <time pubdate datetime={date} title={date}>
-            {new Date(date).toLocaleDateString()}
+          <time pubdate="true" dateTime={formattedDate} title={formattedDate}>
+            {formattedDate}
           </time>
         </p>
       </div>
-      <button
-        id={`dropdownCommentButton`}
-        data-dropdown-toggle={`dropdownComment`}
-        className="inline-flex items-center p-2 text-sm font-medium text-center text-gray-500 dark:text-gray-400 bg-white rounded-lg hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-gray-50 dark:bg-gray-900 dark:hover:bg-gray-700 dark:focus:ring-gray-600"
-        type="button"
-      >
-        <svg className="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 3">
-          <path d="M2 0a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3Zm6.041 0a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM14 0a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3Z" />
-        </svg>
-        <span className="sr-only">Comment settings</span>
-      </button>
     </footer>
     <p className="text-gray-500 dark:text-gray-400">{text}</p>
-    <div className="flex items-center mt-4 space-x-4">
-      <button type="button" className="flex items-center text-sm text-gray-500 hover:underline dark:text-gray-400 font-medium">
-        <svg className="mr-1.5 w-3.5 h-3.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 18">
-          <path
-            stroke="currentColor"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth="2"
-            d="M5 5h5M5 8h2m6-3h2m-5 3h6m2-7H2a1 1 0 0 0-1 1v9a1 1 0 0 0 1 1h3v5l5-5h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1Z"
-          />
-        </svg>
-        Reply
-      </button>
-    </div>
   </article>
 );
 
-const Comments = () => {
+const Comments = ({ product_id, userInfo }) => {
   const [commentText, setCommentText] = useState('');
+  const [comments, setComments] = useState([]);
+  const [token, setToken] = useState('');
 
-  const handlePostComment = (e) => {
+  useEffect(() => {
+    setToken(localStorage.getItem('token'));
+  }, []);
+
+  useEffect(() => {
+    const fetchComments = async () => {
+      try {
+        const response = await fetch(`http://localhost:5000/get-proudct-comment?product_id=${product_id}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': token,
+          },
+        });
+        const data = await response.json();
+
+        // Check if data.comment is an array and contains data
+        if (Array.isArray(data.comment) && data.comment.length > 0) {
+          const formattedComments = data.comment.map(comment => {
+            const readableDate = new Date(comment.created_at).toLocaleString();
+            return {
+              ...comment,
+              formattedDate: readableDate,
+            };
+          });
+          setComments(formattedComments);
+        } else {
+          setComments([]); // If no comments, set an empty array
+        }
+      } catch (err) {
+        console.error("Error fetching comments:", err);
+      }
+    };
+
+    if (product_id && token) {
+      fetchComments();
+    }
+  }, [product_id, token]);
+
+  const handlePostComment = async (e) => {
     e.preventDefault();
-    console.log('Posted comment:', commentText);
-    setCommentText('');
+    const newComment = {
+      text: commentText,
+      product_id: product_id,
+    };
+
+    try {
+      const response = await fetch('http://localhost:5000/postcomment', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': token,
+        },
+        body: JSON.stringify(newComment),
+      });
+      const data = await response.json();
+
+      if (data.message === 'comment posted successfully') {
+        const newFormattedDate = new Date().toLocaleString();
+        setComments([{
+          username: `${userInfo.username}`,
+          formattedDate: newFormattedDate,
+          text: commentText,
+        }, ...comments]);
+        setCommentText('');
+      } else {
+        console.error('Error posting comment:', data.error);
+      }
+    } catch (err) {
+      console.error('Error:', err);
+    }
   };
 
   return (
-    <section className="bg-white dark:bg-gray-900 py-8 lg:py-16 antialiased">
-    <div className="max-w-7xl mx-auto">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-lg lg:text-2xl font-bold text-gray-900 dark:text-white">Comments</h2>
-      </div>
+    <section className="bg-white dark:bg-gray-900 py-4 lg:py-0 antialiased">
+      <div className="max-w-7xl mx-auto">
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Comments</h2>
+        </div>
 
-        {/* Example of existing comments */}
         <div className="mb-6">
-          <Comment
-            username="Michael Gough"
-            date="2022-02-08"
-            avatar="https://flowbite.com/docs/images/people/profile-picture-2.jpg"
-            text="Very straight-to-point article. Really worth time reading. Thank you! But tools are just the instruments for the UX designers. The knowledge of the design tools are as important as the creation of the design strategy."
-          />
-          <Comment
-            username="Jese Leos"
-            date="2022-02-12"
-            avatar="https://flowbite.com/docs/images/people/profile-picture-5.jpg"
-            text="Much appreciated! Glad you liked it ☺️"
-          />
-          <Comment
-            username="Bonnie Green"
-            date="2022-03-12"
-            avatar="https://flowbite.com/docs/images/people/profile-picture-3.jpg"
-            text="Great insights! Keep sharing. Thanks for the article."
-          />
+          {comments.length === 0 ? (
+            <p>No comments yet.</p>
+          ) : (
+            // Reverse the comments array here to display newest on top
+            [...comments].reverse().map((comment, index) => (
+              <Comment
+                key={index}
+                username={comment.username}
+                formattedDate={comment.formattedDate}
+                text={comment.text}
+              />
+            ))
+          )}
         </div>
 
         <form className="mb-6" onSubmit={handlePostComment}>
           <div className="py-2 px-4 mb-4 bg-white rounded-lg rounded-t-lg border border-gray-200 dark:bg-gray-800 dark:border-gray-700">
-            <label htmlFor="comment" className="sr-only">
-              Your comment
-            </label>
             <textarea
               id="comment"
               rows="6"
