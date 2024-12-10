@@ -28,9 +28,9 @@ const BiddingSection = ({ product_id, userInfo, is_available }) => {
             bidaccepted: bid.bid_accepted,
             firstname: bid.fisrstname,
             lastname: bid.lastname,
-            rating: bid.rating || "No Rating", // Use userInfo if available
+            rating: bid.rating, // Use userInfo if available
           }));
-          console.log(formattedBids); // Log for debugging
+          // console.log(formattedBids); 
           setBids(formattedBids); // Update the bids state
         } else {
           setBids([]); // If no bids, clear the state
@@ -41,7 +41,7 @@ const BiddingSection = ({ product_id, userInfo, is_available }) => {
     };
   
     fetchBids();
-  }, [product_id, userInfo]); // Explicitly include all dependencies  
+  }, [product_id]); // Explicitly include all dependencies  
 
   const openDialog = () => setIsDialogOpen(true);
   const closeDialog = () => setIsDialogOpen(false);
@@ -52,69 +52,87 @@ const BiddingSection = ({ product_id, userInfo, is_available }) => {
 
   const handleSubmitBid = async () => {
     if (!is_available) {
-      alert("This item is no longer available for bidding.");
-      return; // Stop execution if the item is unavailable
+        alert("This item is no longer available for bidding.");
+        return; // Stop execution if the item is unavailable
     }
     
     const highestBid = bids.length > 0 ? Math.max(...bids.map(bid => bid.bidAmount)) : 0;
     if (bidInput <= highestBid) {
-      alert(`Your bid must be higher than the current highest bid of $${highestBid}.`);
+        alert(`Your bid must be higher than the current highest bid of $${highestBid}.`);
     } else if (bidInput > 0) {
-      const newBid = {
-        product_id: product_id,
-        bidamount: bidInput,
-        biddeadline: new Date().toISOString(),
-      };
-      
-      // Format the biddeadline as "%Y-%m-%d %H:%M:%S"
-      const formattedBidDeadline = new Date().toISOString().replace('T', ' ').slice(0, 19);
-  
-      // Update newBid with the formatted date
-      newBid.biddeadline = formattedBidDeadline;
-  
-      try {
-        const response = await fetch('http://localhost:5000/postbid', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': token,
-          },
-          body: JSON.stringify(newBid),
-        });
-  
-        const data = await response.json();
-        console.log('Response Data:', data); // Log the entire response data
-  
-        if (data.message === 'Bid posted successfully') {
-          alert(`Bid of $${bidInput} posted successfully!`);
-  
-          // Directly update the bids state with the new bid
-          const newFormattedDate = new Date().toLocaleString();
-          setBids([
-            {
-              username: `${userInfo.username}`,
-              date: newFormattedDate,
-              bidAmount: parseInt(bidInput),
-              rating: userInfo.rating,
-            },
-            ...bids,
-          ]);
-  
-          closeDialog();
-        } else {
-          console.error('Error placing bid:', data.error || 'Unknown error'); // Log a more detailed error message
+        const fullName = `${userInfo.firstname} ${userInfo.lastname} (${userInfo.username})`;  // Create the formatted name
+        const bidderRating = userInfo.rating;  // Get bidder's rating
+
+        const newBid = {
+            product_id: product_id,
+            bidamount: bidInput,
+            biddeadline: new Date().toISOString(),
+            bidderName: fullName,  // Include formatted full name in the bid object
+            bidderRating: bidderRating,  // Include bidder's rating in the bid object
+        };
+        
+        // Format the biddeadline as "%Y-%m-%d %H:%M:%S"
+        const formattedBidDeadline = new Date().toISOString().replace('T', ' ').slice(0, 19);
+    
+        // Update newBid with the formatted date
+        newBid.biddeadline = formattedBidDeadline;
+    
+        try {
+            const response = await fetch('http://localhost:5000/postbid', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': token,
+                },
+                body: JSON.stringify(newBid),
+            });
+    
+            const data = await response.json();
+            console.log('Response Data:', data); // Log the entire response data
+    
+            if (data.message === 'Bid posted successfully') {
+                alert(`Bid of $${bidInput} posted successfully!`);
+    
+                // Directly update the bids state with the new bid
+                const newFormattedDate = new Date().toLocaleString();
+                setBids([
+                    {
+                        username: `${userInfo.username}`,
+                        date: newFormattedDate,
+                        bidAmount: parseInt(bidInput),
+                        rating: userInfo.rating,
+                    },
+                    ...bids,
+                ]);
+    
+                closeDialog();
+            } else {
+                console.error('Error placing bid:', data.error || 'Unknown error'); // Log a more detailed error message
+            }
+        } catch (error) {
+            console.error('Error during fetch:', error);
         }
-      } catch (error) {
-        console.error('Error during fetch:', error);
-      }
     } else {
-      alert("Please enter a valid bid amount.");
+        alert("Please enter a valid bid amount.");
     }
-  };  
+  }; 
 
   // Sort bids by bidAmount in descending order, but only if there are bids
   const sortedBids = bids ? bids.sort((a, b) => b.bidAmount - a.bidAmount) : [];
   console.log(sortedBids)
+
+  // Function to render the star rating based on the bid rating
+  const renderStars = (rating) => {
+    const stars = [];
+    for (let i = 0; i < 5; i++) {
+      stars.push(
+        <svg key={i} className={`w-4 h-4 ${i < rating ? 'text-yellow-300' : 'text-gray-300'}`} aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 22 20">
+          <path d="M20.924 7.625a1.523 1.523 0 0 0-1.238-1.044l-5.051-.734-2.259-4.577a1.534 1.534 0 0 0-2.752 0L7.365 5.847l-5.051.734A1.535 1.535 0 0 0 1.463 9.2l3.656 3.563-.863 5.031a1.532 1.532 0 0 0 2.226 1.616L11 17.033l4.518 2.375a1.534 1.534 0 0 0 2.226-1.617l-.863-5.03L20.537 9.2a1.523 1.523 0 0 0 .387-1.575Z" />
+        </svg>
+      );
+    }
+    return stars;
+  };
 
   return (
     <section className="bg-white dark:bg-gray-900 relative border border-gray-300 rounded-md shadow-md h-[555px] flex flex-col">
@@ -123,10 +141,25 @@ const BiddingSection = ({ product_id, userInfo, is_available }) => {
       </h2>
       <div className="overflow-y-auto flex-grow p-0">
         {sortedBids.map((bid, index) => (
-          <div key={index}>
-            {/* Display bid details here */}
-            <div>{bid.firstname} {bid.lastname} ({bid.username}) - ${bid.bidAmount}</div>
-            <div>{new Date(bid.date).toLocaleString()}</div>
+          <div
+            key={index}
+            className="border p-2 mb-0 flex justify-between items-center"
+          >
+            {/* Left side: Name and Rating */}
+            <div className="flex flex-col items-start">
+              <div className="font-semibold">{bid.firstname} {bid.lastname} ({bid.username})</div>
+              <div className="flex items-center">
+                {renderStars(bid.rating)} {/* Display star rating */}
+              </div>
+            </div>
+
+            {/* Right side: Price and Date */}
+            <div className="flex flex-col items-end">
+              <div className="font-bold">${bid.bidAmount}</div>
+              <div className="text-sm text-gray-500">
+                {new Date(bid.date).toLocaleString()}
+              </div>
+            </div>
           </div>
         ))}
       </div>
