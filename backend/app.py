@@ -144,6 +144,11 @@ def addbalance_route():
 @app.route("/getuserbid", methods=["GET"])
 def getuserbid_route():
     return bid.getuserbid()
+
+@app.route('/getuserbidproduct', methods=["GET"])
+def getuserbidproduct_route():
+    return bid.getuserbidproduct()
+
 @app.route("/getallbids", methods=["GET"])
 def getallbid_route():
     return bid.getallbids()

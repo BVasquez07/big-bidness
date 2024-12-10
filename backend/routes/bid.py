@@ -116,7 +116,7 @@ def getuserbid():
             supabase.table("bids")
             .select("*")
             .eq("userid", userid)
-            .gte("biddeadline", now.strftime('%Y-%m-%d %H:%M:%S'))  #
+            .gte("biddeadline", now.strftime('%Y-%m-%d %H:%M:%S'))  
             .execute()
         )
 
@@ -127,6 +127,40 @@ def getuserbid():
 
     except Exception as e:
         logging.error(f"Error fetching bids: {str(e)}")
+        return jsonify({"error": str(e)}), 500
+    
+def getuserbidproduct():
+    try:
+        email = access_token()
+        user_query = supabase.table("users").select("userid").eq("email", email).execute()
+        if not user_query.data:
+            return jsonify({"error": "User not found"}), 404
+        
+        userid = user_query.data[0]["userid"]
+        now = datetime.now()
+
+        bid_result = (
+            supabase.table("bids")
+            .select("*")
+            .eq("userid", userid)
+            .gte("biddeadline", now.strftime('%Y-%m-%d %H:%M:%S'))
+            .execute()
+        )
+
+        if not bid_result.data:
+            return jsonify({"bids": []}), 200
+
+        bids_with_products = []
+        for bid in bid_result.data:
+            product_query = supabase.table("products").select("*").eq("product_id", bid["product_id"]).execute()
+            if product_query.data:
+                bid_info = {**bid, "product_details": product_query.data[0]}
+                bids_with_products.append(bid_info)
+
+        return jsonify({"bids": bids_with_products}), 200
+
+    except Exception as e:
+        logging.error(f"Error fetching bids with products: {str(e)}")
         return jsonify({"error": str(e)}), 500
 
 def getpastbid():
