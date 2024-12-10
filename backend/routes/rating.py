@@ -33,9 +33,15 @@ def rating():
         
         #needs to check who is rating it 
         ratedby= user_query.data[0]["userid"]
-        valid_transaction = supabase.table("transactions").select("buyerid").eq("buyerid", ratedby).eq("sellerid", userid).execute()
+
+        valid_transaction=supabase.table("transactions").select("buyerid", "sellerid").eq("buyerid", ratedby).eq("sellerid", userid).execute()
         if not valid_transaction.data or len(valid_transaction.data) == 0:
-            return jsonify({"error": "No valid transaction found for this rating"}), 400
+            # Check if the seller can rate the buyer (reverse case)
+            valid_transaction=supabase.table("transactions").select("buyerid", "sellerid").eq("buyerid", userid).eq("sellerid", ratedby).execute()
+            if not valid_transaction.data or len(valid_transaction.data) == 0:
+                return jsonify({"error": "No valid transaction found for this rating"}), 400
+            user_id = valid_transaction.data[0]["sellerid"]
+            buyer_id = valid_transaction.data[0]["buyerid"]
         #inserts in rating table
         rating_result=supabase.table("ratings").insert({
             "userid": userid, 
@@ -64,7 +70,7 @@ def rating():
             return jsonify({"message": "The user has been deleted due to too many suspension from bad ratings"}), 201
 
             
-        product_query=supabase.table("transactions").select("product_id").eq("sellerid",userid).eq("buyerid",ratedby).execute()
+        product_query=supabase.table("transactions").select("product_id").eq("sellerid",user_id).eq("buyerid",buyer_id).execute()
         product_id=product_query.data[0]["product_id"]
        
         update_rate_bool = supabase.table("transactions").update({"rating_posted": True}).eq("product_id", product_id).execute()
