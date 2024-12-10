@@ -1,7 +1,5 @@
 from config import supabase
-from flask import Flask, abort, jsonify, request
-from flask_cors import CORS
-import os
+from flask import jsonify, request
 import logging
 from datetime import datetime
 from routes.auth import access_token
@@ -58,7 +56,8 @@ def submittransaction():
             "product_id": product_id,
             "buytime": now,
             "price": price,
-            "rating_posted":False
+            "buyer_rated":False,
+            "seller_rated":False
         }).execute()
         
         logging.info(f"Transaction result: {transaction_query.data}")
@@ -68,7 +67,7 @@ def submittransaction():
         if not update_post:
             return jsonify({"error": "Product is not available for purchase"}), 403
         
-        update_balance=updatebalance(price)
+        update_balance=updatebalance(price,sellerid)
         if not update_balance:
             return jsonify({"error": "Inussficent balance"}), 403
 

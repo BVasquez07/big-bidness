@@ -1,22 +1,41 @@
 'use client'
-import React from 'react'
-import { useState } from 'react';
-import { Star } from 'lucide-react'
+import React, { use } from 'react'
+import { useState, useEffect } from 'react';
+import { Cone, Star } from 'lucide-react'
 import { Input } from "../../components/ui/input"
 import { Button } from "../../components/ui/button"
 import { Verify } from './verify'
 
 
-const UserInfo = {
-        name: 'John Doe',
-        rating: 5,
-        role: 'User',
-        balance: 1000
-    }
-
 export default function settings() {
-    const [balance, setBalance] = useState(UserInfo.balance)
+    const [UserInfo, setUserInfo] = useState({})
     const [change, setChange] = useState(0)
+    const [balance, setBalance] = useState(0)
+    const [token, setToken] = useState('')
+
+    useEffect(() => {
+        setToken(localStorage.getItem('token'));
+    }, []);
+
+    useEffect(() => {
+        const getUserInfo = async () => {
+            const userinfo = await fetch('http://localhost:5000/personalinfo', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `${token}`
+                }
+            })
+            const data = await userinfo.json()
+            setUserInfo(data['user'])
+            setBalance(data['user']['accountbalance'])
+            console.log(data['user'])
+        }
+        if (token) {
+            console.log({'token': token})
+            getUserInfo()
+        }
+    }, [token]);
 
     const submitWithdraw = () => {
         if (balance - change < 0) {
@@ -24,10 +43,36 @@ export default function settings() {
             return
         }
         setBalance(parseInt(balance) - parseInt(change))
+        fetch('http://localhost:8080/updatebalance', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `${token}`
+            },
+            body: JSON.stringify({'newPrice': parseInt(balance) - parseInt(change)})
+        }).then(res => res.json())
+        .then(data => {
+            console.log(data)
+        }).catch(err => {
+            console.log(err)
+        })
     }
 
     const submitDeposit = () => {
         setBalance(parseInt(balance) + parseInt(change))
+        fetch('http://localhost:8080/updatebalance', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `${token}`
+            },
+            body: JSON.stringify({'newPrice': parseInt(balance) + parseInt(change)})
+        }).then(res => res.json())
+        .then(data => {
+            console.log(data)
+        }).catch(err => {
+            console.log(err)
+        });
     }
 
   return (
@@ -40,7 +85,7 @@ export default function settings() {
         <div className='px-8 space-y-6'>  
             <div className='border shadow rounded-md px-9 py-6'>
                 <h1 className='pb-2 font-semibold text-xl'>Profile Information</h1>
-                <h2><div className="font-semibold inline-block">Name:</div> {UserInfo.name}</h2>
+                <h2><div className="font-semibold inline-block">Name:</div> {UserInfo.firstname + ' ' + UserInfo.lastname}</h2>
                 <div>
                     <div className="font-semibold pr-2 inline-block">Rating:</div>
                     {[1, 2, 3, 4, 5].map((star) => (

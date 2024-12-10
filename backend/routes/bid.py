@@ -1,10 +1,6 @@
-from flask import jsonify
 from config import supabase
 import logging
-from flask import Flask, abort, jsonify, request
-from flask_cors import CORS
-import os
-import logging
+from flask import jsonify, request
 from datetime import datetime
 from routes.auth import access_token
 from routes.product import update_product_post
@@ -62,7 +58,21 @@ def postbid():
         logging.error(f"Error posting bid: {str(e)}")
         return jsonify({"error": str(e)}), 500
 
+def getallbids():
+    try:
+       
 
+        now=datetime.now()
+        bid=supabase.table("bids").select("*").gte("biddeadline", now.strftime('%Y-%m-%d %H:%M:%S')).execute()
+       
+        if bid.data:
+            return jsonify({"products": bid.data}), 200
+        else:
+            return jsonify({"products": []}), 200
+
+    except Exception as e:
+        logging.error(f"Error fetching products: {str(e)}")
+        return jsonify({"error": str(e)}), 500
 
 
 #get all the bid that are not expired
@@ -79,14 +89,48 @@ def getproductbid():
             supabase.table("bids")
             .select("*")
             .eq("product_id", product_id)
-            .gte("biddeadline", now.strftime('%Y-%m-%d %H:%M:%S'))  #
+            .gte("biddeadline", now.strftime('%Y-%m-%d %H:%M:%S'))  
             .execute()
         )
 
         if not bid_result.data or len(bid_result.data) == 0:
             return jsonify({"bids": []}), 200
+        bids= []
+        for bid in bid_result.data:
+            product_id=bid.get("product_id")
+            buyerid=bid.get("userid")
+            sellerid=bid.get("sellerid")
+            bidamount=bid.get("bidamount")
+            biddeadline=bid.get("biddeadline")
+            bid_accepted=bid.get("bid_accepted")
+            product_result=supabase.table("products").select("product_name").eq("product_id", product_id).execute()
+            buyer_result=supabase.table("users").select("username","firstname","lastname","rating").eq("userid", buyerid).execute()
+            seller_result=supabase.table("users").select("username").eq("userid", sellerid).execute()
+
+            product_name=product_result.data[0].get("product_name")
+            buyer_name=buyer_result.data[0].get("username")
+            firstname=buyer_result.data[0].get("firstname")
+            lastname=buyer_result.data[0].get("lastname")
+            buyer_rating=buyer_result.data[0].get("rating")
+            seller_name=seller_result.data[0].get("username")
+
         
-        return jsonify({"bids": bid_result.data}), 200
+            bids.append({
+                "productname": product_name,
+                "buyername": buyer_name,
+                "fisrstname":firstname,
+                "lastname":lastname,
+                "buyer_rating":buyer_rating,
+                "buyerid":buyerid,
+                "sellername": seller_name,
+                "sellerid":sellerid,
+                "bidamount": bidamount,
+                "biddeadline":biddeadline,
+                "bid_accepted":bid_accepted
+                
+            })
+
+        return jsonify({"bids": bids}), 200
 
     except Exception as e:
         logging.error(f"Error fetching bids: {str(e)}")
@@ -113,7 +157,42 @@ def getuserbid():
         if not bid_result.data or len(bid_result.data) == 0:
             return jsonify({"bids": []}), 200
         
-        return jsonify({"bids": bid_result.data}), 200
+        bids= []
+        for bid in bid_result.data:
+            product_id=bid.get("product_id")
+            sellerid=bid.get("sellerid")
+            bidamount=bid.get("bidamount")
+            biddeadline=bid.get("biddeadline")
+            bid_accepted=bid.get("bid_accepted")
+
+            product_result=supabase.table("products").select("product_name").eq("product_id", product_id).execute()
+            user_result=supabase.table("users").select("username","firstname","lastname").eq("userid", userid).execute()
+            seller_result=supabase.table("users").select("username").eq("userid", sellerid).execute()
+
+            product_name=product_result.data[0].get("product_name")
+            username=user_result.data[0].get("username")
+            firstname=user_result.data[0].get("firstname")
+            lastname=user_result.data[0].get("lastname")
+            seller_name=seller_result.data[0].get("username")
+
+        
+            bids.append({
+                "productname": product_name,
+                "username": username,
+                "fisrstname":firstname,
+                "lastname":lastname,
+                "userid":userid,
+                "sellername": seller_name,
+                "sellerid":sellerid,
+                "bidamount": bidamount,
+                "biddeadline":biddeadline,
+                "bid_accepted":bid_accepted
+                
+            })
+
+
+        return jsonify({"bids": bids}), 200
+        
 
     except Exception as e:
         logging.error(f"Error fetching bids: {str(e)}")
@@ -140,7 +219,41 @@ def getpastbid():
         if not bid_result.data or len(bid_result.data) == 0:
             return jsonify({"bids": []}), 200
         
-        return jsonify({"bids": bid_result.data}), 200
+        bids= []
+        for bid in bid_result.data:
+            product_id=bid.get("product_id")
+            sellerid=bid.get("sellerid")
+            bidamount=bid.get("bidamount")
+            biddeadline=bid.get("biddeadline")
+            bid_accepted=bid.get("bid_accepted")
+
+            product_result=supabase.table("products").select("product_name").eq("product_id", product_id).execute()
+            user_result=supabase.table("users").select("username","firstname","lastname").eq("userid", userid).execute()
+            seller_result=supabase.table("users").select("username").eq("userid", sellerid).execute()
+
+            product_name=product_result.data[0].get("product_name")
+            username=user_result.data[0].get("username")
+            firstname=user_result.data[0].get("firstname")
+            lastname=user_result.data[0].get("lastname")
+            seller_name=seller_result.data[0].get("username")
+
+        
+            bids.append({
+                "productname": product_name,
+                "username": username,
+                "fisrstname":firstname,
+                "lastname":lastname,
+                "userid":userid,
+                "sellername": seller_name,
+                "sellerid":sellerid,
+                "bidamount": bidamount,
+                "biddeadline":biddeadline,
+                "bid_accepted":bid_accepted
+                
+            })
+
+        return jsonify({"bids": bids}), 200
+        
 
     except Exception as e:
         logging.error(f"Error fetching bids: {str(e)}")
@@ -223,13 +336,13 @@ def acceptbid():
         if not update_product:
             return jsonify({"error": "did not update product"}), 404
         
-        update_balance=updatebalance(price)
+        update_balance=updatebalance(price,sellerid)
         if not update_balance:
             return jsonify({"error": "Inussficent balance"}), 403
 
         return jsonify({"message": "Transaction posted successfully"}), 201
         
-        return jsonify({"message": "Bid accepted successfully"}),200
+
         
 
 

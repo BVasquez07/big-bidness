@@ -1,14 +1,10 @@
-from flask import jsonify
 from config import supabase
 import logging
-from flask import Flask, abort, jsonify, request
-from flask_cors import CORS
-import os
-import logging
+from flask import jsonify, request
 from datetime import datetime
-from routes.suspened import issuspended
+from backend.routes.suspended import issuspended
 from routes.auth import access_token
-
+from datetime import datetime, date
 
 
 
@@ -17,6 +13,7 @@ def rating():
         query=request.json
         rating=query.get("rating")
         username=query.get("username")
+        buyid=query.get("buyid")
 
         if rating is None:
             return jsonify({"error": "Rating is required"}), 400
@@ -31,16 +28,27 @@ def rating():
         now=datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
         email=access_token()
-
         user_query = supabase.table("users").select("userid").eq("email", email).execute()
         if not user_query.data or len(user_query.data) == 0:
             return jsonify({"error": "User not found"}), 404
         
         #needs to check who is rating it 
         ratedby= user_query.data[0]["userid"]
-        valid_transaction = supabase.table("transactions").select("buyerid").eq("buyerid", ratedby).eq("sellerid", userid).execute()
+
+        valid_transaction=supabase.table("transactions").select("*").eq("buyerid", ratedby).eq("buyid", buyid).execute()
         if not valid_transaction.data or len(valid_transaction.data) == 0:
-            return jsonify({"error": "No valid transaction found for this rating"}), 400
+            # Check if the seller can rate the buyer (reverse case)
+            valid_transaction=supabase.table("transactions").select("*").eq("sellerid", ratedby).eq("buyid", buyid).execute()
+            if not valid_transaction.data or len(valid_transaction.data) == 0:
+                return jsonify({"error": "No valid transaction found for this rating"}), 400
+            update_rate_bool = supabase.table("transactions").update({"seller_rated": True}).eq("buyid", buyid).execute()
+            if not update_rate_bool.data or len(update_rate_bool.data) == 0:
+                return jsonify({"error": "Failed to insert suspension for this user"}), 500
+        else:
+            update_rate_bool = supabase.table("transactions").update({"buyer_rated": True}).eq("buyid", buyid).execute()
+            if not update_rate_bool.data or len(update_rate_bool.data) == 0:
+                return jsonify({"error": "Failed to insert suspension for this user"}), 500
+
         #inserts in rating table
         rating_result=supabase.table("ratings").insert({
             "userid": userid, 
@@ -59,23 +67,19 @@ def rating():
             insert_suspension = supabase.table("user_suspensions").insert({
                 "userid": userid,
                 "is_suspended": False,
-                "suspended_at": now
+                "suspended_at": datetime.combine(date.min, datetime.min.time()).isoformat() # edit here
             }).execute()
             if not insert_suspension.data or len(insert_suspension.data) == 0:
                 return jsonify({"error": "Failed to insert suspension for this user"}), 500
         
         is_suspended=issuspended(userid,suspension_query,now)
-        if is_suspended:
-            logging.info("User has been suspended.")
+        if type(is_suspended) != bool: # here it would mean that the user has been deleted from the system due to multiple suspensions
+            return jsonify({"message": "The user has been deleted due to too many suspension from bad ratings"}), 201
 
             
-        product_query=supabase.table("transactions").select("product_id").eq("sellerid",userid).eq("buyerid",ratedby).execute()
+        product_query=supabase.table("transactions").select("product_id").eq("buyid",buyid).execute()
         product_id=product_query.data[0]["product_id"]
        
-        update_rate_bool = supabase.table("transactions").update({"rating_posted": True}).eq("product_id", product_id).execute()
-        if not update_rate_bool.data or len(update_rate_bool.data) == 0:
-            return jsonify({"error": "Failed to insert suspension for this user"}), 500
-
 
         #updates usertable
         total_ratings_query = supabase.table("ratings").select("*").eq("userid", userid).execute()

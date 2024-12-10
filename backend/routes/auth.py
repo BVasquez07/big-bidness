@@ -1,31 +1,39 @@
-from flask import jsonify
-from backend.config import supabase
+from config import supabase
 import logging
-from flask import Flask, abort, jsonify, request
-from flask_cors import CORS
-import os
-import logging
-from datetime import datetime
+from flask import jsonify, request
 
+"""
+expected input:
+{
+    firstName: <string>,
+    lastName: <string>,
+    email: <string>,
+    userName: <string>,
+    password: <string>,
+    question: <string>,
+    mathAnswer: <string>
+}
 
-
-
-def hello():
-    return "Hello World!"
-
-
-
+expected output:
+{
+    "error": <error message>
+}
+OR
+{
+    "message": "User signed up successfully and is awaiting approval. Please check email for authorization"
+}
+"""
 def register():
     try:
         #parameters
         query=request.json
-        firstname=query.get("firstname")
-        lastname=query.get("lastname")
+        firstname=query.get("firstName")
+        lastname=query.get("lastName")
         email=query.get("email")
-        username=query.get("username")
+        username=query.get("userName")
         password=query.get("password")
         question=query.get("question")
-        answer=query.get("answer")
+        answer=query.get("mathAnswer")
         
         #checks the table if username is already in use
         username_check = supabase.table("users").select("username").eq("username", username).execute() 
@@ -82,7 +90,7 @@ def register():
             raise Exception("Failed to insert approval entry. No data returned.")
 
 
-        return jsonify({"message": "User signed up successfully and is awaiting approval.Please check email for authorization"}), 200
+        return jsonify({"message": "User signed up successfully and is awaiting approval."}), 200
 
     except Exception as e:
         logging.error(f"Error during signup: {str(e)}")
@@ -91,7 +99,29 @@ def register():
 
 
     
-#checks all condtions, if everythign is okay, logs in
+'''
+expected input:
+{
+    "email": "
+    "password": "
+}
+
+expected output:
+{
+    "error": <error message>,
+    (only for suspension)"redirected_to": /suspended
+}
+OR
+{
+    "message": "Login Successful!",
+    "user": {
+        "id": user.id,
+        "email": user.email,
+        "role": role
+    },
+    "access_token": access_token
+}
+'''
 def signin():
     try:
         query=request.json
@@ -107,14 +137,14 @@ def signin():
         if not user_response or not hasattr(user_response, 'user') or not user_response.user:
             return jsonify({"error": "Authentication failed"}), 401
 
-        user=user_response.user
+        user = user_response.user
         email = user.email  
 
         user_query=supabase.table("users").select("userid").eq("email", email).execute()
         user_data=user_query.data
 
         if not user_data:
-            return jsonify({"error": "Seller not found"}), 404
+            return jsonify({"error": "User not found"}), 404
 
         userid=user_data[0]["userid"]
 
@@ -160,40 +190,47 @@ def signin():
 
         userid = user_data[0]['userid']
 
-        #get ratings with created_at and created_date
-        rating_result = supabase.table("ratings").select("rating, created_at").eq("userid", userid).execute()
-        rating_data = rating_result.data if rating_result.data else []
+        role_response=supabase.table("users").select("role").eq("userid",userid).execute()
+        if role_response.data and len(role_response.data) > 0:
+            role = role_response.data[0]["role"]
+        else:
+            return jsonify({"error": "Role not found"}), 404
 
-        #sort by created_at and created_date
-        ratings_sorted = sorted(
-            rating_data, 
-            key=lambda r: (r.get("created_at"))
-        )
+        if role!="Admin":
+            #get ratings with created_at and created_date
+            rating_result = supabase.table("ratings").select("rating, created_at").eq("userid", userid).execute()
+            rating_data = rating_result.data if rating_result.data else []
 
-        #extract the top 4 ratings
-        ratings = [r["rating"] for r in ratings_sorted[:4]]
-        avg_rating = sum(ratings) / len(ratings) if ratings else 0
+            #sort by created_at and created_date
+            ratings_sorted = sorted(
+                rating_data, 
+                key=lambda r: (r.get("created_at"))
+            )
 
-        balance_result = supabase.table("users").select("accountbalance").eq("email", email).execute()
-        balance_data = balance_result.data if balance_result.data else []
-        balance = balance_data[0].get("accountbalance", 0) if balance_data else 0
+            #extract the top 4 ratings
+            ratings = [r["rating"] for r in ratings_sorted[:4]]
+            avg_rating = sum(ratings) / len(ratings) if ratings else 0
 
-        complaints_result=supabase.table("complaints").select("*").eq("sellerid", userid).execute()
-        total_complaints=len(complaints_result.data) if complaints_result.data else 0
+            balance_result = supabase.table("users").select("accountbalance").eq("email", email).execute()
+            balance_data = balance_result.data if balance_result.data else []
+            balance = balance_data[0].get("accountbalance", 0) if balance_data else 0
 
-        role = "User"
+            complaints_result=supabase.table("complaints").select("*").eq("sellerid", userid).execute()
+            total_complaints=len(complaints_result.data) if complaints_result.data else 0
 
-        #update role based on conditions
-        if len(rating_data)>=5:
-            if 2 <= avg_rating <= 4 and balance >= 5000 and total_complaints == 0:
-                role = "Vip"
-            else:
-                role = "User"
+            role = "User"
 
-            update_result = supabase.table("users").update({"role": role}).eq("userid", userid).execute()
+            #update role based on conditions
+            if len(rating_data)>=5:
+                if 2 <= avg_rating <= 4 and balance >= 5000 and total_complaints == 0:
+                    role = "Vip"
+                else:
+                    role = "User"
 
-            if not update_result.data:  
-                return jsonify({"error": "Failed to update user role"}), 500
+                update_result = supabase.table("users").update({"role": role}).eq("userid", userid).execute()
+
+                if not update_result.data:  
+                    return jsonify({"error": "Failed to update user role"}), 500
 
 
 
@@ -229,3 +266,42 @@ def access_token():
     except Exception as e:
         logging.error(f"Error during token: {str(e)}")
         return jsonify({"error": str(e)}), 500
+
+
+
+def signout():
+    try:
+        response=supabase.auth.sign_out()
+        logging.info("User successfully signed out.")
+        return jsonify({"message": "User signed out successfully"}), 200
+
+    except Exception as e:
+        logging.exception("Error during signout:")
+        return jsonify({"error": "An error occurred during signout"}), 500
+
+
+
+
+def valid_token():
+    try:
+
+        token=request.headers.get("Authorization")
+        if not token:
+            return jsonify({"error": "Authentication token is missing"}), 401
+
+        user_response=supabase.auth.get_user(token)
+
+        if not user_response or not hasattr(user_response, 'user') or not user_response.user:
+            return jsonify({"error": "Authentication failed"}), 401
+        user = user_response.user
+        email = user.email
+
+        return jsonify({"message": "Token is active", "user": email}), 200
+
+    except Exception as e:
+        if "Session from session_id claim in JWT does not exist" in str(e):
+            return jsonify({"message":"User is signed out."}), 200
+        
+        return jsonify({"error": f"Error checking token status: {str(e)}"}), 500
+
+

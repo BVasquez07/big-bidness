@@ -1,11 +1,6 @@
-from flask import jsonify
 from config import supabase
 import logging
-from flask import Flask, abort, jsonify, request
-from flask_cors import CORS
-import os
-import logging
-from datetime import datetime
+from flask import jsonify, request
 
 #this gets the user info 
 def personalinfo():
@@ -37,7 +32,7 @@ def userinfo():
         if not username:
             return jsonify({"error": "Username is required"}), 400
 
-        user_query = supabase.table("users").select("*").eq("username", username).execute()
+        user_query = supabase.table("users").select("username","firstname","lastname","rating").eq("username", username).execute()
         if not user_query.data or len(user_query.data) == 0:
             return jsonify({"error": "User not found"}), 404
 
