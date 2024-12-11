@@ -49,8 +49,8 @@ export const Listings = ({ searchInput }) => {
     ));
 
     return (
-      <div className="container p-6">
-        <div className="bg-white flex flex-wrap justify-start gap-8 p-8">
+      <div className="container mx-auto flex">
+        <div className="bg-white flex flex-wrap justify-center p-8 gap-x-6 gap-y-6">
           {items.length > 0 ? items : <p>No items found</p>}
         </div>
       </div>
