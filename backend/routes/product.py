@@ -84,10 +84,8 @@ def product_post():
         return jsonify({"error": str(e)}), 500
 
 #upadte lisiting status
-def update_product_post():
+def update_product_post(product_id):
     try:
-        query=request.json
-        product_id=query.get("product_id")
 
         if not product_id:
             return jsonify({"error":"Product ID is required"}), 400
@@ -119,7 +117,26 @@ def getproducts():
     except Exception as e:
         logging.error(f"Error fetching products: {str(e)}")
         return jsonify({"error": str(e)}), 500
+    
+def user_current_products():
+    try:
+        email=access_token()
 
+        user_query=supabase.table("users").select("userid").eq("email",email).execute()
+        if not user_query.data or len(user_query.data) == 0:
+            return jsonify({"error": "User not found"}), 404
+        userid=user_query.data[0]["userid"]
+
+        products=supabase.table("products").select("*").eq("sellerid",userid).eq("is_available",True).execute()
+
+        if products.data:
+            return jsonify({"products": products.data}), 200
+        else:
+            return jsonify({"products": []}), 200
+
+    except Exception as e:
+        logging.error(f"Error fetching products: {str(e)}")
+        return jsonify({"error": str(e)}), 500
 
 
 
@@ -143,27 +160,6 @@ def user_completed_products():
         logging.error(f"Error fetching products: {str(e)}")
         return jsonify({"error": str(e)}), 500
 
-def user_current_products():
-    try:
-        email=access_token()
-
-        user_query=supabase.table("users").select("userid").eq("email",email).execute()
-        if not user_query.data or len(user_query.data) == 0:
-            return jsonify({"error": "User not found"}), 404
-        userid=user_query.data[0]["userid"]
-
-        products=supabase.table("products").select("*").eq("sellerid",userid).eq("is_available",True).execute()
-
-        if products.data:
-            return jsonify({"products": products.data}), 200
-        else:
-            return jsonify({"products": []}), 200
-
-
-
-    except Exception as e:
-        logging.error(f"Error fetching products: {str(e)}")
-        return jsonify({"error": str(e)}), 500
 
 def query_products():
     try:
@@ -187,4 +183,58 @@ def query_products():
         
     except Exception as e:
         logging.error(f"Error fetching products: {str(e)}")
+        return jsonify({"error": str(e)}), 500
+    
+
+def getcompletedproducts():
+    try:
+        email = access_token()
+        user_query = supabase.table("users").select("userid").eq("email", email).execute()
+        if not user_query.data or len(user_query.data) == 0:
+            return jsonify({"error": "User not found"}), 404
+        userid = user_query.data[0]["userid"]
+
+        completedSales = supabase.table("transactions").select("*").eq("sellerid", userid).execute()
+        if not completedSales.data or len(completedSales.data) == 0:
+            return jsonify({"sales": []}), 200
+
+        sales = []
+        for sale in completedSales.data:
+            product_id = sale.get("product_id")
+            buyerid = sale.get("buyerid")
+            buyid = sale.get("buyid")
+
+            if not product_id or not isinstance(product_id, int):
+                logging.error("Invalid product_id in transaction record")
+                continue
+            if not buyerid or not isinstance(buyerid, int):
+                logging.error("Invalid buyerid in transaction record")
+                continue
+
+            rating_posted = sale.get("seller_rated")
+
+            product_result = supabase.table("products").select("*").eq("product_id", product_id).execute()
+            if not product_result.data or len(product_result.data) == 0:
+                logging.error(f"No product found for product_id: {product_id}")
+                continue
+
+            buyer_result = supabase.table("users").select("username").eq("userid", buyerid).execute()
+            if not buyer_result.data or len(buyer_result.data) == 0:
+                logging.error(f"No buyer found for buyerid: {buyerid}")
+                continue
+            buyer_name = buyer_result.data[0].get("username")
+
+            sales.append({
+                "product": product_result.data,
+                "userid": userid,
+                "ratedname": buyer_name,
+                "ratedid": buyerid,
+                "rating_posted": rating_posted,
+                "buyid": buyid,
+                "price": sale.get("price"),
+            })
+
+        return jsonify({"sales": sales}), 200
+    except Exception as e:
+        logging.error(f"Error fetching sales: {str(e)}")
         return jsonify({"error": str(e)}), 500

@@ -63,6 +63,12 @@ const LoginForm = () => {
         .then((data) => {
             if (data.error) {
                 setError(data.error);
+                if (data.error.toLowerCase() === "account suspended") {
+                    setTimeout(() => {
+                        setError(null);
+                        window.location.href = "/suspended";
+                    }, 1000);
+                }
             } else {
                 setError(null);
                 setSuccess("Login successful");

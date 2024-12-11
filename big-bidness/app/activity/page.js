@@ -1,89 +1,152 @@
-import React from 'react'
-import { Item } from './item';
+'use client';
+import React, { useEffect, useState } from 'react';
+import { BidItem } from './biditem';
+import { ListingItem } from './listingItem';
+import { CompletedItem } from './completeditem'; 
 
-const bids = [{
-    name: 'Item 1',
-    price: 100,
-    image: 'https://images.unsplash.com/photo-1511556532299-8f662fc26c06?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-    expiry: '10/10/2021',
-    rated: true,
-    completed: true
-}, {
-    name: 'Item 2',
-    price: 200,
-    image: 'https://via.placeholder.com/150',
-    expiry: '10/10/2021',
-    rated: false,
-    completed: false
-}, {
-    name: 'Item 3',
-    price: 300,
-    image: 'https://via.placeholder.com/150',
-    expiry: '10/10/2021',
-    rated: false,
-    completed: true
-}];
+export default function Activity() {
+  const [activeBids, setActiveBids] = useState([]);
+  const [completedBids, setCompletedBids] = useState([]);
+  const [activeListings, setActiveListings] = useState([]);
+  const [completedListings, setCompletedListings] = useState([]);
+  const [token, setToken] = useState('');
 
-const listings = [{
-    name: 'Item 1',
-    price: 100,
-    image: 'https://via.placeholder.com/150',
-    rated: true,
-    completed: true
-}, {
-    name: 'Item 2',
-    price: 200,
-    image: 'https://via.placeholder.com/150',
-    rated: false,
-    completed: false
-}, {
-    name: 'Item 3',
-    price: 300,
-    image: 'https://via.placeholder.com/150',
-    rated: false,
-    completed: true
-}];
-
-export default function activity() {
-
-
-    const mapFunction = (data) => {
-        return data.map((item) => <Item data={item} key={item.name} />);
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      setToken(token);
     }
-    const activeBids = mapFunction(bids.filter(bid => !bid.completed));
-    const completedBids = mapFunction(bids.filter(bid => bid.completed));
-    const activeListings = mapFunction(listings.filter(listing => !listing.completed));
-    const completedListings = mapFunction(listings.filter(listing => listing.completed));
+  });
+
+  useEffect(() => {
+    function fetchBids() {
+      fetch('http://localhost:5000/getuserbidproduct', {
+        method: 'GET',
+        headers: {
+          Authorization: `${token}`,
+        },
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          console.log(data);
+          if (data.bids) {
+            const validBids = data.bids.filter((bid) => {
+              const isExpired = new Date(bid.biddeadline) < new Date();
+              const isAvailable = bid.product_details.is_available;
+              return !isExpired && (bid.bid_accepted || isAvailable);
+            });
+            setActiveBids(validBids.filter((bid) => !bid.bid_accepted));
+          } else {
+            console.log('No bids found in the response');
+          }
+        })
+        .catch((error) => console.error('Error fetching bids:', error));
+    }
+
+    function fetchListings() {
+      fetch('http://localhost:5000/user-current-products', {
+        method: 'GET',
+        headers: {
+          Authorization: `${token}`,
+        },
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          console.log(data);
+          if (data.products) {
+            setActiveListings(data.products);
+          } else {
+            console.log('No products found in the response');
+          }
+        })
+        .catch((error) => console.error('Error fetching listings:', error));
+    }
+
+    function fetchCompletedBids() {
+        fetch('http://localhost:5000/getcompletedbids', {
+          method: 'GET',
+          headers: {
+            Authorization: `${token}`,
+          },
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            console.log(data);
+            if (data.bids) {
+                setCompletedBids(data.bids);
+            } else {
+              console.log('No bids found in the response');
+            }
+          })
+          .catch((error) => console.error('Error fetching bids:', error));
+      }
+
+      function fetchCompletedListings() {
+        fetch('http://localhost:5000/getcompletedproducts', {
+          method: 'GET',
+          headers: {
+            Authorization: `${token}`,
+          },
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            console.log(data);
+            if (data.sales) {
+              setCompletedListings(data.sales);
+            } else {
+              console.log('No Listings found in the response');
+            }
+          })
+          .catch((error) => console.error('Error fetching bids:', error));
+      }
+
+    if (token) {
+      fetchBids();
+      fetchListings();
+      fetchCompletedBids();
+      fetchCompletedListings();
+    }
+  }, [token]);
+
+  const mapBids = (data) => {
+    return data.map((item) => <BidItem data={item} key={item.bidid} />);
+  };
+  const mapListings = (data) => {
+    return data.map((item) => <ListingItem data={item} key={item.product_id} />);
+  };
+  const mapCompletedBids = (data, raterType) => {
+    return data.map((item) => <CompletedItem data={item} raterType={raterType} key={item.product[0].product_id} />);
+  };
 
   return (
     <div>
-        <h1 className='pl-4 text-4xl pb-8 font-bold pt-4'>Activity</h1>
-        <div className='px-8'>
-            <div>
-                <div className='text-2xl font-semibold'>Active Bids</div>
-                <div className='px-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 lg:grid-cols-4 gap-6 p-4'>
-                    {activeBids}
-                </div>
-            </div>
-            <div>
-                <div className='text-2xl font-semibold'>Active Listings</div>
-                <div className='px-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 lg:grid-cols-4 gap-6 p-4'>
-                    {activeListings}
-                </div>
-            </div>
-            <div>
-                <div className='text-2xl font-semibold'>Completed Bids</div>
-                <div className='px-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 lg:grid-cols-4 gap-6 p-4'>
-                    {completedBids}
-                </div>
-            </div>
-            <div>
-                <div className='text-2xl font-semibold'>Completed Listings</div>
-                <div className='px-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 lg:grid-cols-4 gap-6 p-4'>
-                    {completedListings}
-                </div>
-            </div>
+      <h1 className="pl-4 text-4xl pb-8 font-bold pt-4">Activity</h1>
+      <div className="px-8">
+        <div>
+          <div className="text-2xl font-semibold">Active Bids</div>
+          <div className="px-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 lg:grid-cols-4 gap-6 p-4">
+            {mapBids(activeBids)}
+          </div>
         </div>
+        <div>
+          <div className="text-2xl font-semibold">Active Listings</div>
+          <div className="px-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 lg:grid-cols-4 gap-6 p-4">
+            {mapListings(activeListings)}
+          </div>
+        </div>
+        <div>
+          <div className="text-2xl font-semibold">Completed Bids</div>
+          <div className="px-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 lg:grid-cols-4 gap-6 p-4">
+            {mapCompletedBids(completedBids, 'buyer')}
+          </div>
+        </div>
+        <div>
+          <div className="text-2xl font-semibold">Completed Listings</div>
+          <div className="px-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 lg:grid-cols-4 gap-6 p-4">
+            {mapCompletedBids(completedListings, 'seller')}
+          </div>
+        </div>
+      </div>
     </div>
-  )
+  );
 }
