@@ -19,7 +19,7 @@ export default function settings() {
 
     useEffect(() => {
         const getUserInfo = async () => {
-            const userinfo = await fetch('http://localhost:8080/personalinfo', {
+            const userinfo = await fetch('http://localhost:5000/personalinfo', {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',

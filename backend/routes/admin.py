@@ -86,9 +86,18 @@ def approve_user():
         logging.error(f"Error approving user: {str(e)}")
         return jsonify({"error": f"An unexpected error occurred: {str(e)}"}), 500
 
+def approval_list():
+    try:
+        approval_query=supabase.table("approvals").select("*").eq("applicationdetails","Approval Pending").execute()
 
+        if approval_query.data:
+            return jsonify({"Approval List": approval_query.data}), 200
+        else:
+            return jsonify({"Approval List": []}), 200
 
-
+    except Exception as e:
+        logging.error(f"Error fetching Approvals: {str(e)}")
+        return jsonify({"error": str(e)}), 500
 
 
 

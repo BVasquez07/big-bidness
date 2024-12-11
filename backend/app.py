@@ -26,10 +26,10 @@ def register_route():
 def signin_route():
     return auth.signin()
 
-@app.route("/signout", methods=["POST"])
+
+@app.route("/signout", methods=["POST"])#checks all condtions, if everythign is okay, logs in
 def signout_route():
     return auth.signout()
-
 
 @app.route("/grant-admin", methods=["POST"])
 def grant_admin_route():
@@ -82,13 +82,21 @@ def getproducts_route():
 def getvipproducts_route():
     return vip.getvipproducts()
 
+@app.route("/approval-list", methods=["GET"])
+def approval_list_route():
+    return admin.approval_list()
 
-
-
-@app.route("/postcomplaint", methods=["POST"])#get all complaints
+@app.route("/postcomplaint", methods=["POST"])
 def postcomplaint_route():
     return complaint.postcomplaint()
 
+@app.route("/postcomment", methods=["POST"])
+def postcomment_route():
+    return comment.postcomment()
+
+@app.route("/get-proudct-comment", methods=["GET"])
+def get_product_comment_route():
+    return comment.get_product_comment()
 
 @app.route("/get-product-complaint", methods=["GET"])#get complainst based on product only
 def getproductcomplaint_route():
@@ -98,6 +106,11 @@ def getproductcomplaint_route():
 @app.route("/get-seller-complaint", methods=["GET"])#get onlby seller complaint
 def getsellercomplaint_route():
     return complaint.getsellercomplaint()
+
+@app.route("/get-all-complaint", methods=["GET"])
+def getallcomplaint_route():
+    return complaint.getallcomplaint()
+
 
 @app.route("/postbid", methods=["POST"])#bid for proudct
 def postbid_route():
@@ -119,8 +132,11 @@ def rating_route():
 def getsuspended_route():
     return suspended.getsuspended()
 
-
 @app.route("/update-suspended", methods=["POST"])
+def admin_suspenion_upadte_route():
+    return suspended.admin_suspenion_upadte()
+
+@app.route("/update-pay-suspended", methods=["POST"])
 def updatesuspended_route():
     return suspended.updatesuspended()
 
@@ -162,6 +178,21 @@ def getpastbid_route():
 def query_products_route():
     return product.query_products()
 
+@app.route("/getquittingsys", methods=["GET"])
+def getquittingsys_route():
+    return quitSys.getquittingsys() 
+
+@app.route("/updatequitsys", methods=["POST"])
+def updatequittingsys_route():
+    return quitSys.updatequitsysvoluntary() 
+
+@app.route("/deletefromsys", methods=["POST"])
+def deletequittingsys_route():
+    return quitSys.deleteQuitSysvoluntary() 
+
+@app.route("/valid-token", methods=["GET"])
+def valid_token_route():
+    return auth.valid_token()
 
 if __name__ == "__main__":
     app.run(host="localhost", debug=True, port=8080)

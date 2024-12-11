@@ -1,13 +1,13 @@
 import { Button } from "@/components/ui/button";
 import { Check, X } from "lucide-react"
 
-function Actions({}){
+function Actions({ onApprove, onReject }){
     return(
-        <div className="space-x-2">
-            <Button variant="outline" size="icon" className="bg-green-300 ">
+        <div className="space-x-2 grid grid-cols-2 sm:grid-cols-2 gap-2">
+            <Button variant="outline" size="icon" className="bg-white-300" onClick={onApprove} >
                 <Check/>
             </Button>
-            <Button variant="outline" size="icon" className="bg-red-300 ">
+            <Button variant="outline" size="icon" className="bg-red-400" onClick={onReject}>
                 <X/>
             </Button>
         </div>

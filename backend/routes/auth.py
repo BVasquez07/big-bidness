@@ -90,7 +90,7 @@ def register():
             raise Exception("Failed to insert approval entry. No data returned.")
 
 
-        return jsonify({"message": "User signed up successfully and is awaiting approval. Please check email for authorization"}), 200
+        return jsonify({"message": "User signed up successfully and is awaiting approval."}), 200
 
     except Exception as e:
         logging.error(f"Error during signup: {str(e)}")
@@ -266,5 +266,42 @@ def access_token():
     except Exception as e:
         logging.error(f"Error during token: {str(e)}")
         return jsonify({"error": str(e)}), 500
+
+
+
+def signout():
+    try:
+        response=supabase.auth.sign_out()
+        logging.info("User successfully signed out.")
+        return jsonify({"message": "User signed out successfully"}), 200
+
+    except Exception as e:
+        logging.exception("Error during signout:")
+        return jsonify({"error": "An error occurred during signout"}), 500
+
+
+
+
+def valid_token():
+    try:
+
+        token=request.headers.get("Authorization")
+        if not token:
+            return jsonify({"error": "Authentication token is missing"}), 401
+
+        user_response=supabase.auth.get_user(token)
+
+        if not user_response or not hasattr(user_response, 'user') or not user_response.user:
+            return jsonify({"error": "Authentication failed"}), 401
+        user = user_response.user
+        email = user.email
+
+        return jsonify({"message": "Token is active", "user": email}), 200
+
+    except Exception as e:
+        if "Session from session_id claim in JWT does not exist" in str(e):
+            return jsonify({"message":"User is signed out."}), 200
+        
+        return jsonify({"error": f"Error checking token status: {str(e)}"}), 500
 
 
