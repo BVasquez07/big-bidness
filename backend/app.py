@@ -126,9 +126,9 @@ def admin_suspenion_upadte_route():
 def updatesuspended_route():
     return suspended.updatesuspended()
 
-@app.route("/submittransaction", methods=["POST"])
-def submittransaction_route():
-    return transaction.submittransaction()
+# @app.route("/submittransaction", methods=["POST"])
+# def submittransaction_route():
+#     return transaction.submittransaction()
 
 @app.route("/acceptbid", methods=["POST"])
 def acceptbid_route():
@@ -187,4 +187,4 @@ def getcompletedbids_route():
     return bid.getCompletedBids()
 
 if __name__ == "__main__":
-    app.run(host="localhost", debug=True, port=5000)
+    app.run(host="localhost", debug=True, port=8080)
