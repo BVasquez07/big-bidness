@@ -9,23 +9,17 @@ from routes import *
 app = Flask(__name__)
 CORS(app)
 
-
 @app.route("/")
 def hello():
     return jsonify({"res": "Hello World!"})
 
-        
 @app.route("/register", methods=["POST"])
 def register_route():
     return auth.register() 
-    
 
-
-    
 @app.route("/signin", methods=["POST"])#checks all condtions, if everythign is okay, logs in
 def signin_route():
     return auth.signin()
-
 
 @app.route("/signout", methods=["POST"])#checks all condtions, if everythign is okay, logs in
 def signout_route():
@@ -39,7 +33,6 @@ def grant_admin_route():
 def approve_user_route():
     return admin.approve_user()
 
-
 @app.route("/personalinfo", methods=["GET"])#this gets the user info 
 def personalinfo_route():
     return user.personalinfo()
@@ -47,7 +40,6 @@ def personalinfo_route():
 @app.route("/userinfo", methods=["GET"])#gets any user info the user clicks ons
 def userinfo_route():
     return user.userinfo()
-
 
 @app.route("/post", methods=["POST"])#posting product
 def product_post_route():
@@ -102,7 +94,6 @@ def get_product_comment_route():
 def getproductcomplaint_route():
     return complaint.getproductcomplaint()
 
-
 @app.route("/get-seller-complaint", methods=["GET"])#get onlby seller complaint
 def getsellercomplaint_route():
     return complaint.getsellercomplaint()
@@ -111,18 +102,13 @@ def getsellercomplaint_route():
 def getallcomplaint_route():
     return complaint.getallcomplaint()
 
-
 @app.route("/postbid", methods=["POST"])#bid for proudct
 def postbid_route():
     return bid.postbid()
 
-
-
 @app.route("/get-product-bid", methods=["GET"])#get all the bid that are not expired
 def getproductbid_route():
     return bid.getproductbid()
-
-
 
 @app.route("/submitrating", methods=["POST"])  # this submits rating and checks for suspension
 def rating_route():
@@ -134,7 +120,7 @@ def getsuspended_route():
 
 @app.route("/update-suspended", methods=["POST"])
 def admin_suspenion_upadte_route():
-    return suspended.admin_suspenion_upadte()
+    return suspended.admin_suspenion_update()
 
 @app.route("/update-pay-suspended", methods=["POST"])
 def updatesuspended_route():
@@ -157,6 +143,9 @@ def updatebalance():
 def addbalance_route():
     return accountbalance.addbalance()
 
+@app.route("/withdrawbalance", methods=["POST"])
+def withdrawbalance_route():
+    return accountbalance.withdrawbalance()
 @app.route("/getuserbid", methods=["GET"])
 def getuserbid_route():
     return bid.getuserbid()
@@ -172,7 +161,6 @@ def getallbid_route():
 @app.route("/getpastbid", methods=["GET"])
 def getpastbid_route():
     return bid.getpastbid()
-
 
 @app.route("/query", methods=["GET"])
 def query_products_route():
@@ -195,4 +183,4 @@ def valid_token_route():
     return auth.valid_token()
 
 if __name__ == "__main__":
-    app.run(host="localhost", debug=True, port=8080)
+    app.run(host="localhost", debug=True, port=5000)

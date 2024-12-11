@@ -23,6 +23,9 @@ def addbalance():
         email=access_token()
         if not email:
             return jsonify({"error": "Invalid access token"}), 401
+        account_result=supabase.table("users").select("accountbalance").eq("email", email).execute()
+        account_balance=account_result.data[0]["accountbalance"]
+        balance=account_balance+balance
 
         update_balance=supabase.table("users").update({"accountbalance": balance}).eq("email", email).execute()
         if not update_balance.data or len(update_balance.data) == 0:
@@ -119,5 +122,35 @@ def changeBalance(product_price):
 
 
 
+def withdrawbalance():
+    try:
+        query = request.json
+        account_number= query.get("account_number")
+        routing_number= query.get("routing_number")
+        balance = query.get("balance")
+
+        if not account_number or not routing_number or not balance:
+            return jsonify({"error": "Fill in all information"}), 400
+
+        try:
+            balance=float(balance)
+        except ValueError:
+            return jsonify({"error": "Invalid balance value"}), 400
+        
+
+        email=access_token()
+        if not email:
+            return jsonify({"error": "Invalid access token"}), 401
+        account_result=supabase.table("users").select("accountbalance").eq("email", email).execute()
+        account_balance=account_result.data[0]["accountbalance"]
+        balance=account_balance-balance
+        update_balance=supabase.table("users").update({"accountbalance": balance}).eq("email", email).execute()
+        if not update_balance.data or len(update_balance.data) == 0:
+            return jsonify({"error": "Account not found"}), 404
+
+        return jsonify({"message": "Account balance posted successfully"}), 201
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
     
 
