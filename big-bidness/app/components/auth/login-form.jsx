@@ -52,7 +52,7 @@ const LoginForm = () => {
 
     // Define the form submission handler (this is where you would send the form data to the server)
     const onSubmit = (data) => {
-        fetch("http://localhost:8080/signin", {
+        fetch("http://localhost:5000/signin", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -63,6 +63,12 @@ const LoginForm = () => {
         .then((data) => {
             if (data.error) {
                 setError(data.error);
+                if (data.error.toLowerCase() === "account suspended") {
+                    setTimeout(() => {
+                        setError(null);
+                        window.location.href = "/suspended";
+                    }, 1000);
+                }
             } else {
                 setError(null);
                 setSuccess("Login successful");

@@ -150,6 +150,10 @@ def withdrawbalance_route():
 def getuserbid_route():
     return bid.getuserbid()
 
+@app.route('/getuserbidproduct', methods=["GET"])
+def getuserbidproduct_route():
+    return bid.getuserbidproduct()
+
 @app.route("/getallbids", methods=["GET"])
 def getallbid_route():
     return bid.getallbids()
@@ -177,6 +181,10 @@ def deletequittingsys_route():
 @app.route("/valid-token", methods=["GET"])
 def valid_token_route():
     return auth.valid_token()
+
+@app.route("/getcompletedbids", methods=["GET"])
+def getcompletedbids_route():
+    return bid.getCompletedBids()
 
 if __name__ == "__main__":
     app.run(host="localhost", debug=True, port=5000)
