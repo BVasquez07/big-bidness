@@ -19,7 +19,7 @@ import { Button } from "../../components/ui/button"
 import React from 'react'
 import { useState } from 'react'
   
-export const Rate = ({setRated}) => {
+export const Rate = ({setRated, sellerID, sellerName}) => {
 
     const [stars, setStars] = useState(0)
     const [complain, setComplain] = useState(false)
