@@ -7,7 +7,7 @@ import {
     TableRow,
     TableCell,
   } from "@/components/ui/table"
-import { XAction } from "../utils/Actions";
+import { SuspendAction } from "../utils/Actions";
 import { useState, useEffect } from "react";
 import { BadgeAlert } from 'lucide-react';
 
@@ -51,6 +51,7 @@ export default function UserApps({}) {
 
     // function to unsuspend a user using endpoint
     const handleSuspension = async (userid) => {
+
         try {
             const response = await fetch('http://localhost:8080/update-suspended', {
                 method: 'POST',
@@ -98,7 +99,7 @@ export default function UserApps({}) {
                 <TableCell>{suspended.userid}</TableCell>
               <TableCell>{suspended.suspended_at}</TableCell>
               <TableCell className="w-[100px]">
-                <XAction
+                <SuspendAction
                   onSuspend={() => handleSuspension(suspended.userid)}
                 />               
               </TableCell>
