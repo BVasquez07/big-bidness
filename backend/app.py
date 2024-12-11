@@ -190,4 +190,4 @@ def valid_token_route():
     return auth.valid_token()
 
 if __name__ == "__main__":
-    app.run(host="localhost", debug=True, port=8080)
+    app.run(host="localhost", debug=True, port=5000)
