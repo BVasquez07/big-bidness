@@ -85,11 +85,12 @@ def getsuspended():
         if not suspended or len(suspended) == 0:
             return jsonify({"suspended": []}), 200
 
-        return jsonify({"suspendded": suspended}), 200
+        return jsonify({"suspended": suspended}), 200
 
     except Exception as e:
         logging.error(f"Error fetching suspended: {str(e)}")
         return jsonify({"error": str(e)}), 500
+
 
 def updatesuspended():
     try:
@@ -145,7 +146,7 @@ def updatesuspended():
         return jsonify({"error": str(e)}), 500
 
 
-def admin_suspenion_upadte():
+def admin_suspenion_update():
     try:
         query=request.json
         suspended_id=query.get("userid")

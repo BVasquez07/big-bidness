@@ -35,7 +35,7 @@ export default function Complaints({}){
 
 
 
-    return(
+    return (
         <Table>
             <TableCaption>A list of users and the corresponding complaints</TableCaption>
             <TableHeader>
@@ -49,7 +49,15 @@ export default function Complaints({}){
             <TableBody>
                 {loading ? (
                     <TableRow>
-                        <TableCell colSpan={4} className="text-center">Loading...</TableCell>
+                        <TableCell colSpan={4} className="text-center">
+                            <div className="animate-pulse">Loading...</div>
+                        </TableCell>
+                    </TableRow>
+                ) : complaints.length === 0 ? (
+                    <TableRow>
+                        <TableCell colSpan={4} className="text-center">
+                            No complaints available.
+                        </TableCell>
                     </TableRow>
                 ) : (
                     complaints.map((complaint) => (
@@ -59,7 +67,7 @@ export default function Complaints({}){
                             <TableCell>{complaint.productname}</TableCell>
                             <TableCell>{complaint.sellername}</TableCell>
                         </TableRow>
-                ))
+                    ))
                 )}
             </TableBody>
         </Table>
