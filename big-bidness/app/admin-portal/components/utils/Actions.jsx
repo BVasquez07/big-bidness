@@ -14,14 +14,24 @@ function Actions({ onApprove, onReject }){
     );
 }
 
-function XAction({ onSuspend }){
+function SuspendAction({ onSuspend }){
     return(
         <div>
-            <Button variant="outline" size="icon" className="bg-red-300 " onClick={onSuspend}>
+            <Button variant="outline" size="icon" className="bg-red-300 " onClick={ onSuspend }>
                 <X/>
             </Button>
         </div>
     );
 }
 
-export {Actions, XAction}
+function QuitAction({ onQuit }){
+    return(
+        <div>
+            <Button variant="outline" size="icon" className="bg-red-300 " onClick={ onQuit }>
+                <X/>
+            </Button>
+        </div>
+    );
+}
+
+export {Actions, SuspendAction, QuitAction}
