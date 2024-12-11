@@ -6,6 +6,14 @@ import { Star } from 'lucide-react';
 
 export const CompletedListing = ({ data }) => {
   const [rated, setRated] = useState(data.rating_posted);
+  const product_id = data.product[0].product_id;
+  const backendData = {
+    ratedID: data.sellerid,
+    raterType: 'buyer',
+    buyID: data.buyid,
+    productID: product_id,
+    userID: data.userid,
+  }
 
   return (
     <>
@@ -22,7 +30,7 @@ export const CompletedListing = ({ data }) => {
             {data.product[0].product_name}
           </h1>
           <p className="text-xl font-semibold mt-2 mb-4">${data.product[0].price}</p>
-          {data.rating_posted ? (
+          {rated ? (
             <div className="flex justify-center items-center border bg-gray-500 text-white py-1 px-3 rounded-md">
               <Star size={16} fill="gold" stroke="gold" />
               <p className="pl-2">Rated</p>
@@ -30,7 +38,7 @@ export const CompletedListing = ({ data }) => {
           ) : (
             <div className="flex justify-center items-center border bg-black text-white py-1 px-3 rounded-md">
               <Star size={16} />
-              <Rate setRated={setRated} sellerID={data.sellerid} sellerName={data.sellername} />
+              <Rate setRated={setRated} sendData={backendData} showSellerName={data.sellername}/>
             </div>
           )}
         </div>
