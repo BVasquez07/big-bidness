@@ -9,10 +9,15 @@ const BiddingSection = ({ product_id, userInfo, is_available }) => {
   const [token, setToken] = useState('');
   const [selectedBid, setSelectedBid] = useState(null);
   const [dialogType, setDialogType] = useState(null); // null, 'placeBid', or 'acceptBid'
+  const [bidDeadline, setBidDeadline] = useState(""); // State for bid deadline
 
   useEffect(() => {
     setToken(localStorage.getItem('token'));
   }, []);
+
+  const handleBidDeadlineChange = (e) => {
+    setBidDeadline(e.target.value);
+  };
 
   useEffect(() => {
     const fetchBids = async () => {
@@ -25,11 +30,11 @@ const BiddingSection = ({ product_id, userInfo, is_available }) => {
             username: bid.buyername,
             date: new Date(bid.biddeadline).toLocaleString(),
             bidAmount: bid.bidamount,
-            bidDeadline: bid.biddeadline,
+            bidDeadline: new Date(bid.biddeadline).toLocaleString(),
             bidaccepted: bid.bid_accepted,
             firstname: bid.fisrstname,
             lastname: bid.lastname,
-            rating: bid.rating || 0,
+            rating: bid.buyer_rating,
           }));
           setBids(formattedBids);
         } else {
@@ -102,12 +107,12 @@ const BiddingSection = ({ product_id, userInfo, is_available }) => {
       const newBid = {
         product_id: product_id,
         bidamount: bidInput,
-        biddeadline: new Date().toISOString(),
+        biddeadline: new Date(bidDeadline).toISOString(),
         bidderName: fullName,
         bidderRating: bidderRating,
       };
 
-      const formattedBidDeadline = new Date().toISOString().replace('T', ' ').slice(0, 19);
+      const formattedBidDeadline = new Date(bidDeadline).toISOString().replace('T', ' ').slice(0, 19);
       newBid.biddeadline = formattedBidDeadline;
 
       try {
@@ -121,6 +126,7 @@ const BiddingSection = ({ product_id, userInfo, is_available }) => {
         });
 
         const data = await response.json();
+        console.log(data)
 
         if (data.message === 'Bid posted successfully') {
           alert(`Bid of $${bidInput} posted successfully!`);
@@ -130,6 +136,7 @@ const BiddingSection = ({ product_id, userInfo, is_available }) => {
             username: userInfo.username,
             date: newFormattedDate,
             bidAmount: parseInt(bidInput),
+            bidDeadline: bidDeadline.toLocaleString(),
             rating: userInfo.rating,
             firstname: userInfo.firstname,
             lastname: userInfo.lastname
@@ -182,7 +189,7 @@ const BiddingSection = ({ product_id, userInfo, is_available }) => {
             </div>
             <div className="flex flex-col items-end">
               <div className="font-bold">${bid.bidAmount}</div>
-              <div className="text-sm text-gray-500">{new Date(bid.date).toLocaleString()}</div>
+              <div className="text-sm text-gray-500">{new Date(bid.bidDeadline).toLocaleString()}</div>
             </div>
           </button>
         ))}
@@ -198,47 +205,55 @@ const BiddingSection = ({ product_id, userInfo, is_available }) => {
               Place Your Bid
             </button>
           </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>{dialogType === 'placeBid' ? 'Confirm Your Bid' : 'Accept Bid'}</DialogTitle>
-              <DialogDescription>
-                {dialogType === 'placeBid' ? 'Please enter the amount you want to bid.' : `Are you sure you want to accept the bid of $${selectedBid?.bidAmount}?`}
-              </DialogDescription>
-            </DialogHeader>
-            {dialogType === 'placeBid' ? (
-              <div className="mt-4">
-                <form>
-                  <label htmlFor="bidInput" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Enter Bid Amount
-                  </label>
-                  <input
-                    type="number"
-                    id="bidInput"
-                    value={bidInput}
-                    onChange={handleBidChange}
-                    min="1"
-                    className="mt-2 p-2 w-full border border-gray-300 rounded-md dark:bg-gray-800 dark:text-white"
-                    placeholder="Enter your bid"
-                  />
-                </form>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>{dialogType === 'placeBid' ? 'Confirm Your Bid' : 'Accept Bid'}</DialogTitle>
+                <DialogDescription>
+                  {dialogType === 'placeBid' ? 'Please enter the amount you want to bid and the bid deadline.' : `Are you sure you want to accept the bid of $${selectedBid?.bidAmount}?`}
+                </DialogDescription>
+              </DialogHeader>
+              {dialogType === 'placeBid' ? (
+                <div className="mt-4">
+                  <form>
+                    <label htmlFor="bidInput" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                      Enter Bid Amount
+                    </label>
+                    <input
+                      type="number"
+                      id="bidInput"
+                      value={bidInput}
+                      onChange={handleBidChange}
+                      min="1"
+                      className="mt-2 p-2 w-full border border-gray-300 rounded-md dark:bg-gray-800 dark:text-white"
+                      placeholder="Enter your bid"
+                    />
+                    <label htmlFor="bidDeadline" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mt-4">
+                      Enter Bid Deadline
+                    </label>
+                    <input
+                      type="datetime-local"
+                      id="bidDeadline"
+                      value={bidDeadline}
+                      onChange={handleBidDeadlineChange}
+                      className="mt-2 p-2 w-full border border-gray-300 rounded-md dark:bg-gray-800 dark:text-white"
+                    />
+                  </form>
+                </div>
+              ) : (
+                <div className="mt-4">
+                  <div className="text-lg">Bid Amount: ${selectedBid?.bidAmount}</div>
+                </div>
+              )}
+              <div className="mt-6 flex justify-end">
+                <button
+                  type="button"
+                  onClick={dialogType === 'placeBid' ? handleSubmitBid : handleAcceptBid}
+                  className="py-2 px-4 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                >
+                  {dialogType === 'placeBid' ? 'Submit Bid' : 'Accept Bid'}
+                </button>
               </div>
-            ) : (
-              <div className="mt-4">
-                <div className="text-lg">Bid Amount: ${selectedBid?.bidAmount}</div>
-              </div>
-            )}
-            <div className="mt-4 flex justify-end">
-              <button onClick={closeDialog} className="py-2 px-4 text-white bg-gray-500 rounded-md mr-2">
-                Cancel
-              </button>
-              <button
-                onClick={dialogType === 'placeBid' ? handleSubmitBid : handleAcceptBid}
-                className="py-2 px-4 text-white bg-black rounded-md"
-              >
-                {dialogType === 'placeBid' ? 'Confirm' : 'Accept'}
-              </button>
-            </div>
-          </DialogContent>
+            </DialogContent>
         </Dialog>
       </div>
     </section>
