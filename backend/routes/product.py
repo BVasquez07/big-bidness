@@ -119,7 +119,26 @@ def getproducts():
     except Exception as e:
         logging.error(f"Error fetching products: {str(e)}")
         return jsonify({"error": str(e)}), 500
+    
+def user_current_products():
+    try:
+        email=access_token()
 
+        user_query=supabase.table("users").select("userid").eq("email",email).execute()
+        if not user_query.data or len(user_query.data) == 0:
+            return jsonify({"error": "User not found"}), 404
+        userid=user_query.data[0]["userid"]
+
+        products=supabase.table("products").select("*").eq("sellerid",userid).eq("is_available",True).execute()
+
+        if products.data:
+            return jsonify({"products": products.data}), 200
+        else:
+            return jsonify({"products": []}), 200
+
+    except Exception as e:
+        logging.error(f"Error fetching products: {str(e)}")
+        return jsonify({"error": str(e)}), 500
 
 
 
@@ -143,27 +162,6 @@ def user_completed_products():
         logging.error(f"Error fetching products: {str(e)}")
         return jsonify({"error": str(e)}), 500
 
-def user_current_products():
-    try:
-        email=access_token()
-
-        user_query=supabase.table("users").select("userid").eq("email",email).execute()
-        if not user_query.data or len(user_query.data) == 0:
-            return jsonify({"error": "User not found"}), 404
-        userid=user_query.data[0]["userid"]
-
-        products=supabase.table("products").select("*").eq("sellerid",userid).eq("is_available",True).execute()
-
-        if products.data:
-            return jsonify({"products": products.data}), 200
-        else:
-            return jsonify({"products": []}), 200
-
-
-
-    except Exception as e:
-        logging.error(f"Error fetching products: {str(e)}")
-        return jsonify({"error": str(e)}), 500
 
 def query_products():
     try:
