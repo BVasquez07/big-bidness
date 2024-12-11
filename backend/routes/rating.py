@@ -39,10 +39,11 @@ def rating():
         #needs to check who is rating it 
         ratedby = userid
 
-
-        print(type(buyid))
         print("Retrieving transaction")
-        valid_transaction=supabase.table("transactions").select("*").eq("buyerid", ratedby).eq("buyid", buyid).execute()
+        if raterType == "seller":
+            valid_transaction=supabase.table("transactions").select("*").eq("sellerid", ratedby).eq("buyid", buyid).execute()
+        else:
+            valid_transaction=supabase.table("transactions").select("*").eq("buyerid", ratedby).eq("buyid", buyid).execute()
         print("Transaction Retrieved Successfully")
         if valid_transaction.data:
             if raterType == "seller":
@@ -58,8 +59,7 @@ def rating():
                 if not update_rate_bool.data or len(update_rate_bool.data) == 0:
                     return jsonify({"error": "Failed to update buyer_rated"}), 500
 
-        #inserts in rating table
-        print("Inserting rating")
+
         rating_result=supabase.table("ratings").insert({
             "userid": ratedID, 
             "rating":rating,

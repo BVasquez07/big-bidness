@@ -2,12 +2,13 @@
 import React, { useEffect, useState } from 'react';
 import { BidItem } from './biditem';
 import { ListingItem } from './listingItem';
-import { CompletedBids } from './completedbids'; 
+import { CompletedItem } from './completeditem'; 
 
 export default function Activity() {
   const [activeBids, setActiveBids] = useState([]);
   const [completedBids, setCompletedBids] = useState([]);
   const [activeListings, setActiveListings] = useState([]);
+  const [completedListings, setCompletedListings] = useState([]);
   const [token, setToken] = useState('');
 
   useEffect(() => {
@@ -80,10 +81,30 @@ export default function Activity() {
           .catch((error) => console.error('Error fetching bids:', error));
       }
 
+      function fetchCompletedListings() {
+        fetch('http://localhost:5000/getcompletedproducts', {
+          method: 'GET',
+          headers: {
+            Authorization: `${token}`,
+          },
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            console.log(data);
+            if (data.sales) {
+              setCompletedListings(data.sales);
+            } else {
+              console.log('No Listings found in the response');
+            }
+          })
+          .catch((error) => console.error('Error fetching bids:', error));
+      }
+
     if (token) {
       fetchBids();
       fetchListings();
       fetchCompletedBids();
+      fetchCompletedListings();
     }
   }, [token]);
 
@@ -93,8 +114,8 @@ export default function Activity() {
   const mapListings = (data) => {
     return data.map((item) => <ListingItem data={item} key={item.product_id} />);
   };
-  const mapCompletedBids = (data) => {
-    return data.map((item) => <CompletedBids data={item} key={item.product[0].product_id} />);
+  const mapCompletedBids = (data, raterType) => {
+    return data.map((item) => <CompletedItem data={item} raterType={raterType} key={item.product[0].product_id} />);
   };
 
   return (
@@ -116,7 +137,13 @@ export default function Activity() {
         <div>
           <div className="text-2xl font-semibold">Completed Bids</div>
           <div className="px-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 lg:grid-cols-4 gap-6 p-4">
-            {mapCompletedBids(completedBids)}
+            {mapCompletedBids(completedBids, 'buyer')}
+          </div>
+        </div>
+        <div>
+          <div className="text-2xl font-semibold">Completed Listings</div>
+          <div className="px-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 lg:grid-cols-4 gap-6 p-4">
+            {mapCompletedBids(completedListings, 'seller')}
           </div>
         </div>
       </div>

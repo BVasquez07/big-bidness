@@ -229,10 +229,11 @@ def getcompletedproducts():
             sales.append({
                 "product": product_result.data,
                 "userid": userid,
-                "buyername": buyer_name,
-                "buyerid": buyerid,
+                "ratedname": buyer_name,
+                "ratedid": buyerid,
                 "rating_posted": rating_posted,
-                "buyid": buyid
+                "buyid": buyid,
+                "price": sale.get("price"),
             })
 
         return jsonify({"sales": sales}), 200

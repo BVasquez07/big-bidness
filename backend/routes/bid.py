@@ -334,10 +334,11 @@ def getCompletedBids():
             bids.append({
                 "product": product_result.data,
                 "userid": userid,
-                "sellername": seller_name,
-                "sellerid": sellerid,
+                "ratedname": seller_name,
+                "ratedid": sellerid,
                 "rating_posted": rating_posted,
-                "buyid": buyid
+                "buyid": buyid,
+                "price": bid.get("price")
             })
 
         return jsonify({"bids": bids}), 200

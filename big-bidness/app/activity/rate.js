@@ -33,7 +33,7 @@ export const Rate = ({setRated, sendData, showSellerName}) => {
     const submitRating = () => {
       if (stars > 0 && token) {
         setRated(true)
-        
+        console.log(sendData)
         fetch('http://localhost:5000/submitrating', {
           method: 'POST',
           headers: {
