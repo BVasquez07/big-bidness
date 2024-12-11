@@ -4,7 +4,7 @@ import { Rate } from './rate';
 import { useState } from 'react';
 import { Star } from 'lucide-react';
 
-export const CompletedListing = ({ data }) => {
+export const CompletedBids = ({ data }) => {
   const [rated, setRated] = useState(data.rating_posted);
   const product_id = data.product[0].product_id;
   const backendData = {

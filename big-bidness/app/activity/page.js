@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { BidItem } from './biditem';
 import { ListingItem } from './listingItem';
-import { CompletedListing } from './completedlisting'; 
+import { CompletedBids } from './completedbids'; 
 
 export default function Activity() {
   const [activeBids, setActiveBids] = useState([]);
@@ -94,7 +94,7 @@ export default function Activity() {
     return data.map((item) => <ListingItem data={item} key={item.product_id} />);
   };
   const mapCompletedBids = (data) => {
-    return data.map((item) => <CompletedListing data={item} key={item.product[0].product_id} />);
+    return data.map((item) => <CompletedBids data={item} key={item.product[0].product_id} />);
   };
 
   return (
@@ -114,7 +114,7 @@ export default function Activity() {
           </div>
         </div>
         <div>
-          <div className="text-2xl font-semibold">Completed Listings</div>
+          <div className="text-2xl font-semibold">Completed Bids</div>
           <div className="px-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 lg:grid-cols-4 gap-6 p-4">
             {mapCompletedBids(completedBids)}
           </div>
