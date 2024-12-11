@@ -84,10 +84,8 @@ def product_post():
         return jsonify({"error": str(e)}), 500
 
 #upadte lisiting status
-def update_product_post():
+def update_product_post(product_id):
     try:
-        query=request.json
-        product_id=query.get("product_id")
 
         if not product_id:
             return jsonify({"error":"Product ID is required"}), 400
