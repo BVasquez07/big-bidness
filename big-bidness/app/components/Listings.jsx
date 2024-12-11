@@ -34,7 +34,7 @@ export const Listings = ({ searchInput }) => {
     });
 
     const filteredData = data.filter((item) => 
-      item.product_name.toLowerCase().includes(searchInput.toLowerCase())
+      item.product_name.toLowerCase().includes(searchInput.toLowerCase()) && item.is_available === true
     );
     const items = filteredData.map((item) => (
       <Item

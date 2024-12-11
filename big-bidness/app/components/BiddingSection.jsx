@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import axios from 'axios';
 
-const BiddingSection = ({ product_id, userInfo, is_available }) => {
+const BiddingSection = ({ product_id, userInfo, is_available, seller_id }) => {
   const [bids, setBids] = useState([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [bidInput, setBidInput] = useState("");
@@ -24,7 +24,7 @@ const BiddingSection = ({ product_id, userInfo, is_available }) => {
       try {
         const response = await fetch(`http://localhost:5000/get-product-bid?product_id=${product_id}`);
         const data = await response.json();
-        console.log(data.bids)
+        // console.log(data.bids)
         if (data.bids && Array.isArray(data.bids)) {
           const formattedBids = data.bids.map(bid => ({
             username: bid.buyername,
@@ -35,7 +35,8 @@ const BiddingSection = ({ product_id, userInfo, is_available }) => {
             firstname: bid.fisrstname,
             lastname: bid.lastname,
             rating: bid.buyer_rating,
-            bidid: bid.bidid
+            bidid: bid.bidid,
+            sellerid: bid.sellerid
           }));
           setBids(formattedBids);
         } else {
@@ -140,7 +141,8 @@ const BiddingSection = ({ product_id, userInfo, is_available }) => {
             bidDeadline: bidDeadline.toLocaleString(),
             rating: userInfo.rating,
             firstname: userInfo.firstname,
-            lastname: userInfo.lastname
+            lastname: userInfo.lastname,
+            sellerid: userInfo.userid
           }, ...bids]);
 
           closeDialog();
@@ -156,7 +158,7 @@ const BiddingSection = ({ product_id, userInfo, is_available }) => {
   };
 
   const sortedBids = bids ? bids.sort((a, b) => b.bidAmount - a.bidAmount) : [];
-  // console.log(sortedBids)
+  const isSameUser = seller_id === userInfo.userid;
 
   const renderStars = (rating) => {
     const stars = [];
@@ -180,7 +182,14 @@ const BiddingSection = ({ product_id, userInfo, is_available }) => {
           <button
             key={index}
             className="w-full p-2 mb-0 text-left border-b border-gray-300 flex justify-between items-center hover:bg-gray-200"
-            onClick={() => openDialog(bid, 'acceptBid')} // Opening accept bid dialog
+            onClick={() => {
+              if (isSameUser) {
+                openDialog(bid, 'acceptBid'); // Opening accept bid dialog
+              } else {
+                alert("You cannot interact with this bid.");
+              }
+            }}
+            disabled={!isSameUser}
           >
             <div className="flex flex-col items-start">
               <div className="font-semibold">{bid.firstname} {bid.lastname} ({bid.username})</div>

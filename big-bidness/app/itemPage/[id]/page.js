@@ -24,6 +24,7 @@ const ItemPage = ({ params }) => {
             }
         })
         const data = await userinfo.json()
+        // console.log(data['user'])
         setUserInfo(data['user'])
     }
     if (token) {
@@ -72,7 +73,7 @@ const ItemPage = ({ params }) => {
           {/* Right side: Bidding Section */}
           <div className="flex flex-col justify-start">
             <div className="p-0 border rounded-lg mb-0 h-[555px]">
-              <BiddingSection product_id={item.product_id} userInfo={userInfo} is_available={item.is_available}/>
+              <BiddingSection product_id={item.product_id} userInfo={userInfo} is_available={item.is_available} seller_id={item.sellerid}/>
             </div>
           </div>
         </div>
