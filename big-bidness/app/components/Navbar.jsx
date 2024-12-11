@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, use } from 'react';
 import Link from 'next/link';
 
 export const Navbar = () => {
@@ -13,6 +13,23 @@ export const Navbar = () => {
       setRole(localStorage.getItem('role'));
     }
   }, []);
+
+  //hook handles signing out of supabase when user logs out
+  useEffect(() => {
+    if(!localStorage.getItem('token')){
+      fetch("http://localhost:5000/signout", {method: "POST"} )
+      .then(() => console.log("signed out user in supabase as well."))
+      .catch((err) => console.log(err));
+    }
+  }, [token]);
+
+  const handleLogout = () => {//handles removing cached tokens and role from local storage and redirects to home page
+    localStorage.removeItem('token');
+    localStorage.removeItem('role');
+    setToken(null);
+    setRole(null);
+    setTimeout(() => {window.location.href = "/";}, 1750)
+  }
 
   function toggleNav() {
     setIsToggle(!isToggle);
@@ -42,6 +59,9 @@ export const Navbar = () => {
                 <Link href="/settings" className="text-black hover:bg-black hover:text-white rounded-md px-1 py-1">
                   Settings
                 </Link>
+                <button className="text-black hover:bg-black hover:text-white rounded-md px-1 py-1" onClick={handleLogout}>
+                  Sign out
+                </button>
               </>
             ) : (
               <>

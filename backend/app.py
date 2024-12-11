@@ -191,4 +191,4 @@ def getcompletedbids_route():
     return bid.getCompletedBids()
 
 if __name__ == "__main__":
-    app.run(host="localhost", debug=True, port=8080)
+    app.run(host="localhost", debug=True, port=5000)
