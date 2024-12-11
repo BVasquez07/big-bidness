@@ -309,6 +309,7 @@ def getCompletedBids():
         for bid in completedBids.data:
             product_id = bid.get("product_id")
             sellerid = bid.get("sellerid")
+            buyid = bid.get("buyid")
 
             if not product_id or not isinstance(product_id, int):
                 logging.error("Invalid product_id in transaction record")
@@ -335,7 +336,8 @@ def getCompletedBids():
                 "userid": userid,
                 "sellername": seller_name,
                 "sellerid": sellerid,
-                "rating_posted": rating_posted
+                "rating_posted": rating_posted,
+                "buyid": buyid
             })
 
         return jsonify({"bids": bids}), 200

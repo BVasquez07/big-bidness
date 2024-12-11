@@ -1,21 +1,10 @@
 from config import supabase
 import logging
 from flask import jsonify, request
-from routes.auth import access_token
 
 #get all complaints
-def postcomplaint():
+def postcomplaint(product_id, complaintdetails, email):
     try:
-        
-        query=request.json
-        complaintdetails=query.get("complaintdetails")
-        product_id=query.get("product_id")
-
-       
-        if not complaintdetails or not product_id:
-            return jsonify({"error": "Complaint details and product ID are required"}), 400
-
-        email=access_token()
         
         buyer_result=supabase.table("users").select("userid").eq("email", email).execute()
 
