@@ -35,6 +35,7 @@ const BiddingSection = ({ product_id, userInfo, is_available }) => {
             firstname: bid.fisrstname,
             lastname: bid.lastname,
             rating: bid.buyer_rating,
+            bidid: bid.bidid
           }));
           setBids(formattedBids);
         } else {
@@ -62,23 +63,23 @@ const BiddingSection = ({ product_id, userInfo, is_available }) => {
 
   const handleAcceptBid = async () => {
     if (!selectedBid) return;
-    console.log(selectedBid)
+    // console.log(selectedBid)
 
     try {
-      const response = await fetch('http://localhost:5000/acceptbid', {
+      const response = await fetch(`http://localhost:5000/acceptbid`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': token,
         },
-        body: JSON.stringify({ product_id, bid_id: selectedBid.bidId }),
+        body: JSON.stringify({ bidid: selectedBid.bidid }),
       });
 
       const data = await response.json();
 
-      if (response.status === 200) {
+      if (response.status === 201) {
         alert(`You have accepted the bid of $${selectedBid.bidAmount}`);
-        setBids(bids.filter(bid => bid.bidId !== selectedBid.bidId)); // Remove accepted bid
+        setBids(bids.filter(bid => bid.bidid !== selectedBid.bidid)); // Remove accepted bid
       }
       closeDialog(); // Close dialog after accepting the bid
     } catch (err) {
@@ -126,7 +127,7 @@ const BiddingSection = ({ product_id, userInfo, is_available }) => {
         });
 
         const data = await response.json();
-        console.log(data)
+        // console.log(data)
 
         if (data.message === 'Bid posted successfully') {
           alert(`Bid of $${bidInput} posted successfully!`);
@@ -155,7 +156,7 @@ const BiddingSection = ({ product_id, userInfo, is_available }) => {
   };
 
   const sortedBids = bids ? bids.sort((a, b) => b.bidAmount - a.bidAmount) : [];
-  console.log(sortedBids)
+  // console.log(sortedBids)
 
   const renderStars = (rating) => {
     const stars = [];
