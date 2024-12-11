@@ -182,5 +182,9 @@ def deletequittingsys_route():
 def valid_token_route():
     return auth.valid_token()
 
+@app.route("/getcompletedbids", methods=["GET"])
+def getcompletedbids_route():
+    return bid.getCompletedBids()
+
 if __name__ == "__main__":
     app.run(host="localhost", debug=True, port=5000)

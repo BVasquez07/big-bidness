@@ -293,7 +293,57 @@ def getpastbid():
         logging.error(f"Error fetching bids: {str(e)}")
         return jsonify({"error": str(e)}), 500
 
+def getCompletedBids():
+    try:
+        email = access_token()
+        user_query = supabase.table("users").select("userid").eq("email", email).execute()
+        if not user_query.data or len(user_query.data) == 0:
+            return jsonify({"error": "User not found"}), 404
+        userid = user_query.data[0]["userid"]
 
+        completedBids = supabase.table("transactions").select("*").eq("buyerid", userid).execute()
+        if not completedBids.data or len(completedBids.data) == 0:
+            return jsonify({"bids": []}), 200
+
+        bids = []
+        for bid in completedBids.data:
+            product_id = bid.get("product_id")
+            sellerid = bid.get("sellerid")
+
+            if not product_id or not isinstance(product_id, int):
+                logging.error("Invalid product_id in transaction record")
+                continue
+            if not sellerid or not isinstance(sellerid, int):
+                logging.error("Invalid sellerid in transaction record")
+                continue
+
+            rating_posted = bid.get("buyer_rated")
+
+            product_result = supabase.table("products").select("*").eq("product_id", product_id).execute()
+            if not product_result.data or len(product_result.data) == 0:
+                logging.error(f"No product found for product_id: {product_id}")
+                continue
+
+            seller_result = supabase.table("users").select("username").eq("userid", sellerid).execute()
+            if not seller_result.data or len(seller_result.data) == 0:
+                logging.error(f"No seller found for sellerid: {sellerid}")
+                continue
+            seller_name = seller_result.data[0].get("username")
+
+            bids.append({
+                "product": product_result.data,
+                "userid": userid,
+                "sellername": seller_name,
+                "sellerid": sellerid,
+                "rating_posted": rating_posted
+            })
+
+        return jsonify({"bids": bids}), 200
+    except Exception as e:
+        logging.error(f"Error fetching bids: {str(e)}")
+        return jsonify({"error": str(e)}), 500
+
+    
 
 def acceptbid():
     try:
