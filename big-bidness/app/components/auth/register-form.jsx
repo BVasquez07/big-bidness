@@ -48,10 +48,18 @@ const RegisterForm = () => {
 
     // Generate a math question
     useEffect(() => {
-        const num1 = Math.floor(Math.random() * 10);
-        const num2 = Math.floor(Math.random() * 10);
-        setMathQuestion(`${num1} + ${num2} = ?`);
+        const num1 = Math.floor(Math.random() * 50 + 1); // Random number between 1 and 50
+        const num2 = Math.floor(Math.random() * 50 + 1);
+        const num3 = Math.floor(Math.random() * 20 + 1); // Random number between 1 and 20
+    
+        const operators = ['+', '-', '*', '/'];
+        const op1 = operators[Math.floor(Math.random() * operators.length)];
+        const op2 = operators[Math.floor(Math.random() * operators.length)];
+    
+        const question = `(${num1} ${op1} ${num2}) ${op2} ${num3} = ?`;
+        setMathQuestion(question);
     }, []);
+    
 
     // Define the form submission handler
     const onSubmit = (data) => {
