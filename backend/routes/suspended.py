@@ -85,11 +85,12 @@ def getsuspended():
         if not suspended or len(suspended) == 0:
             return jsonify({"suspended": []}), 200
 
-        return jsonify({"suspendded": suspended}), 200
+        return jsonify({"suspended": suspended}), 200
 
     except Exception as e:
         logging.error(f"Error fetching suspended: {str(e)}")
         return jsonify({"error": str(e)}), 500
+
 
 def updatesuspended():
     try:
@@ -108,6 +109,10 @@ def updatesuspended():
 
         #get user to login and add their credit card
         user_response=supabase.auth.sign_in_with_password({"email": email, "password": password})
+
+        access_token=user_response.session.access_token
+        if not access_token:
+            return jsonify({"error": "Access Token Failure"}), 401
 
         if not user_response or not hasattr(user_response, 'user') or not user_response.user:
             return jsonify({"error": "Authentication failed"}), 401
@@ -128,9 +133,8 @@ def updatesuspended():
         if not user_response.data or len(user_response.data) == 0:
             return jsonify({"error": "User not found"}), 404
         userid = user_response.data[0]["userid"]
-        now=datetime.now()
-        today=now.date().isoformat()
-        current_time=now.time().isoformat() 
+        role = user_response.data[0]["role"]
+        now=datetime.now().isoformat()
 
         update_suspension = supabase.table("user_suspensions").update({
             "is_suspended": False,
@@ -139,13 +143,13 @@ def updatesuspended():
         if not update_suspension.data or len(update_suspension.data) == 0:
             return jsonify({"error": "Failed to update suspension for this user"}), 500
 
-        return jsonify({"message": "50 dollars paid.You can sign in now"}), 200
+        return jsonify({"role": role, "token": access_token, "message": "50 dollars paid.You can sign in now"}), 200
     except Exception as e:
         logging.error(f"Error fetching suspended: {str(e)}")
         return jsonify({"error": str(e)}), 500
 
 
-def admin_suspenion_upadte():
+def admin_suspenion_update():
     try:
         query=request.json
         suspended_id=query.get("userid")
