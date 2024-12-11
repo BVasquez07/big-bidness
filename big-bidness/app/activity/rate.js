@@ -17,18 +17,45 @@ import { Switch } from "../../components/ui/switch"
 import { Button } from "../../components/ui/button"
   
 import React from 'react'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
   
-export const Rate = ({setRated, sellerID, sellerName}) => {
+export const Rate = ({setRated, sendData, showSellerName}) => {
 
     const [stars, setStars] = useState(0)
     const [complain, setComplain] = useState(false)
     const [complainText, setComplainText] = useState('')
+    const [token, setToken] = useState('')
+
+    useEffect(() => {
+      setToken(localStorage.getItem('token'))
+    }, [])
 
     const submitRating = () => {
-      setRated(true)
-      console.log(stars)
-      console.log(complainText)
+      if (stars > 0 && token) {
+        setRated(true)
+        console.log(sendData)
+        fetch('http://localhost:5000/submitrating', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `${token}`
+          },
+          body: JSON.stringify({
+            'raterType': sendData.raterType,
+            "userID": sendData.userID,
+            "buyid": sendData.buyID,
+            "product_id": sendData.productID,
+            "ratedID": sendData.ratedID,
+            "rating": stars,
+            "complaintdetails": complainText
+          })
+        })
+        .then(response => response.json())
+        .then(data => console.log(data))
+        .catch(error => console.log(error))
+        console.log(stars)
+        console.log(complainText)
+      }
     }
 
     return (
@@ -36,7 +63,7 @@ export const Rate = ({setRated, sellerID, sellerName}) => {
         <DialogTrigger className='pl-2'>Rate</DialogTrigger>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Rate</DialogTitle>
+            <DialogTitle>Please rate {showSellerName}</DialogTitle>
             <div className='flex justify-between'>
               <DialogDescription>
                 How would you rate your experience?

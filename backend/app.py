@@ -62,6 +62,10 @@ def update_product_vip_post_route():
 def userproducts_route():
     return product.user_current_products()
 
+@app.route('/getcompletedproducts', methods=["GET"])
+def getcompletedproducts_route():
+    return product.getcompletedproducts()
+
 @app.route("/vipuser-completed-products", methods=["GET"])
 def vipuser_completed_route():
     return vip.vipuser_completed_products()
