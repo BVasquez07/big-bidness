@@ -10,6 +10,8 @@ const ItemPage = ({ params }) => {
   const [token, setToken] = useState('');
   const { id: product_id } = React.use(params);
 
+  const [isVip, setIsVip] = useState(false);
+
   useEffect(() => {
     setToken(localStorage.getItem('token'));
   }, []);
