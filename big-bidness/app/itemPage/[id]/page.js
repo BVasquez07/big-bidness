@@ -133,6 +133,13 @@ const ItemPage = ({ params }) => {
   
   return (
     <div className="flex justify-center p-6 px-8">
+      {success && (
+        <div className="shadow max-w-md w-full text-center">
+          <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative" role="alert">
+            <strong className="font-bold">Bid Accepted Successfully</strong>
+          </div>
+        </div>
+      )}
       <div className="w-full max-w-7xl">
         <h1 className="text-2xl font-bold mb-4">{item.product_name}</h1>
         <p className="text-xl text-gray-700 mb-4">Price: ${item.price}</p>
