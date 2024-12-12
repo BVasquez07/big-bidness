@@ -96,7 +96,7 @@ const BiddingSection = ({ product_id, setBids, userInfo, bids }) => {
             buyer_rating: userInfo.rating,
             buyername: userInfo.username,
           },
-          ...bids
+          ...(Array.isArray(bids) ? bids : []), // Ensure bids is an array
         ]);
 
         closeDialog();

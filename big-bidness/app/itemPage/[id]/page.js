@@ -213,7 +213,7 @@ const ItemPage = ({ params }) => {
         </div>
   
         <div className="mt-6">
-          <Comments product_id={item.product_id} />
+          <Comments product_id={item.product_id} userInfo={userInfo}/>
         </div>
       </div>
     </div>
