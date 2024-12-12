@@ -140,6 +140,13 @@ const BiddingSection = ({ product_id, setBids, userInfo, bids, isVip }) => {
                 Please enter the amount you want to bid and the bid deadline.
               </DialogDescription>
             </DialogHeader>
+            {success && (
+      <div className="shadow max-w-md w-full text-center">
+          <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative" role="alert">
+              <strong className="font-bold">Bid Accepted Successfully</strong>
+          </div>
+      </div>
+      )}
             <div className="mt-4">
               <form>
                 {/* Bid Amount Input */}
