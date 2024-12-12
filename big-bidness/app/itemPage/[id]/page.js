@@ -32,6 +32,9 @@ const ItemPage = ({ params }) => {
         console.log(data)
         setUserid(data['user']['userid'])
         setUserInfo(data['user'])
+        if (data['user']['role'] === 'Vip') {
+          setIsVip(true);
+        }
     }
     if (token) {
         getUserInfo()
@@ -176,6 +179,7 @@ const ItemPage = ({ params }) => {
                     setBids={setBids}
                     bids={bids}
                     userInfo={userInfo}
+                    isVip={isVip}
                   />
                 </div>
               )} 
