@@ -14,6 +14,7 @@ const ItemPage = ({ params }) => {
   const { id: product_id } = React.use(params);
   const [isSeller, setIsSeller] = useState(false);
   const [isVip, setIsVip] = useState(false);
+  const [success, setSuccess] = useState(null);
 
   useEffect(() => {
     setToken(localStorage.getItem('token'));
@@ -111,6 +112,11 @@ const ItemPage = ({ params }) => {
 
       const data = await response.json();
       console.log(data);
+
+      setTimeout(() => {
+        setSuccess(true);
+        window.location.href = "/";
+      }, 2000);
 
     } catch (error) {
       console.error('Error during fetch:', error);
