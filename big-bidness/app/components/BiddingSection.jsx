@@ -68,9 +68,14 @@ const BiddingSection = ({ product_id, setBids, userInfo, bids, isVip }) => {
       return;
     }
 
+    let bidPriceVal = parseFloat(bidInput)
+    if (isVip) {
+      bidPriceVal = bidPriceVal * 0.9
+    }
+
     const newBid = {
       product_id: product_id,
-      bidamount: parseFloat(bidInput),
+      bidamount: bidPriceVal,
       biddeadline: formattedDeadline,
     };
 
@@ -88,7 +93,7 @@ const BiddingSection = ({ product_id, setBids, userInfo, bids, isVip }) => {
       console.log(data);
 
       if (data.message === 'Bid posted successfully') {
-        alert(`Bid of $${bidInput} posted successfully!`);
+        alert(`Bid of $${bidPriceVal} posted successfully!`);
         setBids([
           {
             bidamount: parseFloat(bidInput),
