@@ -12,19 +12,21 @@ def postcomment():
         query=request.json
         text=query.get("text")
         product_id=query.get("product_id")
+        isUser = query.get("isUser")
 
         now=datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         if not text or not product_id:
             return jsonify({"error": "Comment details and product ID are required"}), 400
-
-        email=access_token()
+        commenterid = None
+        if isUser == True:
+            email=access_token()
         
-        commenter_result=supabase.table("users").select("userid").eq("email", email).execute()
+            commenter_result=supabase.table("users").select("userid").eq("email", email).execute()
 
-        if not commenter_result.data or len(commenter_result.data) == 0:
-            return jsonify({"error":"User not found"}), 404
+            if not commenter_result.data or len(commenter_result.data) == 0:
+                return jsonify({"error":"User not found"}), 404
 
-        commenterid=commenter_result.data[0].get("userid") 
+            commenterid=commenter_result.data[0].get("userid") 
         
         comment_result=supabase.table("comments").insert({
             "product_id": product_id, 
@@ -63,10 +65,12 @@ def get_product_comment():
 
         
             product_result=supabase.table("products").select("product_name").eq("product_id", product_id).execute()
-            user_result=supabase.table("users").select("username").eq("userid", userid).execute()
+            username="Anonymous"
+            if userid:
+                user_result=supabase.table("users").select("username").eq("userid", userid).execute()
+                username=user_result.data[0].get("username")
 
             product_name=product_result.data[0].get("product_name")
-            username=user_result.data[0].get("username")
 
             comments.append({
                 "comment_id":comment_id,

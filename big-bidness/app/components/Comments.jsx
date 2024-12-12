@@ -35,10 +35,10 @@ const Comments = ({ product_id, userInfo }) => {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': token,
           },
         });
         const data = await response.json();
+        console.log(data);
 
         // Check if data.comment is an array and contains data
         if (Array.isArray(data.comment) && data.comment.length > 0) {
@@ -58,33 +58,45 @@ const Comments = ({ product_id, userInfo }) => {
       }
     };
 
-    if (product_id && token) {
+    if (product_id) {
       fetchComments();
     }
-  }, [product_id, token]);
+  }, [product_id]);
 
   const handlePostComment = async (e) => {
     e.preventDefault();
+    let isUser = false;
+    let headers = {
+      'Content-Type': 'application/json',
+    }
+    if (token) {
+      isUser = true;
+      headers['Authorization'] = token
+    }
     const newComment = {
       text: commentText,
       product_id: product_id,
+      isUser: isUser,
     };
 
     try {
       const response = await fetch('http://localhost:5000/postcomment', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': token,
-        },
+        headers: headers,
         body: JSON.stringify(newComment),
       });
       const data = await response.json();
 
       if (data.message === 'comment posted successfully') {
         const newFormattedDate = new Date().toLocaleString();
+        console.log(userInfo.username)
+        console.log(isUser)
+        let username = 'anonymous';
+        if (isUser) {
+          username = userInfo.username
+        }
         setComments([{
-          username: `${userInfo.username}`,
+          username: username,
           formattedDate: newFormattedDate,
           text: commentText,
         }, ...comments]);
