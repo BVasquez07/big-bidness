@@ -13,6 +13,7 @@ const BiddingSection = ({ product_id, setBids, userInfo, bids, isVip }) => {
   const [bidInput, setBidInput] = useState("");
   const [token, setToken] = useState('');
   const [bidDeadline, setBidDeadline] = useState("");
+  const [success, setSuccess] = useState(null);
 
   useEffect(() => {
     const storedToken = localStorage.getItem('token');
@@ -103,6 +104,11 @@ const BiddingSection = ({ product_id, setBids, userInfo, bids, isVip }) => {
           },
           ...bids
         ]);
+
+        setTimeout(() => {
+          setSuccess(true);
+          window.location.href = "/";
+        }, 2000);
 
         closeDialog();
       } else {
