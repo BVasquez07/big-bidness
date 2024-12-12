@@ -153,6 +153,18 @@ def getproducts():
         logging.error(f"Error fetching products: {str(e)}")
         return jsonify({"error": str(e)}), 500
     
+def getspecificproduct():
+    product_id = request.args.get("product_id")
+    try:
+        product=supabase.table("products").select("*").eq("product_id",product_id).execute()
+        if product.data:
+            return jsonify({"product": product.data}), 200
+        else:
+            return jsonify({"product": []}), 200
+    except Exception as e:
+        logging.error(f"Error fetching product: {str(e)}")
+        return jsonify({"error": str(e)}), 500
+    
 def user_current_products():
     try:
         email=access_token()

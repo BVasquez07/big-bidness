@@ -1,272 +1,194 @@
 import React, { useState, useEffect } from 'react';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import axios from 'axios';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger
+} from "@/components/ui/dialog";
 
-const BiddingSection = ({ product_id, userInfo, is_available, seller_id }) => {
-  const [bids, setBids] = useState([]);
+const BiddingSection = ({ product_id, setBids, userInfo, bids }) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [bidInput, setBidInput] = useState("");
   const [token, setToken] = useState('');
-  const [selectedBid, setSelectedBid] = useState(null);
-  const [dialogType, setDialogType] = useState(null); // null, 'placeBid', or 'acceptBid'
-  const [bidDeadline, setBidDeadline] = useState(""); // State for bid deadline
+  const [bidDeadline, setBidDeadline] = useState("");
 
   useEffect(() => {
-    setToken(localStorage.getItem('token'));
+    const storedToken = localStorage.getItem('token');
+    setToken(storedToken || '');
   }, []);
 
   const handleBidDeadlineChange = (e) => {
     setBidDeadline(e.target.value);
   };
 
-  useEffect(() => {
-    const fetchBids = async () => {
-      try {
-        const response = await fetch(`http://localhost:5000/get-product-bid?product_id=${product_id}`);
-        const data = await response.json();
-        // console.log(data.bids)
-        if (data.bids && Array.isArray(data.bids)) {
-          const formattedBids = data.bids.map(bid => ({
-            username: bid.buyername,
-            date: new Date(bid.biddeadline).toLocaleString(),
-            bidAmount: bid.bidamount,
-            bidDeadline: new Date(bid.biddeadline).toLocaleString(),
-            bidaccepted: bid.bid_accepted,
-            firstname: bid.fisrstname,
-            lastname: bid.lastname,
-            rating: bid.buyer_rating,
-            bidid: bid.bidid,
-            sellerid: bid.sellerid
-          }));
-          setBids(formattedBids);
-        } else {
-          setBids([]);
-        }
-      } catch (error) {
-        console.error("Error fetching bids:", error);
-      }
-    };
-
-    fetchBids();
-  }, [product_id]);
-
-  const openDialog = (bid, type) => {
-    setSelectedBid(bid);
-    setDialogType(type); // 'placeBid' or 'acceptBid'
+  const openDialog = () => {
     setIsDialogOpen(true);
   };
 
   const closeDialog = () => {
-    setSelectedBid(null);
-    setDialogType(null);
     setIsDialogOpen(false);
-  };
-
-  const handleAcceptBid = async () => {
-    if (!selectedBid) return;
-    // console.log(selectedBid)
-
-    try {
-      const response = await fetch(`http://localhost:5000/acceptbid`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': token,
-        },
-        body: JSON.stringify({ bidid: selectedBid.bidid }),
-      });
-
-      const data = await response.json();
-
-      if (response.status === 201) {
-        alert(`You have accepted the bid of $${selectedBid.bidAmount}`);
-        setBids(bids.filter(bid => bid.bidid !== selectedBid.bidid)); // Remove accepted bid
-      }
-      closeDialog(); // Close dialog after accepting the bid
-    } catch (err) {
-      console.error('Error accepting bid:', err);
-      alert('There was an error accepting the bid');
-    }
+    setBidInput("");
+    setBidDeadline("");
   };
 
   const handleBidChange = (e) => {
     setBidInput(e.target.value);
   };
 
+  const convertToDesiredFormat = (input) => {
+    const date = new Date(input);
+
+    if (isNaN(date.getTime())) {
+      throw new Error("Invalid date format");
+    }
+
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-based
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    const seconds = String(date.getSeconds()).padStart(2, '0');
+
+    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+  };
+
   const handleSubmitBid = async () => {
-    if (!is_available) {
-      alert("This item is no longer available for bidding.");
+    if (!bidInput || !bidDeadline) {
+      alert("Please enter both bid amount and deadline.");
       return;
     }
 
-    const highestBid = bids.length > 0 ? Math.max(...bids.map(bid => bid.bidAmount)) : 0;
-    if (bidInput <= highestBid) {
-      alert(`Your bid must be higher than the current highest bid of $${highestBid}.`);
-    } else if (bidInput > 0) {
-      const fullName = `${userInfo.firstname} ${userInfo.lastname} (${userInfo.username})`;
-      const bidderRating = userInfo.rating;
+    let formattedDeadline;
+    try {
+      formattedDeadline = convertToDesiredFormat(bidDeadline);
+    } catch (error) {
+      alert("Invalid date format. Please enter a valid date and time.");
+      return;
+    }
 
-      const newBid = {
-        product_id: product_id,
-        bidamount: bidInput,
-        biddeadline: new Date(bidDeadline).toISOString(),
-        bidderName: fullName,
-        bidderRating: bidderRating,
-      };
+    const newBid = {
+      product_id: product_id,
+      bidamount: parseFloat(bidInput),
+      biddeadline: formattedDeadline,
+    };
 
-      const formattedBidDeadline = new Date(bidDeadline).toISOString().replace('T', ' ').slice(0, 19);
-      newBid.biddeadline = formattedBidDeadline;
+    try {
+      const response = await fetch('http://localhost:5000/postbid', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': token,
+        },
+        body: JSON.stringify(newBid),
+      });
 
-      try {
-        const response = await fetch('http://localhost:5000/postbid', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': token,
+      const data = await response.json();
+      console.log(data);
+
+      if (data.message === 'Bid posted successfully') {
+        alert(`Bid of $${bidInput} posted successfully!`);
+        setBids([
+          {
+            bidamount: parseFloat(bidInput),
+            biddeadline: formattedDeadline,
+            buyer_rating: userInfo.rating,
+            buyername: userInfo.username,
           },
-          body: JSON.stringify(newBid),
-        });
+          ...bids
+        ]);
 
-        const data = await response.json();
-        // console.log(data)
-
-        if (data.message === 'Bid posted successfully') {
-          alert(`Bid of $${bidInput} posted successfully!`);
-
-          const newFormattedDate = new Date().toLocaleString();
-          setBids([{
-            username: userInfo.username,
-            date: newFormattedDate,
-            bidAmount: parseInt(bidInput),
-            bidDeadline: bidDeadline.toLocaleString(),
-            rating: userInfo.rating,
-            firstname: userInfo.firstname,
-            lastname: userInfo.lastname,
-            sellerid: userInfo.userid
-          }, ...bids]);
-
-          closeDialog();
-        } else {
-          console.error('Error placing bid:', data.error || 'Unknown error');
-        }
-      } catch (error) {
-        console.error('Error during fetch:', error);
+        closeDialog();
+      } else {
+        console.error('Error placing bid:', data.error || 'Unknown error');
+        alert(data.error || 'Error placing bid.');
       }
-    } else {
-      alert("Please enter a valid bid amount.");
+    } catch (error) {
+      console.error('Error during fetch:', error);
+      alert('An error occurred while placing your bid. Please try again.');
     }
-  };
-
-  const sortedBids = bids ? bids.sort((a, b) => b.bidAmount - a.bidAmount) : [];
-  const isSameUser = seller_id === userInfo.userid;
-
-  const renderStars = (rating) => {
-    const stars = [];
-    for (let i = 0; i < 5; i++) {
-      stars.push(
-        <svg key={i} className={`w-4 h-4 ${i < rating ? 'text-yellow-300' : 'text-gray-300'}`} aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 22 20">
-          <path d="M20.924 7.625a1.523 1.523 0 0 0-1.238-1.044l-5.051-.734-2.259-4.577a1.534 1.534 0 0 0-2.752 0L7.365 5.847l-5.051.734A1.535 1.535 0 0 0 1.463 9.2l3.656 3.563-.863 5.031a1.532 1.532 0 0 0 2.226 1.616L11 17.033l4.518 2.375a1.534 1.534 0 0 0 2.226-1.617l-.863-5.03L20.537 9.2a1.523 1.523 0 0 0 .387-1.575Z" />
-        </svg>
-      );
-    }
-    return stars;
   };
 
   return (
-    <section className="bg-white dark:bg-gray-900 relative border border-gray-500 h-[555px] flex flex-col">
-      <h2 className="text-lg lg:text-2xl font-bold text-gray-900 dark:text-white p-4 border-b border-gray-500 sticky top-0 bg-white dark:bg-gray-900 z-10">
-        Current Bids
-      </h2>
-      <div className="overflow-y-auto flex-grow p-0">
-        {sortedBids.map((bid, index) => (
-          <button
-            key={index}
-            className="w-full p-2 mb-0 text-left border-b border-gray-300 flex justify-between items-center hover:bg-gray-200"
-            onClick={() => {
-              if (isSameUser) {
-                openDialog(bid, 'acceptBid'); // Opening accept bid dialog
-              } else {
-                alert("You cannot interact with this bid.");
-              }
-            }}
-            disabled={!isSameUser}
-          >
-            <div className="flex flex-col items-start">
-              <div className="font-semibold">{bid.firstname} {bid.lastname} ({bid.username})</div>
-              <div className="flex items-center">
-                {renderStars(bid.rating)}
-              </div>
-            </div>
-            <div className="flex flex-col items-end">
-              <div className="font-bold">${bid.bidAmount}</div>
-              <div className="text-sm text-gray-500">{new Date(bid.bidDeadline).toLocaleString()}</div>
-            </div>
-          </button>
-        ))}
-      </div>
-      <div className="sticky bottom-0 p-4 bg-white dark:bg-gray-900 border-t border-gray-500">
+      <div className="relative bottom-0 p-4 bg-white dark:bg-gray-900 border-t border-gray-500">
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
             <button
               type="button"
-              onClick={() => openDialog(null, 'placeBid')} // Opening place bid dialog
-              className="w-full py-3 px-5 text-md font-medium text-center text-white bg-black rounded-lg focus:ring-4 focus:ring-black-200 dark:focus:ring-black-900 hover:bg-black-800"
+              onClick={openDialog}
+              className="w-full py-3 px-5 text-md font-medium text-center text-white bg-black rounded-lg focus:ring-4 focus:ring-black-200 dark:focus:ring-black-900 hover:bg-black-800 transition-colors"
             >
               Place Your Bid
             </button>
           </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>{dialogType === 'placeBid' ? 'Confirm Your Bid' : 'Accept Bid'}</DialogTitle>
-                <DialogDescription>
-                  {dialogType === 'placeBid' ? 'Please enter the amount you want to bid and the bid deadline.' : `Are you sure you want to accept the bid of $${selectedBid?.bidAmount}?`}
-                </DialogDescription>
-              </DialogHeader>
-              {dialogType === 'placeBid' ? (
-                <div className="mt-4">
-                  <form>
-                    <label htmlFor="bidInput" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                      Enter Bid Amount
-                    </label>
-                    <input
-                      type="number"
-                      id="bidInput"
-                      value={bidInput}
-                      onChange={handleBidChange}
-                      min="1"
-                      className="mt-2 p-2 w-full border border-gray-300 rounded-md dark:bg-gray-800 dark:text-white"
-                      placeholder="Enter your bid"
-                    />
-                    <label htmlFor="bidDeadline" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mt-4">
-                      Enter Bid Deadline
-                    </label>
-                    <input
-                      type="datetime-local"
-                      id="bidDeadline"
-                      value={bidDeadline}
-                      onChange={handleBidDeadlineChange}
-                      className="mt-2 p-2 w-full border border-gray-300 rounded-md dark:bg-gray-800 dark:text-white"
-                    />
-                  </form>
+          <DialogContent className="max-w-md mx-auto">
+            <DialogHeader>
+              <DialogTitle>Place Bid</DialogTitle>
+              <DialogDescription>
+                Please enter the amount you want to bid and the bid deadline.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="mt-4">
+              <form>
+                {/* Bid Amount Input */}
+                <div className="mb-4">
+                  <label
+                    htmlFor="bidInput"
+                    className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                  >
+                    Enter Bid Amount ($)
+                  </label>
+                  <input
+                    type="number"
+                    id="bidInput"
+                    value={bidInput}
+                    onChange={handleBidChange}
+                    min="1"
+                    className="w-full p-2 border border-gray-300 rounded-md dark:bg-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500"
+                    placeholder="e.g., 100"
+                    required
+                  />
                 </div>
-              ) : (
-                <div className="mt-4">
-                  <div className="text-lg">Bid Amount: ${selectedBid?.bidAmount}</div>
+
+                {/* Bid Deadline Input */}
+                <div className="mb-4">
+                  <label
+                    htmlFor="bidDeadline"
+                    className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                  >
+                    Enter Bid Deadline
+                  </label>
+                  <input
+                    type="datetime-local"
+                    id="bidDeadline"
+                    value={bidDeadline}
+                    onChange={handleBidDeadlineChange}
+                    className="w-full p-2 border border-gray-300 rounded-md dark:bg-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500"
+                    required
+                  />
                 </div>
-              )}
-              <div className="mt-6 flex justify-end">
-                <button
-                  type="button"
-                  onClick={dialogType === 'placeBid' ? handleSubmitBid : handleAcceptBid}
-                  className="py-2 px-4 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-                >
-                  {dialogType === 'placeBid' ? 'Submit Bid' : 'Accept Bid'}
-                </button>
-              </div>
-            </DialogContent>
+              </form>
+            </div>
+            <div className="mt-6 flex justify-end space-x-3">
+              <button
+                type="button"
+                onClick={closeDialog}
+                className="py-2 px-4 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleSubmitBid}
+                className="py-2 px-4 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+              >
+                Submit Bid
+              </button>
+            </div>
+          </DialogContent>
         </Dialog>
       </div>
-    </section>
   );
 };
 

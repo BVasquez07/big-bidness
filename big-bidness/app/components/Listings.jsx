@@ -22,7 +22,6 @@ export const Listings = ({ searchInput }) => {
       }
   }, [searchInput]);
 
-  // Filter items based on the search input
   if (data && data.length > 0) {
     console.log("Items in Listings:", data);
     data.forEach((item, index) => {
@@ -33,9 +32,11 @@ export const Listings = ({ searchInput }) => {
       console.log(`is_available: ${item.is_available}`);
     });
 
-    const filteredData = data.filter((item) => 
-      item.product_name.toLowerCase().includes(searchInput.toLowerCase()) && item.is_available === true
-    );
+    const filteredData = data.filter(
+      (item) => 
+        item.is_available && 
+        item.product_name.toLowerCase().includes(searchInput.toLowerCase())
+    );    
     const items = filteredData.map((item) => (
       <Item
         key={item.product_id}
