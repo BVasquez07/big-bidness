@@ -143,13 +143,13 @@ const ItemPage = ({ params }) => {
           </div>
   
           <div className="flex flex-col justify-start">
-            <div className="p-0 border rounded-lg mb-0 h-[555px]">
+            <div className="bg-white dark:bg-gray-900 relative border border-gray-500 h-[555px] flex flex-col">
               <h2 className="text-lg lg:text-2xl font-bold text-gray-900 dark:text-white p-4 border-b border-gray-500 sticky top-0 bg-white dark:bg-gray-900 z-10">
                 Current Bids
               </h2>
               {!isSeller && (
                 <div>
-                  <div className="overflow-y-auto flex-grow p-0">
+                  <div className="overflow-y-auto flex-grow p-0 h-[405px]">
                     {bids && bids.map((bid, index) => (
                       <div
                         key={index} 

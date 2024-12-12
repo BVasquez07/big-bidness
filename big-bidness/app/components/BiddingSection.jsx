@@ -111,13 +111,13 @@ const BiddingSection = ({ product_id, setBids, userInfo, bids }) => {
   };
 
   return (
-      <div className="p-4 bg-white   ">
+      <div className="relative bottom-0 p-4 bg-white dark:bg-gray-900 border-t border-gray-500">
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
             <button
               type="button"
               onClick={openDialog}
-              className="w-full py-3 px-5 text-md font-medium text-center text-white bg-black rounded-lg focus:ring-4 focus:ring-black focus:outline-none hover:bg-gray-800 transition-colors"
+              className="w-full py-3 px-5 text-md font-medium text-center text-white bg-black rounded-lg focus:ring-4 focus:ring-black-200 dark:focus:ring-black-900 hover:bg-black-800 transition-colors"
             >
               Place Your Bid
             </button>
