@@ -8,7 +8,7 @@ import {
   DialogTrigger
 } from "@/components/ui/dialog";
 
-const BiddingSection = ({ product_id, setBids, userInfo, bids }) => {
+const BiddingSection = ({ product_id, setBids, userInfo, bids, isVip }) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [bidInput, setBidInput] = useState("");
   const [token, setToken] = useState('');
