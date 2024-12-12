@@ -69,9 +69,9 @@ const BiddingSection = ({ product_id, setBids, userInfo, bids, isVip }) => {
       return;
     }
 
-    let bidPriceVal = parseFloat(bidInput)
+    let bidPriceVal = parseFloat(bidInput);
     if (isVip) {
-      bidPriceVal = bidPriceVal * 0.9
+      bidPriceVal = bidPriceVal * 0.9;
     }
 
     const newBid = {
@@ -122,91 +122,91 @@ const BiddingSection = ({ product_id, setBids, userInfo, bids, isVip }) => {
   };
 
   return (
-      <div className="relative bottom-0 p-4 bg-white dark:bg-gray-900 border-t border-gray-500">
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
+    <div className="relative bottom-0 p-4 bg-white dark:bg-gray-900 border-t border-gray-500">
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogTrigger asChild>
+          <button
+            type="button"
+            onClick={openDialog}
+            className="w-full py-3 px-5 text-md font-medium text-center text-white bg-black rounded-lg focus:ring-4 focus:ring-black-200 dark:focus:ring-black-900 hover:bg-black-800 transition-colors"
+          >
+            Place Your Bid
+          </button>
+        </DialogTrigger>
+        <DialogContent className="max-w-md mx-auto">
+          <DialogHeader>
+            <DialogTitle>Place Bid</DialogTitle>
+            <DialogDescription>
+              Please enter the amount you want to bid and the bid deadline.
+            </DialogDescription>
+          </DialogHeader>
+          {success && (
+            <div className="shadow max-w-md w-full text-center">
+              <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative" role="alert">
+                <strong className="font-bold">Bid Accepted Successfully</strong>
+              </div>
+            </div>
+          )}
+          <div className="mt-4">
+            <form>
+              {/* Bid Amount Input */}
+              <div className="mb-4">
+                <label
+                  htmlFor="bidInput"
+                  className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                >
+                  Enter Bid Amount ($)
+                </label>
+                <input
+                  type="number"
+                  id="bidInput"
+                  value={bidInput}
+                  onChange={handleBidChange}
+                  min="1"
+                  className="w-full p-2 border border-gray-300 rounded-md dark:bg-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500"
+                  placeholder="e.g., 100"
+                  required
+                />
+              </div>
+
+              {/* Bid Deadline Input */}
+              <div className="mb-4">
+                <label
+                  htmlFor="bidDeadline"
+                  className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                >
+                  Enter Bid Deadline
+                </label>
+                <input
+                  type="datetime-local"
+                  id="bidDeadline"
+                  value={bidDeadline}
+                  onChange={handleBidDeadlineChange}
+                  className="w-full p-2 border border-gray-300 rounded-md dark:bg-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500"
+                  required
+                />
+              </div>
+            </form>
+          </div>
+          <div className="mt-6 flex justify-end space-x-3">
             <button
               type="button"
-              onClick={openDialog}
-              className="w-full py-3 px-5 text-md font-medium text-center text-white bg-black rounded-lg focus:ring-4 focus:ring-black-200 dark:focus:ring-black-900 hover:bg-black-800 transition-colors"
+              onClick={closeDialog}
+              className="py-2 px-4 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition-colors"
             >
-              Place Your Bid
+              Cancel
             </button>
-          </DialogTrigger>
-          <DialogContent className="max-w-md mx-auto">
-            <DialogHeader>
-              <DialogTitle>Place Bid</DialogTitle>
-              <DialogDescription>
-                Please enter the amount you want to bid and the bid deadline.
-              </DialogDescription>
-            </DialogHeader>
-            {success && (
-      <div className="shadow max-w-md w-full text-center">
-          <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative" role="alert">
-              <strong className="font-bold">Bid Accepted Successfully</strong>
+            <button
+              type="button"
+              onClick={handleSubmitBid}
+              className="py-2 px-4 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+            >
+              Submit Bid
+            </button>
           </div>
-      </div>
-      )}
-            <div className="mt-4">
-              <form>
-                {/* Bid Amount Input */}
-                <div className="mb-4">
-                  <label
-                    htmlFor="bidInput"
-                    className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                  >
-                    Enter Bid Amount ($)
-                  </label>
-                  <input
-                    type="number"
-                    id="bidInput"
-                    value={bidInput}
-                    onChange={handleBidChange}
-                    min="1"
-                    className="w-full p-2 border border-gray-300 rounded-md dark:bg-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500"
-                    placeholder="e.g., 100"
-                    required
-                  />
-                </div>
-
-                {/* Bid Deadline Input */}
-                <div className="mb-4">
-                  <label
-                    htmlFor="bidDeadline"
-                    className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                  >
-                    Enter Bid Deadline
-                  </label>
-                  <input
-                    type="datetime-local"
-                    id="bidDeadline"
-                    value={bidDeadline}
-                    onChange={handleBidDeadlineChange}
-                    className="w-full p-2 border border-gray-300 rounded-md dark:bg-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500"
-                    required
-                  />
-                </div>
-              </form>
-            </div>
-            <div className="mt-6 flex justify-end space-x-3">
-              <button
-                type="button"
-                onClick={closeDialog}
-                className="py-2 px-4 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={handleSubmitBid}
-                className="py-2 px-4 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-              >
-                Submit Bid
-              </button>
-            </div>
-          </DialogContent>
-        </Dialog>
-      </div>
+        </DialogContent>
+      </Dialog>
+    </div>
   );
 };
 
