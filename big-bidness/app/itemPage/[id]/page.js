@@ -16,6 +16,8 @@ const ItemPage = ({ params }) => {
   const [isVip, setIsVip] = useState(false);
   const [success, setSuccess] = useState(null);
 
+  const [isVip, setIsVip] = useState(false);
+
   useEffect(() => {
     setToken(localStorage.getItem('token'));
   }, []);
