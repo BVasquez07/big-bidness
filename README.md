@@ -102,9 +102,12 @@ Key Features:
 
 * [![Next][Next.js]][Next-url]
 * [![React][React.js]][React-url]
+* [![shadcn/ui][shadcn-ui]][shadcn-ui-url]
 * [![Supabase][Supabase.io]][Supabase-url]
+* [![Flask][Flask]][Flask-url]
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+<p align="right">(<a href="#reme-top">back to top</a>)</p>
 
 
 
@@ -247,3 +250,8 @@ Use this space to list resources you find helpful and would like to give credit 
 [React-url]: https://reactjs.org/
 [Supabase.io]: https://img.shields.io/badge/Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white
 [Supabase-url]: https://supabase.io/
+[Flask]: https://img.shields.io/badge/Flask-000000?style=for-the-badge&logo=flask&logoColor=white
+[Flask-url]: https://flask.palletsprojects.com/
+[shadcn-ui]: https://img.shields.io/badge/shadcn/ui-000000?style=for-the-badge&logo=shadcn&logoColor=white
+[shadcn-ui-url]: https://ui.shadcn.com/
+
