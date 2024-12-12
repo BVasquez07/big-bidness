@@ -86,7 +86,6 @@ def getproductbid():
 
         now=datetime.now()
 
-
         bid_result = (
             supabase.table("bids")
             .select("*")
@@ -94,6 +93,8 @@ def getproductbid():
             .gte("biddeadline", now.strftime('%Y-%m-%d %H:%M:%S'))  
             .execute()
         )
+
+        print(bid_result)
 
         if not bid_result.data or len(bid_result.data) == 0:
             return jsonify({"bids": []}), 200
