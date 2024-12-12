@@ -96,7 +96,7 @@ const BiddingSection = ({ product_id, setBids, userInfo, bids, isVip }) => {
         alert(`Bid of $${bidPriceVal} posted successfully!`);
         setBids([
           {
-            bidamount: parseFloat(bidInput),
+            bidamount: bidPriceVal,
             biddeadline: formattedDeadline,
             buyer_rating: userInfo.rating,
             buyername: userInfo.username,
