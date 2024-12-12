@@ -126,6 +126,10 @@ def getsuspended_route():
 def admin_suspenion_upadte_route():
     return suspended.admin_suspenion_update()
 
+@app.route("/get-specific-product", methods=["GET"])
+def get_specific_product_route():
+    return product.getspecificproduct()
+
 @app.route("/update-pay-suspended", methods=["POST"])
 def updatesuspended_route():
     return suspended.updatesuspended()
