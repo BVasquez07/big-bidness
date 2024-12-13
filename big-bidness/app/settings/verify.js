@@ -1,5 +1,6 @@
 'use client'
 import { Star } from 'lucide-react'
+import { useState, useEffect, use } from 'react'
 
 import {
     Dialog,
@@ -15,10 +16,29 @@ import {
 import React from 'react'
   
 export const Verify = () => {
+    const [quitting, setQuitting] = useState(false)
 
     const submitYes = () => {
-        // send User ID to Backend
+        fetch(`http://localhost:5000/personalinfo`, {method: 'GET', headers: {'Content-Type': 'application/json', Authorization: String(localStorage.getItem('token'))}})
+        .then(response => response.json())
+        .then(data => data.user['userid'])
+        .then((userid) =>{
+          fetch('http://localhost:5000/updatequitsys', { //this inner fetch will add the user to the quitting sys voluntarily table 
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({userid: userid}),
+          })
+          .catch((error) => {
+              console.error('Error:', error)
+          })
+        })
+        .catch((error) => {
+            console.error('Error:', error)
+        })
     }
+    useEffect(() => quitting ? submitYes() : undefined, [quitting])
 
     return (
         <Dialog>
@@ -34,7 +54,7 @@ export const Verify = () => {
           <DialogFooter className="sm:justify-start">
             <DialogClose asChild>
                 <div className='space-x-3 '>
-                    <button className='bg-black text-white rounded-md px-10 py-1' onClick={submitYes()}>Yes</button>
+                    <button className='bg-black text-white rounded-md px-10 py-1' onClick={() => setQuitting(true)}>Yes</button>
                     <button className='bg-gray-500 text-white rounded-md px-10 py-1'>No</button>
                 </div>
             </DialogClose>
