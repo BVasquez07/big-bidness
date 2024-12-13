@@ -13,6 +13,8 @@ const ItemPage = ({ params }) => {
   const [token, setToken] = useState('');
   const { id: product_id } = React.use(params);
   const [isSeller, setIsSeller] = useState(false);
+  const [isVip, setIsVip] = useState(false);
+  const [success, setSuccess] = useState(null);
 
   useEffect(() => {
     setToken(localStorage.getItem('token'));
@@ -31,6 +33,9 @@ const ItemPage = ({ params }) => {
         console.log(data)
         setUserid(data['user']['userid'])
         setUserInfo(data['user'])
+        if (data['user']['role'] === 'Vip') {
+          setIsVip(true);
+        }
     }
     if (token) {
         getUserInfo()
@@ -107,6 +112,10 @@ const ItemPage = ({ params }) => {
 
       const data = await response.json();
       console.log(data);
+      setSuccess(true);
+      setTimeout(() => {
+        window.location.href = "/";
+      }, 2000);
 
     } catch (error) {
       console.error('Error during fetch:', error);
@@ -129,6 +138,13 @@ const ItemPage = ({ params }) => {
   
   return (
     <div className="flex justify-center p-6 px-8">
+        {success && (
+          <div className="fixed inset-0 flex items-center justify-center z-50">
+            <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative shadow-lg" role="alert">
+              <strong className="font-bold">Bid Accepted Successfully</strong>
+            </div>
+          </div>
+        )}
       <div className="w-full max-w-7xl">
         <h1 className="text-2xl font-bold mb-4">{item.product_name}</h1>
         <p className="text-xl text-gray-700 mb-4">Price: ${item.price}</p>
@@ -175,6 +191,7 @@ const ItemPage = ({ params }) => {
                     setBids={setBids}
                     bids={bids}
                     userInfo={userInfo}
+                    isVip={isVip}
                   />
                 </div>
               )} 
@@ -213,7 +230,7 @@ const ItemPage = ({ params }) => {
         </div>
   
         <div className="mt-6">
-          <Comments product_id={item.product_id} />
+          <Comments product_id={item.product_id} userInfo={userInfo}/>
         </div>
       </div>
     </div>
