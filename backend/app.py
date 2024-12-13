@@ -90,7 +90,7 @@ def postcomplaint_route():
 def postcomment_route():
     return comment.postcomment()
 
-@app.route("/get-proudct-comment", methods=["GET"])
+@app.route("/get-product-comment", methods=["GET"])
 def get_product_comment_route():
     return comment.get_product_comment()
 
